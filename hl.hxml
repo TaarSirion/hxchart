@@ -1,0 +1,11 @@
+-cp Source
+-main Main
+
+-lib heaps
+-lib hldx
+-lib haxeui-core
+-lib haxeui-heaps
+
+-D resourcesPath=Assets
+
+-hl Export/hl/main.hl
