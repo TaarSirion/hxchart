@@ -33,7 +33,7 @@ class Point {
 		this.y = axis_info.y_ticks[axis_info.y_tick_info.zero].position - y_dist.pos_dist * y_ratio;
 		if (y_val < 0) {
 			y_ratio = y_val / axis_info.y_ticks[0].num;
-			this.y = axis_info.y_ticks[axis_info.x_tick_info.zero].position + y_dist.neg_dist * y_ratio;
+			this.y = axis_info.y_ticks[axis_info.y_tick_info.zero].position + y_dist.neg_dist * y_ratio;
 		}
 	}
 }

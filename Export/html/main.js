@@ -694,7 +694,7 @@ basics_Chart.setAxisEndPoint = function(start_point,axis_length,is_y) {
 };
 basics_Chart.calcAxisDists = function(min_coord,max_coord,pos_ratio) {
 	var dist = max_coord - min_coord;
-	var pos_dist = dist * (1 - pos_ratio);
+	var pos_dist = dist * pos_ratio;
 	var neg_dist = dist - pos_dist;
 	return { pos_dist : pos_dist, neg_dist : neg_dist};
 };
@@ -707,7 +707,7 @@ basics_Chart.drawPoints = function(graphhics,x_points,y_points,width,height,marg
 	var x_dist = basics_Chart.calcAxisDists(x_coord_min,x_coord_max,axis_info.x_tick_info.pos_ratio);
 	var y_coord_min = axis_info.y_ticks[0].position;
 	var y_coord_max = axis_info.y_ticks[axis_info.y_ticks.length - 1].position;
-	var y_dist = basics_Chart.calcAxisDists(y_coord_min,y_coord_max,axis_info.y_tick_info.pos_ratio);
+	var y_dist = basics_Chart.calcAxisDists(y_coord_max,y_coord_min,axis_info.y_tick_info.pos_ratio);
 	haxe_Log.trace("Zeroes",{ fileName : "Source/basics/Chart.hx", lineNumber : 127, className : "basics.Chart", methodName : "drawPoints", customParams : [axis_info.x_tick_info.zero,axis_info.y_tick_info.zero,axis_info.x_ticks[axis_info.x_tick_info.zero]]});
 	haxe_Log.trace("Dists",{ fileName : "Source/basics/Chart.hx", lineNumber : 128, className : "basics.Chart", methodName : "drawPoints", customParams : [x_dist.pos_dist,x_dist.neg_dist,axis_info.x_tick_info.pos_ratio]});
 	haxe_Log.trace("Dists y",{ fileName : "Source/basics/Chart.hx", lineNumber : 129, className : "basics.Chart", methodName : "drawPoints", customParams : [y_dist.pos_dist,y_dist.neg_dist,axis_info.y_tick_info.pos_ratio,y_coord_min,y_coord_max]});
@@ -751,7 +751,7 @@ basics_Point.prototype = {
 		this.y = axis_info.y_ticks[axis_info.y_tick_info.zero].position - y_dist.pos_dist * y_ratio;
 		if(y_val < 0) {
 			y_ratio = y_val / axis_info.y_ticks[0].num;
-			this.y = axis_info.y_ticks[axis_info.x_tick_info.zero].position + y_dist.neg_dist * y_ratio;
+			this.y = axis_info.y_ticks[axis_info.y_tick_info.zero].position + y_dist.neg_dist * y_ratio;
 		}
 	}
 	,__class__: basics_Point
