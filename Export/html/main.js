@@ -149,6 +149,7 @@ Main.main = function() {
 	haxe_ui_Toolkit.init();
 	var app = new haxe_ui_HaxeUIApp();
 	var chart = new basics_Chart([0.5,-1,2,-0.5],[0.5,1,-2,-1]);
+	chart.setOptions([{ name : "point.size", value : 4},{ name : "point.color", value : haxe_ui_util_Color.fromString("red")}]);
 	app.ready(function() {
 		app.addComponent(chart.draw());
 		app.start();
@@ -526,7 +527,17 @@ basics_Axis.prototype = {
 	,tick_amount: null
 	,ticks: null
 	,sub_ticks: null
-	,draw: function(graphics) {
+	,setOtherMargin: function(value) {
+		if(this.is_y) {
+			this.start.x = value;
+			this.end.x = value;
+		} else {
+			this.start.y = value;
+			this.end.y = value;
+		}
+	}
+	,draw: function(graphics,other_margin) {
+		this.setOtherMargin(other_margin);
 		graphics.strokeStyle(this.color);
 		graphics.moveTo(this.start.x,this.start.y);
 		graphics.lineTo(this.end.x,this.end.y);
@@ -558,14 +569,12 @@ basics_Axis.prototype = {
 		var end_p = this.is_y ? this.end.y + this.margin : this.end.x - this.margin;
 		var dist = this.is_y ? start_p - end_p : end_p - start_p;
 		var dist_between_ticks = dist / (tick_calc.num - 1);
-		haxe_Log.trace("Axis dist",{ fileName : "Source/basics/Axis.hx", lineNumber : 108, className : "basics.Axis", methodName : "setTickPosition", customParams : [dist,dist_between_ticks]});
 		var _g = 0;
 		var _g1 = tick_calc.num;
 		while(_g < _g1) {
 			var i = _g++;
 			var pos = this.is_y ? start_p - dist_between_ticks * i : start_p + dist_between_ticks * i;
 			var label = Utils.floatToStringPrecision(tick_calc.min + tick_calc.step * i,tick_calc.prec);
-			haxe_Log.trace("Tick ",{ fileName : "Source/basics/Axis.hx", lineNumber : 112, className : "basics.Axis", methodName : "setTickPosition", customParams : [label," pos",pos]});
 			this.ticks.push(new basics_ticks_Ticks(pos,label,tick_calc.min + tick_calc.step * i));
 		}
 		this.setSubTicks(tick_calc,dist_between_ticks);
@@ -603,26 +612,25 @@ basics_Axis.prototype = {
 var basics_Chart = function(x_points,y_points,top,left,width,height) {
 	this.margin_left = 60;
 	this.margin_bottom = 60;
-	this.color = haxe_ui_util_Color.fromString("black");
-	this.tick_margin = 10;
-	this.margin = 50;
+	this.options = new basics_Options();
 	this.x_points = x_points;
 	this.y_points = y_points;
 	this.setDimensions(width,height);
 	this.createCanvas(top,left);
 	this.sortPoints();
+	this.setAxis();
 	this.setTickInfo();
 };
 $hxClasses["basics.Chart"] = basics_Chart;
 basics_Chart.__name__ = "basics.Chart";
-basics_Chart.setOptions = function() {
-	return basics_Chart;
-};
 basics_Chart.prototype = {
 	x_points: null
 	,y_points: null
 	,x_tick_info: null
 	,y_tick_info: null
+	,options: null
+	,x_axis: null
+	,y_axis: null
 	,canvas: null
 	,width: null
 	,height: null
@@ -658,10 +666,6 @@ basics_Chart.prototype = {
 		this.min_y = y_points_copy.shift();
 		this.max_y = y_points_copy.pop();
 	}
-	,margin: null
-	,set_margin: function(margin) {
-		return this.margin = margin;
-	}
 	,draw: function() {
 		if(this.x_points.length != this.y_points.length) {
 			return null;
@@ -674,54 +678,52 @@ basics_Chart.prototype = {
 		this.x_tick_info = basics_Axis.calcTickNum(this.min_x,this.max_x);
 		this.y_tick_info = basics_Axis.calcTickNum(this.min_y,this.max_y);
 	}
-	,tick_margin: null
-	,set_tick_margin: function(tick_margin) {
-		return this.tick_margin = tick_margin;
-	}
-	,color: null
-	,set_color: function(color) {
-		return this.color = color;
-	}
 	,margin_bottom: null
 	,margin_left: null
 	,drawAxis: function() {
-		var y_axis_length = this.calcAxisLength(this.height,this.margin);
-		var x_axis_length = this.calcAxisLength(this.width,this.margin);
-		var x_ticks = this.drawXAxis(x_axis_length,y_axis_length);
-		var y_ticks = this.drawYAxis(x_axis_length,y_axis_length);
+		var x_ticks = this.drawXAxis();
+		var y_ticks = this.drawYAxis();
+		this.canvas.componentGraphics.circle(x_ticks[this.x_tick_info.zero].position,y_ticks[this.y_tick_info.zero].position,4);
 		return { x_ticks : x_ticks, y_ticks : y_ticks};
 	}
-	,drawXAxis: function(x_axis_length,y_axis_length) {
-		var y_tick_boundary = this.calcAxisLength(y_axis_length,this.tick_margin);
-		var y_tick_max = this.y_tick_info.min + this.y_tick_info.step * (this.max_y <= 0 ? this.y_tick_info.num - 1 : this.y_tick_info.num);
-		this.margin_bottom = this.calcAxisMargin(this.y_tick_info.min,y_tick_max,this.y_tick_info.pos_ratio,this.tick_margin,this.margin,y_tick_boundary,true);
-		var x_axis_start = this.setAxisStartPoint(this.margin,this.margin_bottom,false);
+	,setAxis: function() {
+		var y_axis_length = this.calcAxisLength(this.height);
+		var x_axis_length = this.calcAxisLength(this.width);
+		this.setXAxis(x_axis_length,y_axis_length);
+		this.setYAxis(x_axis_length,y_axis_length);
+	}
+	,setXAxis: function(x_axis_length,y_axis_length) {
+		var x_axis_start = this.setAxisStartPoint(this.options.margin,0,false);
 		var x_axis_end = this.setAxisEndPoint(x_axis_start,x_axis_length,false);
-		var x_axis = new basics_Axis(x_axis_start,x_axis_end,this.min_x,this.max_x,false,this.color,this.tick_margin);
-		var x_ticks = x_axis.draw(this.canvas.componentGraphics);
+		this.x_axis = new basics_Axis(x_axis_start,x_axis_end,this.min_x,this.max_x,false,this.options.color,this.options.tick_margin);
+	}
+	,setYAxis: function(x_axis_length,y_axis_length) {
+		var y_axis_end = this.setAxisStartPoint(this.options.margin,0,true);
+		var y_axis_start = this.setAxisEndPoint(y_axis_end,y_axis_length,true);
+		this.y_axis = new basics_Axis(y_axis_start,y_axis_end,this.min_y,this.max_y,true,this.options.color,this.options.tick_margin);
+	}
+	,drawXAxis: function() {
+		var x_ticks = this.x_axis.draw(this.canvas.componentGraphics,this.y_axis.ticks[this.y_tick_info.zero].position);
 		return x_ticks;
 	}
-	,drawYAxis: function(x_axis_length,y_axis_length) {
-		var x_tick_boundary = this.calcAxisLength(x_axis_length,this.tick_margin);
-		var x_tick_max = this.x_tick_info.min + this.x_tick_info.step * (this.max_x <= 0 ? this.x_tick_info.num - 1 : this.x_tick_info.num);
-		this.margin_left = this.calcAxisMargin(this.x_tick_info.min,x_tick_max,this.x_tick_info.pos_ratio,this.tick_margin,this.margin,x_tick_boundary,false);
-		var y_axis_end = this.setAxisStartPoint(this.margin,this.margin_left,true);
-		var y_axis_start = this.setAxisEndPoint(y_axis_end,y_axis_length,true);
-		var y_axis = new basics_Axis(y_axis_start,y_axis_end,this.min_y,this.max_y,true,this.color,this.tick_margin);
-		var y_ticks = y_axis.draw(this.canvas.componentGraphics);
+	,drawYAxis: function() {
+		var y_ticks = this.y_axis.draw(this.canvas.componentGraphics,this.x_axis.ticks[this.x_tick_info.zero].position);
 		return y_ticks;
 	}
-	,calcAxisLength: function(length,margin) {
-		return length - 2 * margin;
+	,calcAxisLength: function(length) {
+		haxe_Log.trace("Axis length",{ fileName : "Source/basics/Chart.hx", lineNumber : 138, className : "basics.Chart", methodName : "calcAxisLength", customParams : [this.options.margin]});
+		return length - 2 * this.options.margin;
 	}
-	,calcAxisMargin: function(tick_min,tick_max,pos_ratio,tick_margin,margin,tick_boundary,is_y) {
+	,calcAxisMargin: function(tick_min,tick_max,pos_ratio,tick_boundary,is_y) {
+		haxe_Log.trace("Calc margins",{ fileName : "Source/basics/Chart.hx", lineNumber : 143, className : "basics.Chart", methodName : "calcAxisMargin", customParams : [this.options.margin,this.options.tick_margin]});
 		if(tick_min >= 0) {
-			return (is_y ? tick_boundary + tick_margin : 0) + margin;
+			return (is_y ? tick_boundary + this.options.tick_margin : 0) + this.options.margin;
 		}
 		if(tick_max <= 0) {
-			return (is_y ? 0 : tick_boundary) + tick_margin + margin;
+			return (is_y ? 0 : tick_boundary) + this.options.tick_margin + this.options.margin;
 		}
-		return tick_margin + margin + tick_boundary * (is_y ? pos_ratio : 1 - pos_ratio);
+		haxe_Log.trace("HERE",{ fileName : "Source/basics/Chart.hx", lineNumber : 150, className : "basics.Chart", methodName : "calcAxisMargin"});
+		return this.options.tick_margin + this.options.margin + tick_boundary * (is_y ? pos_ratio : 1 - pos_ratio);
 	}
 	,setAxisStartPoint: function(margin,axis_margin,is_y) {
 		if(is_y) {
@@ -752,22 +754,110 @@ basics_Chart.prototype = {
 		var _g1 = this.x_points.length;
 		while(_g < _g1) {
 			var i = _g++;
-			var point = new basics_Point(this.x_points[i],this.y_points[i],{ axis_info : axis_info, x_dist : x_dist, y_dist : y_dist, y_tick_info : this.y_tick_info, x_tick_info : this.x_tick_info});
+			var point = new basics_Point(this.x_points[i],this.y_points[i],{ axis_info : axis_info, x_dist : x_dist, y_dist : y_dist, y_tick_info : this.y_tick_info, x_tick_info : this.x_tick_info},this.options.point_size,this.options.point_color);
 			point.draw(this.canvas.componentGraphics);
 		}
 	}
-	,__class__: basics_Chart
-	,__properties__: {set_color:"set_color",set_tick_margin:"set_tick_margin",set_margin:"set_margin"}
-};
-var basics_Point = function(x_val,y_val,chart_info,size) {
-	if(size == null) {
-		size = 1;
+	,setOptions: function(options) {
+		var _g = 0;
+		while(_g < options.length) {
+			var option = options[_g];
+			++_g;
+			switch(option.name) {
+			case "color":
+				this.options.set_color(option.value);
+				this.options.set_point_color(option.value);
+				this.options.set_label_color(option.value);
+				this.options.set_tick_color(option.value);
+				break;
+			case "label.color":
+				this.options.set_label_color(option.value);
+				break;
+			case "label_color":
+				this.options.set_label_color(option.value);
+				break;
+			case "margin":
+				this.options.set_margin(option.value);
+				break;
+			case "point.color":
+				this.options.set_point_color(option.value);
+				break;
+			case "point.size":
+				this.options.set_point_size(option.value);
+				break;
+			case "point_color":
+				this.options.set_point_color(option.value);
+				break;
+			case "point_size":
+				this.options.set_point_size(option.value);
+				break;
+			case "tick.color":
+				this.options.set_tick_color(option.value);
+				break;
+			case "tick.margin":
+				this.options.set_tick_margin(option.value);
+				break;
+			case "tick_color":
+				this.options.set_tick_color(option.value);
+				break;
+			case "tick_margin":
+				this.options.set_tick_margin(option.value);
+				break;
+			}
+		}
 	}
+	,__class__: basics_Chart
+};
+var basics_Options = function() {
+	this.point_size = 1;
+	this.label_color = haxe_ui_util_Color.fromString("black");
+	this.tick_color = haxe_ui_util_Color.fromString("black");
+	this.point_color = haxe_ui_util_Color.fromString("black");
+	this.color = haxe_ui_util_Color.fromString("black");
+	this.tick_margin = 10;
+	this.margin = 50;
+};
+$hxClasses["basics.Options"] = basics_Options;
+basics_Options.__name__ = "basics.Options";
+basics_Options.prototype = {
+	margin: null
+	,set_margin: function(margin) {
+		return this.margin = margin;
+	}
+	,tick_margin: null
+	,set_tick_margin: function(tick_margin) {
+		return this.tick_margin = tick_margin;
+	}
+	,color: null
+	,set_color: function(color) {
+		return this.color = color;
+	}
+	,point_color: null
+	,set_point_color: function(color) {
+		return this.point_color = color;
+	}
+	,tick_color: null
+	,set_tick_color: function(color) {
+		return this.tick_color = color;
+	}
+	,label_color: null
+	,set_label_color: function(color) {
+		return this.label_color = color;
+	}
+	,point_size: null
+	,set_point_size: function(size) {
+		return this.point_size = size;
+	}
+	,__class__: basics_Options
+	,__properties__: {set_point_size:"set_point_size",set_label_color:"set_label_color",set_tick_color:"set_tick_color",set_point_color:"set_point_color",set_color:"set_color",set_tick_margin:"set_tick_margin",set_margin:"set_margin"}
+};
+var basics_Point = function(x_val,y_val,chart_info,size,color) {
 	this.size = 1;
 	this.x_val = x_val;
 	this.y_val = y_val;
 	this.setPosition(chart_info);
 	this.size = size;
+	this.color = color;
 };
 $hxClasses["basics.Point"] = basics_Point;
 basics_Point.__name__ = "basics.Point";

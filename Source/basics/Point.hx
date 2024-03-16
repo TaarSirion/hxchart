@@ -17,11 +17,12 @@ class Point {
 	private var x_val:Float;
 	private var y_val:Float;
 
-	public function new(x_val:Float, y_val:Float, chart_info:ChartInfo, ?size:Float = 1) {
+	public function new(x_val:Float, y_val:Float, chart_info:ChartInfo, size:Float, color:Color) {
 		this.x_val = x_val;
 		this.y_val = y_val;
 		setPosition(chart_info);
 		this.size = size;
+		this.color = color;
 	}
 
 	public function draw(graphics:ComponentGraphics) {

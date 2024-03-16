@@ -19,6 +19,10 @@ class Main {
 		// canvas.height = 500;
 		// axis.draw(canvas.componentGraphics);
 		var chart = new Chart([0.5, -1, 2, -0.5], [0.5, 1, -2, -1]);
+		chart.setOptions([
+			{name: "point.size", value: 4},
+			{name: "point.color", value: Color.fromString("red")}
+		]);
 
 		app.ready(function() {
 			app.addComponent(chart.draw());

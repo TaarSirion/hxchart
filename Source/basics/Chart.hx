@@ -1,5 +1,6 @@
 package basics;
 
+import basics.Options.Option;
 import basics.AxisInfo.TickInfo;
 import haxe.ui.containers.VBox;
 import basics.AxisInfo.AxisDist;
@@ -27,12 +28,18 @@ class Chart {
 	private var x_tick_info:TickInfo;
 	private var y_tick_info:TickInfo;
 
+	private var options:Options;
+	private var x_axis:Axis;
+	private var y_axis:Axis;
+
 	public function new(x_points:Array<Float>, y_points:Array<Float>, ?top:Float, ?left:Float, ?width:Float, ?height:Float) {
+		options = new Options();
 		this.x_points = x_points;
 		this.y_points = y_points;
 		setDimensions(width, height);
 		createCanvas(top, left);
 		sortPoints();
+		setAxis();
 		setTickInfo();
 	}
 
@@ -71,12 +78,6 @@ class Chart {
 		max_y = y_points_copy.pop();
 	}
 
-	public var margin(default, set):Float = 50;
-
-	function set_margin(margin:Float) {
-		return this.margin = margin;
-	}
-
 	public function draw() {
 		if (x_points.length != y_points.length) {
 			return null;
@@ -91,66 +92,51 @@ class Chart {
 		y_tick_info = Axis.calcTickNum(min_y, max_y);
 	}
 
-	public var tick_margin(default, set):Float = 10;
-
-	function set_tick_margin(tick_margin) {
-		return this.tick_margin = tick_margin;
-	}
-
-	public var color(default, set):Color = Color.fromString("black");
-
-	function set_color(color:Color) {
-		return this.color = color;
-	}
-
 	private var margin_bottom:Float = 60;
 	private var margin_left:Float = 60;
 
 	private function drawAxis():AxisInfo {
-		var y_axis_length = calcAxisLength(height, margin);
-		var x_axis_length = calcAxisLength(width, margin);
-		var x_ticks = drawXAxis(x_axis_length, y_axis_length);
-		var y_ticks = drawYAxis(x_axis_length, y_axis_length);
+		var x_ticks = drawXAxis();
+		var y_ticks = drawYAxis();
+		canvas.componentGraphics.circle(x_ticks[x_tick_info.zero].position, y_ticks[y_tick_info.zero].position, 4);
 		return {
 			x_ticks: x_ticks,
 			y_ticks: y_ticks
 		};
 	}
 
-	private function drawXAxis(x_axis_length:Float, y_axis_length:Float) {
-		var y_tick_boundary = calcAxisLength(y_axis_length, tick_margin);
-		var y_tick_max = y_tick_info.min + y_tick_info.step * (max_y <= 0 ? y_tick_info.num - 1 : y_tick_info.num);
-		margin_bottom = calcAxisMargin(y_tick_info.min, y_tick_max, y_tick_info.pos_ratio, tick_margin, margin, y_tick_boundary, true);
-		var x_axis_start = setAxisStartPoint(margin, margin_bottom, false);
+	private function setAxis() {
+		var y_axis_length = calcAxisLength(height);
+		var x_axis_length = calcAxisLength(width);
+		setXAxis(x_axis_length, y_axis_length);
+		setYAxis(x_axis_length, y_axis_length);
+	}
+
+	private function setXAxis(x_axis_length:Float, y_axis_length:Float) {
+		var x_axis_start = setAxisStartPoint(options.margin, 0, false);
 		var x_axis_end = setAxisEndPoint(x_axis_start, x_axis_length, false);
-		var x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, color, tick_margin);
-		var x_ticks = x_axis.draw(canvas.componentGraphics);
+		x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, options.color, options.tick_margin);
+	}
+
+	private function setYAxis(x_axis_length:Float, y_axis_length:Float) {
+		var y_axis_end = setAxisStartPoint(options.margin, 0, true);
+		var y_axis_start = setAxisEndPoint(y_axis_end, y_axis_length, true);
+		y_axis = new Axis(y_axis_start, y_axis_end, min_y, max_y, true, options.color, options.tick_margin);
+	}
+
+	private function drawXAxis() {
+		var x_ticks = x_axis.draw(canvas.componentGraphics, y_axis.ticks[y_tick_info.zero].position);
 		return x_ticks;
 	}
 
-	private function drawYAxis(x_axis_length:Float, y_axis_length:Float) {
-		var x_tick_boundary = calcAxisLength(x_axis_length, tick_margin);
-		var x_tick_max = x_tick_info.min + x_tick_info.step * (max_x <= 0 ? x_tick_info.num - 1 : x_tick_info.num);
-		margin_left = calcAxisMargin(x_tick_info.min, x_tick_max, x_tick_info.pos_ratio, tick_margin, margin, x_tick_boundary, false);
-		var y_axis_end = setAxisStartPoint(margin, margin_left, true);
-		var y_axis_start = setAxisEndPoint(y_axis_end, y_axis_length, true);
-		var y_axis = new Axis(y_axis_start, y_axis_end, min_y, max_y, true, color, tick_margin);
-		var y_ticks = y_axis.draw(canvas.componentGraphics);
+	private function drawYAxis() {
+		var y_ticks = y_axis.draw(canvas.componentGraphics, x_axis.ticks[x_tick_info.zero].position);
 		return y_ticks;
 	}
 
-	private function calcAxisLength(length:Float, margin:Float) {
-		return length - 2 * margin;
-	}
-
-	private function calcAxisMargin(tick_min:Float, tick_max:Float, pos_ratio:Float, tick_margin:Float, margin:Float, tick_boundary:Float, is_y:Bool) {
-		if (tick_min >= 0) {
-			return (is_y ? tick_boundary + tick_margin : 0) + margin;
-		}
-		if (tick_max <= 0) {
-			return (is_y ? 0 : tick_boundary) + tick_margin + margin;
-		}
-		return tick_margin + margin + tick_boundary * (is_y ? pos_ratio : 1 - pos_ratio);
+	private function calcAxisLength(length:Float) {
+		trace("Axis length", options.margin);
+		return length - 2 * options.margin;
 	}
 
 	private function setAxisStartPoint(margin:Float, axis_margin:Float, is_y:Bool) {
@@ -188,12 +174,42 @@ class Chart {
 				y_dist: y_dist,
 				y_tick_info: y_tick_info,
 				x_tick_info: x_tick_info
-			});
+			}, options.point_size, options.point_color);
 			point.draw(canvas.componentGraphics);
 		}
 	}
 
-	public static function setOptions() {
-		return Chart;
+	public function setOptions(options:Array<Option>) {
+		for (option in options) {
+			switch option.name {
+				case "margin":
+					this.options.margin = option.value;
+				case "tick_margin":
+					this.options.tick_margin = option.value;
+				case "tick.margin":
+					this.options.tick_margin = option.value;
+				case "color":
+					this.options.color = option.value;
+					this.options.point_color = option.value;
+					this.options.label_color = option.value;
+					this.options.tick_color = option.value;
+				case "label_color":
+					this.options.label_color = option.value;
+				case "label.color":
+					this.options.label_color = option.value;
+				case "tick_color":
+					this.options.tick_color = option.value;
+				case "tick.color":
+					this.options.tick_color = option.value;
+				case "point.size":
+					this.options.point_size = option.value;
+				case "point_size":
+					this.options.point_size = option.value;
+				case "point.color":
+					this.options.point_color = option.value;
+				case "point_color":
+					this.options.point_color = option.value;
+			}
+		}
 	}
 }

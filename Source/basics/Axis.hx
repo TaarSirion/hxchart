@@ -22,7 +22,9 @@ class Axis {
 	public var color:Color;
 
 	private var tick_amount:Int = 10;
-	private var ticks:Array<Ticks>;
+
+	public var ticks(default, null):Array<Ticks>;
+
 	private var sub_ticks:Array<Ticks>;
 
 	public function new(start:Point, end:Point, min:Float, max:Float, is_y:Bool, color:Color, margin:Float, tick_amount:Int = 10) {
@@ -39,7 +41,18 @@ class Axis {
 		setTickPosition(min, max);
 	}
 
-	public function draw(graphics:ComponentGraphics) {
+	private function setOtherMargin(value:Float) {
+		if (is_y) {
+			start.x = value;
+			end.x = value;
+		} else {
+			start.y = value;
+			end.y = value;
+		}
+	}
+
+	public function draw(graphics:ComponentGraphics, other_margin:Float) {
+		setOtherMargin(other_margin);
 		graphics.strokeStyle(color);
 		graphics.moveTo(start.x, start.y);
 		graphics.lineTo(end.x, end.y);
@@ -105,11 +118,9 @@ class Axis {
 		var end_p = is_y ? end.y + margin : end.x - margin;
 		var dist = is_y ? start_p - end_p : end_p - start_p;
 		var dist_between_ticks = dist / (tick_calc.num - 1);
-		trace("Axis dist", dist, dist_between_ticks);
 		for (i in 0...tick_calc.num) {
 			var pos = is_y ? start_p - dist_between_ticks * i : start_p + dist_between_ticks * i;
 			var label = Utils.floatToStringPrecision(tick_calc.min + tick_calc.step * i, tick_calc.prec);
-			trace("Tick ", label, " pos", pos);
 			ticks.push(new Ticks(pos, label, tick_calc.min + tick_calc.step * i));
 		}
 		setSubTicks(tick_calc, dist_between_ticks);
