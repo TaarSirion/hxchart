@@ -21,14 +21,16 @@ class Utils {
 				return str;
 			}
 			if (str.charAt(str.length - 1) == '.') {
-				return str.substr(0, str.length - 2);
+				return sign + str.substr(0, str.length - 2);
 			}
 			return sign + '0.' + str;
 		} else {
-			if (str.charAt(str.length - 1) == '.') {
-				return str.substr(0, str.length - 2);
+			if (prec == 0) {
+				return sign + str;
 			}
-			return sign + str.substr(0, str.length - prec) + '.' + str.substr(str.length - prec);
+			var str_before_comma = sign + str.substr(0, str.length - prec);
+			var str_after_comma = removeTrailingZeros(str.substr(str.length - prec));
+			return str_before_comma + '.' + str_after_comma;
 		}
 	}
 
