@@ -149,7 +149,7 @@ Main.main = function() {
 	haxe_ui_Toolkit.init();
 	var app = new haxe_ui_HaxeUIApp();
 	var chart = new basics_Chart([0.5,-1,2,-0.5],[0.5,1,-2,-1]);
-	chart.setOptions([{ name : "point.size", value : 4},{ name : "point.color", value : haxe_ui_util_Color.fromString("red")}]);
+	chart.setOptions([{ name : "point.size", value : 4},{ name : "color", value : haxe_ui_util_Color.fromString("blue")}]);
 	app.ready(function() {
 		app.addComponent(chart.draw());
 		app.start();
@@ -683,7 +683,6 @@ basics_Chart.prototype = {
 	,drawAxis: function() {
 		var x_ticks = this.drawXAxis();
 		var y_ticks = this.drawYAxis();
-		this.canvas.componentGraphics.circle(x_ticks[this.x_tick_info.zero].position,y_ticks[this.y_tick_info.zero].position,4);
 		return { x_ticks : x_ticks, y_ticks : y_ticks};
 	}
 	,setAxis: function() {
@@ -711,19 +710,7 @@ basics_Chart.prototype = {
 		return y_ticks;
 	}
 	,calcAxisLength: function(length) {
-		haxe_Log.trace("Axis length",{ fileName : "Source/basics/Chart.hx", lineNumber : 138, className : "basics.Chart", methodName : "calcAxisLength", customParams : [this.options.margin]});
 		return length - 2 * this.options.margin;
-	}
-	,calcAxisMargin: function(tick_min,tick_max,pos_ratio,tick_boundary,is_y) {
-		haxe_Log.trace("Calc margins",{ fileName : "Source/basics/Chart.hx", lineNumber : 143, className : "basics.Chart", methodName : "calcAxisMargin", customParams : [this.options.margin,this.options.tick_margin]});
-		if(tick_min >= 0) {
-			return (is_y ? tick_boundary + this.options.tick_margin : 0) + this.options.margin;
-		}
-		if(tick_max <= 0) {
-			return (is_y ? 0 : tick_boundary) + this.options.tick_margin + this.options.margin;
-		}
-		haxe_Log.trace("HERE",{ fileName : "Source/basics/Chart.hx", lineNumber : 150, className : "basics.Chart", methodName : "calcAxisMargin"});
-		return this.options.tick_margin + this.options.margin + tick_boundary * (is_y ? pos_ratio : 1 - pos_ratio);
 	}
 	,setAxisStartPoint: function(margin,axis_margin,is_y) {
 		if(is_y) {
@@ -765,10 +752,17 @@ basics_Chart.prototype = {
 			++_g;
 			switch(option.name) {
 			case "color":
+				var old_color = this.options.color;
 				this.options.set_color(option.value);
-				this.options.set_point_color(option.value);
-				this.options.set_label_color(option.value);
-				this.options.set_tick_color(option.value);
+				if(haxe_ui_util_Color.toInt(old_color) == haxe_ui_util_Color.toInt(this.options.point_color)) {
+					this.options.set_point_color(option.value);
+				}
+				if(haxe_ui_util_Color.toInt(old_color) == haxe_ui_util_Color.toInt(this.options.label_color)) {
+					this.options.set_label_color(option.value);
+				}
+				if(haxe_ui_util_Color.toInt(old_color) == haxe_ui_util_Color.toInt(this.options.tick_color)) {
+					this.options.set_tick_color(option.value);
+				}
 				break;
 			case "label.color":
 				this.options.set_label_color(option.value);

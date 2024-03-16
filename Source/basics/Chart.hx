@@ -98,7 +98,6 @@ class Chart {
 	private function drawAxis():AxisInfo {
 		var x_ticks = drawXAxis();
 		var y_ticks = drawYAxis();
-		canvas.componentGraphics.circle(x_ticks[x_tick_info.zero].position, y_ticks[y_tick_info.zero].position, 4);
 		return {
 			x_ticks: x_ticks,
 			y_ticks: y_ticks
@@ -135,7 +134,6 @@ class Chart {
 	}
 
 	private function calcAxisLength(length:Float) {
-		trace("Axis length", options.margin);
 		return length - 2 * options.margin;
 	}
 
@@ -189,10 +187,17 @@ class Chart {
 				case "tick.margin":
 					this.options.tick_margin = option.value;
 				case "color":
+					var old_color = this.options.color;
 					this.options.color = option.value;
-					this.options.point_color = option.value;
-					this.options.label_color = option.value;
-					this.options.tick_color = option.value;
+					if (old_color.toInt() == this.options.point_color.toInt()) {
+						this.options.point_color = option.value;
+					}
+					if (old_color.toInt() == this.options.label_color.toInt()) {
+						this.options.label_color = option.value;
+					}
+					if (old_color.toInt() == this.options.tick_color.toInt()) {
+						this.options.tick_color = option.value;
+					}
 				case "label_color":
 					this.options.label_color = option.value;
 				case "label.color":
