@@ -1,5 +1,6 @@
 package basics;
 
+import haxe.ui.events.MouseEvent;
 import basics.AxisInfo.TickInfo;
 import basics.Chart.ChartInfo;
 import haxe.ui.core.Screen;
@@ -26,8 +27,21 @@ class Point {
 
 	public function draw(graphics:ComponentGraphics) {
 		var screen = Screen.instance;
+		screen.registerEvent("click", onClick);
 		graphics.strokeStyle(options.point_color, 1);
 		graphics.circle(x, y, options.point_size);
+	}
+
+	private function onClick(e:MouseEvent) {
+		if (isClickInside(e.screenX, e.screenY)) {
+			trace("Clicked smt", e);
+		}
+	}
+
+	private function isClickInside(x:Float, y:Float) {
+		var in_x = x >= this.x - options.point_size / 2 && x <= this.x + options.point_size / 2;
+		var in_y = y >= this.y - options.point_size / 2 && y <= this.y + options.point_size / 2;
+		return in_x && in_y;
 	}
 
 	private function setPosition(chart_info:ChartInfo) {
