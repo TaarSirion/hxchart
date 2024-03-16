@@ -9,26 +9,25 @@ import haxe.ui.util.Color;
 import haxe.ui.graphics.ComponentGraphics;
 
 class Point {
-	private var size:Float = 1;
-	private var color:Color;
 	private var x:Float;
 	private var y:Float;
 
 	private var x_val:Float;
 	private var y_val:Float;
 
-	public function new(x_val:Float, y_val:Float, chart_info:ChartInfo, size:Float, color:Color) {
+	private var options:Options;
+
+	public function new(x_val:Float, y_val:Float, chart_info:ChartInfo, options:Options) {
 		this.x_val = x_val;
 		this.y_val = y_val;
 		setPosition(chart_info);
-		this.size = size;
-		this.color = color;
+		this.options = options;
 	}
 
 	public function draw(graphics:ComponentGraphics) {
 		var screen = Screen.instance;
-		graphics.strokeStyle(color, 1);
-		graphics.circle(x, y, size);
+		graphics.strokeStyle(options.point_color, 1);
+		graphics.circle(x, y, options.point_size);
 	}
 
 	private function setPosition(chart_info:ChartInfo) {

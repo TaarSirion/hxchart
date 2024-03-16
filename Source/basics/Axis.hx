@@ -16,26 +16,20 @@ class Axis {
 	private var is_y:Bool;
 	private var min:Float;
 	private var max:Float;
-	private var margin:Float;
 
-	public var size:Float = 1;
-	public var color:Color;
-
-	private var tick_amount:Int = 10;
+	private var options:Options;
 
 	public var ticks(default, null):Array<Ticks>;
 
 	private var sub_ticks:Array<Ticks>;
 
-	public function new(start:Point, end:Point, min:Float, max:Float, is_y:Bool, color:Color, margin:Float, tick_amount:Int = 10) {
+	public function new(start:Point, end:Point, min:Float, max:Float, is_y:Bool, options:Options) {
 		this.start = start;
 		this.end = end;
 		this.is_y = is_y;
-		this.color = color;
-		this.tick_amount = tick_amount;
 		this.min = min;
 		this.max = max;
-		this.margin = margin;
+		this.options = options;
 		ticks = [];
 		sub_ticks = [];
 		setTickPosition(min, max);
@@ -53,7 +47,7 @@ class Axis {
 
 	public function draw(graphics:ComponentGraphics, other_margin:Float) {
 		setOtherMargin(other_margin);
-		graphics.strokeStyle(color);
+		graphics.strokeStyle(options.color);
 		graphics.moveTo(start.x, start.y);
 		graphics.lineTo(end.x, end.y);
 		for (tick in ticks) {
@@ -114,14 +108,14 @@ class Axis {
 
 	private function setTickPosition(min:Float, max:Float) {
 		var tick_calc = calcTickNum(min, max);
-		var start_p = is_y ? start.y - margin : start.x + margin;
-		var end_p = is_y ? end.y + margin : end.x - margin;
+		var start_p = is_y ? start.y - options.tick_margin : start.x + options.tick_margin;
+		var end_p = is_y ? end.y + options.tick_margin : end.x - options.tick_margin;
 		var dist = is_y ? start_p - end_p : end_p - start_p;
 		var dist_between_ticks = dist / (tick_calc.num - 1);
 		for (i in 0...tick_calc.num) {
 			var pos = is_y ? start_p - dist_between_ticks * i : start_p + dist_between_ticks * i;
 			var label = Utils.floatToStringPrecision(tick_calc.min + tick_calc.step * i, tick_calc.prec);
-			ticks.push(new Ticks(pos, label, tick_calc.min + tick_calc.step * i));
+			ticks.push(new Ticks(pos, label, tick_calc.min + tick_calc.step * i, false, options));
 		}
 		setSubTicks(tick_calc, dist_between_ticks);
 	}
@@ -141,7 +135,7 @@ class Axis {
 			for (j in 0...(sub_num - 1)) {
 				var l = ticks[i].num + sub_tick.step * (j + 1);
 				var d = start + (is_y ? -sub_tick.dists : sub_tick.dists) * (j + 1);
-				sub_ticks.push(new Ticks(d, Utils.floatToStringPrecision(l, sub_tick.prec + 1), l, true));
+				sub_ticks.push(new Ticks(d, Utils.floatToStringPrecision(l, sub_tick.prec + 1), l, true, options));
 			}
 		}
 	}

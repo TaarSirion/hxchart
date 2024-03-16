@@ -114,13 +114,13 @@ class Chart {
 	private function setXAxis(x_axis_length:Float, y_axis_length:Float) {
 		var x_axis_start = setAxisStartPoint(options.margin, 0, false);
 		var x_axis_end = setAxisEndPoint(x_axis_start, x_axis_length, false);
-		x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, options.color, options.tick_margin);
+		x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, options);
 	}
 
 	private function setYAxis(x_axis_length:Float, y_axis_length:Float) {
 		var y_axis_end = setAxisStartPoint(options.margin, 0, true);
 		var y_axis_start = setAxisEndPoint(y_axis_end, y_axis_length, true);
-		y_axis = new Axis(y_axis_start, y_axis_end, min_y, max_y, true, options.color, options.tick_margin);
+		y_axis = new Axis(y_axis_start, y_axis_end, min_y, max_y, true, options);
 	}
 
 	private function drawXAxis() {
@@ -172,7 +172,7 @@ class Chart {
 				y_dist: y_dist,
 				y_tick_info: y_tick_info,
 				x_tick_info: x_tick_info
-			}, options.point_size, options.point_color);
+			}, options);
 			point.draw(canvas.componentGraphics);
 		}
 	}
@@ -180,39 +180,29 @@ class Chart {
 	public function setOptions(options:Array<Option>) {
 		for (option in options) {
 			switch option.name {
-				case "margin":
+				case margin:
 					this.options.margin = option.value;
-				case "tick_margin":
+				case tick_length:
+					this.options.tick_length = option.value;
+				case tick_color:
+					this.options.tick_color = option.value;
+				case tick_margin:
 					this.options.tick_margin = option.value;
-				case "tick.margin":
-					this.options.tick_margin = option.value;
-				case "color":
+				case tick_fontsize:
+					this.options.tick_fontsize = option.value;
+
+				case color:
 					var old_color = this.options.color;
 					this.options.color = option.value;
 					if (old_color.toInt() == this.options.point_color.toInt()) {
 						this.options.point_color = option.value;
 					}
-					if (old_color.toInt() == this.options.label_color.toInt()) {
-						this.options.label_color = option.value;
-					}
 					if (old_color.toInt() == this.options.tick_color.toInt()) {
 						this.options.tick_color = option.value;
 					}
-				case "label_color":
-					this.options.label_color = option.value;
-				case "label.color":
-					this.options.label_color = option.value;
-				case "tick_color":
-					this.options.tick_color = option.value;
-				case "tick.color":
-					this.options.tick_color = option.value;
-				case "point.size":
+				case point_size:
 					this.options.point_size = option.value;
-				case "point_size":
-					this.options.point_size = option.value;
-				case "point.color":
-					this.options.point_color = option.value;
-				case "point_color":
+				case point_color:
 					this.options.point_color = option.value;
 			}
 		}

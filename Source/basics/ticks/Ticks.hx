@@ -41,27 +41,27 @@ class Ticks {
 		return is_sub;
 	}
 
-	private var tick_length:Float;
-	private var fontsize:Float;
+	private var options:Options;
 
-	public function new(pos:Float, label:String, num:Float, is_sub:Bool = false) {
+	public function new(pos:Float, label:String, num:Float, is_sub:Bool = false, options:Options) {
 		this.position = pos;
 		this.label = label;
 		this.num = num;
 		this.is_sub = is_sub;
-		tick_length = is_sub ? 2 : 5;
-		fontsize = is_sub ? 8 : 10;
+		this.options = options;
 	}
 
 	public function draw(graphics:ComponentGraphics, start:Point, is_y:Bool) {
 		var screen = Screen.instance;
 		var text_label = new Label();
+		var tick_length = (is_sub ? options.tick_sublength : options.tick_length);
+		var tick_fontsize = (is_sub ? options.tick_subfontsize : options.tick_fontsize);
+
 		text_label.width = 20;
 		text_label.text = label;
-		text_label.customStyle.fontSize = fontsize;
-		if (is_sub) {
-			graphics.strokeStyle(Color.fromComponents(120, 120, 120, 1));
-		}
+		text_label.customStyle.fontSize = tick_fontsize;
+		graphics.strokeStyle(options.tick_color);
+
 		if (label == '0' && !is_y) {
 			return;
 		}
@@ -73,12 +73,12 @@ class Ticks {
 		} else if (is_y) {
 			text_label.customStyle.textAlign = "right";
 			text_label.left = start.x - 18 - 12;
-			text_label.top = position - fontsize / 2;
+			text_label.top = position - tick_fontsize / 2;
 			screen.addComponent(text_label);
 			graphics.moveTo(start.x - tick_length, position);
 			graphics.lineTo(start.x + tick_length, position);
 		} else {
-			text_label.left = position - fontsize / 2;
+			text_label.left = position - tick_fontsize / 2;
 			text_label.top = start.y + 10;
 			screen.addComponent(text_label);
 			graphics.moveTo(position, start.y - tick_length);

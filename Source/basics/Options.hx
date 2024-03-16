@@ -2,9 +2,20 @@ package basics;
 
 import haxe.ui.util.Color;
 
+enum OptionEnum {
+	margin;
+	color;
+	point_color;
+	point_size;
+	tick_length;
+	tick_margin;
+	tick_fontsize;
+	tick_color;
+}
+
 typedef Option = {
-	name:String,
-	value:Any
+	name:OptionEnum,
+	value:Dynamic,
 }
 
 class Options {
@@ -38,16 +49,34 @@ class Options {
 		return this.tick_color = color;
 	}
 
-	public var label_color(default, set):Color = Color.fromString("black");
-
-	function set_label_color(color:Color) {
-		return this.label_color = color;
-	}
-
 	public var point_size(default, set):Float = 1;
 
 	function set_point_size(size:Float) {
 		return this.point_size = size;
+	}
+
+	public var tick_fontsize(default, set):Float = 10;
+
+	function set_tick_fontsize(size:Float) {
+		return this.tick_fontsize = size;
+	}
+
+	public var tick_subfontsize(default, set):Float = 8;
+
+	function set_tick_subfontsize(size:Float) {
+		return this.tick_subfontsize = size;
+	}
+
+	public var tick_length(default, set):Float = 5;
+
+	function set_tick_length(length:Float) {
+		return this.tick_length = length;
+	}
+
+	public var tick_sublength(default, set):Float = 2;
+
+	function set_tick_sublength(length:Float) {
+		return this.tick_sublength = length;
 	}
 
 	public function new() {}
