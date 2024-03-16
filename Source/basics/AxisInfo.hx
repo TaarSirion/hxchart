@@ -12,10 +12,6 @@ typedef TickInfo = {
 }
 
 typedef AxisInfo = {
-	margin_bottom:Float,
-	margin_left:Float,
-	x_tick_info:TickInfo,
-	y_tick_info:TickInfo,
 	x_ticks:Array<Ticks>,
 	y_ticks:Array<Ticks>,
 }

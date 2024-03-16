@@ -18,8 +18,10 @@ class Main {
 		// canvas.width = 500;
 		// canvas.height = 500;
 		// axis.draw(canvas.componentGraphics);
+		var chart = new Chart([0.5, -1, 2, -0.5], [0.5, 1, -2, -1]);
+
 		app.ready(function() {
-			app.addComponent(Chart.draw([0.5, -1, 2, -0.5], [0.5, 1, -2, -1]));
+			app.addComponent(chart.draw());
 			app.start();
 		});
 	}

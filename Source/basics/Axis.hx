@@ -39,15 +39,15 @@ class Axis {
 		setTickPosition(min, max);
 	}
 
-	public function draw(graphics:ComponentGraphics, screen:Screen) {
+	public function draw(graphics:ComponentGraphics) {
 		graphics.strokeStyle(color);
 		graphics.moveTo(start.x, start.y);
 		graphics.lineTo(end.x, end.y);
 		for (tick in ticks) {
-			tick.draw(graphics, screen, start, is_y);
+			tick.draw(graphics, start, is_y);
 		}
 		for (tick in sub_ticks) {
-			tick.draw(graphics, screen, start, is_y);
+			tick.draw(graphics, start, is_y);
 		}
 		return ticks;
 	}

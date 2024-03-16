@@ -53,7 +53,8 @@ class Ticks {
 		fontsize = is_sub ? 8 : 10;
 	}
 
-	public function draw(graphics:ComponentGraphics, screen:Screen, start:Point, is_y:Bool) {
+	public function draw(graphics:ComponentGraphics, start:Point, is_y:Bool) {
+		var screen = Screen.instance;
 		var text_label = new Label();
 		text_label.width = 20;
 		text_label.text = label;
