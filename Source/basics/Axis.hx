@@ -74,15 +74,8 @@ class Axis {
 	}
 
 	private function setSubTicks(tick_calc:TickInfo, dist_between_ticks:Float) {
-		var sub_num = 0;
-		if (tick_calc.num <= 2) {
-			sub_num = 6;
-		} else if (tick_calc.num <= 5) {
-			sub_num = 4;
-		} else if (tick_calc.num <= 10) {
-			sub_num = 2;
-		}
-		var sub_tick = AxisTools.calcSubTickNum(dist_between_ticks, sub_num, tick_calc.step);
+		var sub_num = AxisTools.setSubTickNum(tick_calc.num);
+		var sub_tick = AxisTools.calcSubTickInfo(dist_between_ticks, sub_num, tick_calc.step);
 		for (i in 0...(tick_calc.num - 1)) {
 			var start = ticks[i].position;
 			for (j in 0...(sub_num - 1)) {
@@ -91,9 +84,5 @@ class Axis {
 				sub_ticks.push(new Ticks(d, Utils.floatToStringPrecision(l, sub_tick.prec + 1), l, true, options));
 			}
 		}
-	}
-
-	private function lerp(min:Float, max:Float, value:Float) {
-		return min + (max - min) * value;
 	}
 }

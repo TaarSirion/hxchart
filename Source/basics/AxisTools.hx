@@ -52,7 +52,18 @@ class AxisTools {
 		return max / dist;
 	}
 
-	public static function calcSubTickNum(dist:Float, num:Int, big_step:Float) {
+	public static function setSubTickNum(tick_num:Int) {
+		if (tick_num <= 2) {
+			return 6;
+		} else if (tick_num <= 5) {
+			return 4;
+		} else if (tick_num <= 10) {
+			return 2;
+		}
+		return 0;
+	}
+
+	public static function calcSubTickInfo(dist:Float, num:Int, big_step:Float) {
 		var prec = (big_step < 1 ? -1 : 1) * Math.floor(Math.log(big_step) / Math.log(10)) + 1;
 		var step = big_step / num;
 		var dists = dist / num;
