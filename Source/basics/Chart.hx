@@ -18,8 +18,7 @@ typedef ChartInfo = {
 
 @:build(haxe.ui.ComponentBuilder.build("Assets/chart.xml"))
 class Chart extends Absolute {
-	private var x_points:Array<Float>;
-	private var y_points:Array<Float>;
+	private var points:Array<Point>;
 
 	private var x_tick_info:TickInfo;
 	private var y_tick_info:TickInfo;
@@ -29,17 +28,27 @@ class Chart extends Absolute {
 	private var y_axis:Axis;
 	private var label_layer:Absolute;
 
-	public function new(x_points:Array<Float>, y_points:Array<Float>, ?top:Float, ?left:Float, ?width:Float, ?height:Float) {
+	public function new(?top:Float, ?left:Float, ?width:Float, ?height:Float) {
 		super();
 		label_layer = new Absolute();
 		addComponent(label_layer);
 		var screen = Screen.instance;
 		screen.registerEvent("resize", onResize);
 		options = new Options();
-		this.x_points = x_points;
-		this.y_points = y_points;
 		label_layer.percentHeight = 100;
 		label_layer.percentWidth = 100;
+	}
+
+	public function setPoints(x_points:Array<Float>, y_points:Array<Float>, ?group:Array<Int>) {
+		if (group == null) {
+			group = [];
+			for (i in 0...x_points.length) {
+				group.push(1);
+			}
+		}
+		for (i in 0...x_points.length) {
+			points.push(new Point(x_points[i], y_points[i], options, group[i]));
+		}
 		setChart(top, left, width, height);
 	}
 
@@ -79,6 +88,12 @@ class Chart extends Absolute {
 	private var max_y:Float;
 
 	private function sortPoints() {
+		var x_points = points.map(function(p) {
+			return p.x_val;
+		});
+		var y_points = points.map(function(p) {
+			return p.y_val;
+		});
 		var minmax = ChartTools.sortPoints(x_points, y_points);
 		min_x = minmax.min_x;
 		max_x = minmax.max_x;
@@ -87,9 +102,6 @@ class Chart extends Absolute {
 	}
 
 	public function draw() {
-		if (x_points.length != y_points.length) {
-			return null;
-		}
 		var axis_info = drawAxis();
 		drawPoints(axis_info);
 		return this;
@@ -148,14 +160,14 @@ class Chart extends Absolute {
 		var y_coord_min = axis_info.y_ticks[0].position;
 		var y_coord_max = axis_info.y_ticks[axis_info.y_ticks.length - 1].position;
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, y_tick_info.pos_ratio);
-		for (i in 0...x_points.length) {
-			var point = new basics.Point(x_points[i], y_points[i], {
+		for (point in points) {
+			point.setPosition({
 				axis_info: axis_info,
 				x_dist: x_dist,
 				y_dist: y_dist,
 				y_tick_info: y_tick_info,
 				x_tick_info: x_tick_info
-			}, options);
+			});
 			point.draw(canvas.componentGraphics);
 		}
 	}

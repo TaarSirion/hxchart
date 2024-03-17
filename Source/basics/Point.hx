@@ -11,15 +11,17 @@ class Point {
 	private var x:Float;
 	private var y:Float;
 
-	private var x_val:Float;
-	private var y_val:Float;
+	public var x_val(default, null):Float;
+	public var y_val(default, null):Float;
+
+	public var group(default, null):Int;
 
 	private var options:Options;
 
-	public function new(x_val:Float, y_val:Float, chart_info:ChartInfo, options:Options) {
+	public function new(x_val:Float, y_val:Float, options:Options, group:Int = 1) {
 		this.x_val = x_val;
 		this.y_val = y_val;
-		setPosition(chart_info);
+		this.group = group;
 		this.options = options;
 	}
 
@@ -42,7 +44,7 @@ class Point {
 		return in_x && in_y;
 	}
 
-	private function setPosition(chart_info:ChartInfo) {
+	public function setPosition(chart_info:ChartInfo) {
 		var axis_info = chart_info.axis_info;
 		var x_tick_info = chart_info.x_tick_info;
 		var y_tick_info = chart_info.y_tick_info;
