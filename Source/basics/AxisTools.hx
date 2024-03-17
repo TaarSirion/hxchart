@@ -1,0 +1,52 @@
+package basics;
+
+typedef TickInfo = {
+	num:Int,
+	step:Int,
+	min:Float,
+	prec:Int,
+	pos_ratio:Float,
+	zero:Int,
+}
+
+class AxisTools {
+	private static function calcZeroIndex(pos_ratio:Float, tick_num:Int):Int {
+		if (pos_ratio == 1) {
+			return 0;
+		}
+		return Math.floor(tick_num * (1 - pos_ratio));
+	}
+
+	public static function calcTickNum(min:Float, max:Float):TickInfo {
+		var ten_pow = 1;
+		if (max > 0) {
+			ten_pow = Math.floor(Math.log(max) / Math.log(10));
+		} else if (max < 0) {
+			ten_pow = Math.floor(Math.log(Math.abs(min)) / Math.log(10));
+		}
+		var tick_step = cast(Math.pow(10, ten_pow), Int);
+		var prec = tick_step < 1 ? -1 * ten_pow : ten_pow;
+		var nmax = max < 0 ? 0 : Utils.roundToPrec(max + tick_step, prec);
+		var nmin = min < 0 ? Utils.roundToPrec(min - tick_step, prec) : 0;
+		var dist = Math.abs(nmin) + nmax;
+		var tick_num = (max < 0 ? Math.ceil(dist / tick_step) : Math.floor(dist / tick_step)) + 1;
+		var pos_ratio = calcPosRatio(nmin, nmax, dist);
+		return ({
+			num: tick_num,
+			step: tick_step,
+			min: nmin,
+			prec: prec,
+			pos_ratio: pos_ratio,
+			zero: calcZeroIndex(pos_ratio, tick_num),
+		});
+	}
+
+	private static function calcPosRatio(min:Float, max:Float, dist:Float):Float {
+		if (min == 0) {
+			return 1;
+		} else if (max == 0) {
+			return 0;
+		}
+		return max / dist;
+	}
+}

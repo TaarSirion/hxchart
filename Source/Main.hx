@@ -18,7 +18,8 @@ class Main {
 		// canvas.width = 500;
 		// canvas.height = 500;
 		// axis.draw(canvas.componentGraphics);
-		var chart = new Chart([0.5, -1, 2, -0.5], [0.5, 1, -2, -1]);
+		var chart = new Chart();
+		chart.setChart([0.5, -1, 2, -0.5], [0.5, 1, -2, -1]);
 		chart.setOptions([{name: point_size, value: 2}, {name: color, value: Color.fromString("blue")}]);
 
 		app.ready(function() {

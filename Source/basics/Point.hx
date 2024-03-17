@@ -1,12 +1,10 @@
 package basics;
 
 import haxe.ui.events.MouseEvent;
-import basics.AxisInfo.TickInfo;
+import basics.AxisTools.TickInfo;
 import basics.Chart.ChartInfo;
 import haxe.ui.core.Screen;
-import basics.AxisInfo.AxisZeros;
-import basics.AxisInfo.AxisDist;
-import haxe.ui.util.Color;
+import basics.ChartTools.AxisDist;
 import haxe.ui.graphics.ComponentGraphics;
 
 class Point {

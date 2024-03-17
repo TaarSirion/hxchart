@@ -1,8 +1,7 @@
 package basics;
 
 import haxe.ui.containers.Absolute;
-import basics.AxisInfo.TickInfo;
-import js.html.audio.DistanceModelType;
+import basics.AxisTools.TickInfo;
 import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import haxe.ui.components.Canvas;
@@ -60,46 +59,6 @@ class Axis {
 		return ticks;
 	}
 
-	private static function calcZeroIndex(pos_ratio:Float, tick_num:Int):Int {
-		if (pos_ratio == 1) {
-			return tick_num - 1;
-		}
-		return Math.floor(tick_num * (1 - pos_ratio));
-	}
-
-	public static function calcTickNum(min:Float, max:Float):TickInfo {
-		var ten_pow = 1;
-		if (max > 0) {
-			ten_pow = Math.floor(Math.log(max) / Math.log(10));
-		} else if (max < 0) {
-			ten_pow = Math.floor(Math.log(Math.abs(min)) / Math.log(10));
-		}
-		var tick_step = cast(Math.pow(10, ten_pow), Int);
-		var prec = tick_step < 1 ? -1 * ten_pow : ten_pow;
-		var nmax = max < 0 ? 0 : Utils.roundToPrec(max + tick_step, prec);
-		var nmin = min < 0 ? Utils.roundToPrec(min - tick_step, prec) : 0;
-		var dist = Math.abs(nmin) + nmax;
-		var tick_num = (max < 0 ? Math.ceil(dist / tick_step) : Math.floor(dist / tick_step)) + 1;
-		var pos_ratio = calcPosRatio(nmin, nmax, dist);
-		return ({
-			num: tick_num,
-			step: tick_step,
-			min: nmin,
-			prec: prec,
-			pos_ratio: pos_ratio,
-			zero: calcZeroIndex(pos_ratio, tick_num),
-		});
-	}
-
-	private static function calcPosRatio(min:Float, max:Float, dist:Float):Float {
-		if (min == 0) {
-			return 1;
-		} else if (max == 0) {
-			return 0;
-		}
-		return max / dist;
-	}
-
 	private function calcSubTickNum(dist:Float, num:Int, big_step:Float) {
 		var prec = (big_step < 1 ? -1 : 1) * Math.floor(Math.log(big_step) / Math.log(10)) + 1;
 		var step = big_step / num;
@@ -108,7 +67,7 @@ class Axis {
 	}
 
 	private function setTickPosition(min:Float, max:Float) {
-		var tick_calc = calcTickNum(min, max);
+		var tick_calc = AxisTools.calcTickNum(min, max);
 		var start_p = is_y ? start.y - options.tick_margin : start.x + options.tick_margin;
 		var end_p = is_y ? end.y + options.tick_margin : end.x - options.tick_margin;
 		var dist = is_y ? start_p - end_p : end_p - start_p;
