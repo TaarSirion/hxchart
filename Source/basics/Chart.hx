@@ -29,7 +29,7 @@ class Chart extends Absolute {
 	private var y_axis:Axis;
 	private var label_layer:Absolute;
 
-	public function new(x_points:Array<Float>, y_points:Array<Float>,) {
+	public function new(x_points:Array<Float>, y_points:Array<Float>, ?top:Float, ?left:Float, ?width:Float, ?height:Float) {
 		super();
 		label_layer = new Absolute();
 		addComponent(label_layer);
@@ -40,9 +40,10 @@ class Chart extends Absolute {
 		this.y_points = y_points;
 		label_layer.percentHeight = 100;
 		label_layer.percentWidth = 100;
+		setChart(top, left, width, height);
 	}
 
-	public function setChart(?top:Float, ?left:Float, ?width:Float, ?height:Float) {
+	public function setChart(top:Float, left:Float, width:Float, height:Float) {
 		setDimensions(width, height);
 		createCanvas(top, left);
 		sortPoints();
@@ -128,6 +129,7 @@ class Chart extends Absolute {
 		var x_axis_start = ChartTools.setAxisStartPoint(options.margin, 0, false);
 		var x_axis_end = ChartTools.setAxisEndPoint(x_axis_start, x_axis_length, false);
 		x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, options);
+		trace("set xaxis", x_axis);
 	}
 
 	private function setYAxis(x_axis_length:Float, y_axis_length:Float) {
@@ -137,6 +139,7 @@ class Chart extends Absolute {
 	}
 
 	private function drawXAxis() {
+		trace("x_axis", x_axis);
 		var x_ticks = x_axis.draw(canvas.componentGraphics, y_axis.ticks[y_tick_info.zero].position, label_layer);
 		return x_ticks;
 	}
