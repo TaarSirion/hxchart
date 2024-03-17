@@ -59,23 +59,16 @@ class Axis {
 		return ticks;
 	}
 
-	private function calcSubTickNum(dist:Float, num:Int, big_step:Float) {
-		var prec = (big_step < 1 ? -1 : 1) * Math.floor(Math.log(big_step) / Math.log(10)) + 1;
-		var step = big_step / num;
-		var dists = dist / num;
-		return {dists: dists, step: step, prec: prec};
-	}
-
 	private function setTickPosition(min:Float, max:Float) {
 		var tick_calc = AxisTools.calcTickNum(min, max);
 		var start_p = is_y ? start.y - options.tick_margin : start.x + options.tick_margin;
 		var end_p = is_y ? end.y + options.tick_margin : end.x - options.tick_margin;
 		var dist = is_y ? start_p - end_p : end_p - start_p;
 		var dist_between_ticks = dist / (tick_calc.num - 1);
+		var pos = AxisTools.calcTickPos(tick_calc.num, dist_between_ticks, start_p, is_y);
 		for (i in 0...tick_calc.num) {
-			var pos = is_y ? start_p - dist_between_ticks * i : start_p + dist_between_ticks * i;
 			var label = Utils.floatToStringPrecision(tick_calc.min + tick_calc.step * i, tick_calc.prec);
-			ticks.push(new Ticks(pos, label, tick_calc.min + tick_calc.step * i, false, options));
+			ticks.push(new Ticks(pos[i], label, tick_calc.min + tick_calc.step * i, false, options));
 		}
 		setSubTicks(tick_calc, dist_between_ticks);
 	}
@@ -89,7 +82,7 @@ class Axis {
 		} else if (tick_calc.num <= 10) {
 			sub_num = 2;
 		}
-		var sub_tick = calcSubTickNum(dist_between_ticks, sub_num, tick_calc.step);
+		var sub_tick = AxisTools.calcSubTickNum(dist_between_ticks, sub_num, tick_calc.step);
 		for (i in 0...(tick_calc.num - 1)) {
 			var start = ticks[i].position;
 			for (j in 0...(sub_num - 1)) {

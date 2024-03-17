@@ -43,7 +43,15 @@ class Chart extends Absolute {
 		setChart(top, left, width, height);
 	}
 
-	public function setChart(top:Float, left:Float, width:Float, height:Float) {
+	private function onResize(e:UIEvent) {
+		var screen = Screen.instance;
+		setChart(this.top, this.left, screen.width, screen.height);
+		canvas.componentGraphics.clear();
+		label_layer.removeAllComponents();
+		draw();
+	}
+
+	private function setChart(top:Float, left:Float, width:Float, height:Float) {
 		setDimensions(width, height);
 		createCanvas(top, left);
 		sortPoints();
@@ -51,21 +59,7 @@ class Chart extends Absolute {
 		setTickInfo();
 	}
 
-	private function onResize(e:UIEvent) {
-		trace("Resize");
-		var screen = Screen.instance;
-		setDimensions(screen.width, screen.height);
-		createCanvas(top, left);
-		sortPoints();
-		setAxis();
-		setTickInfo();
-		canvas.componentGraphics.clear();
-		label_layer.removeAllComponents();
-		draw();
-	}
-
 	private function createCanvas(top:Float, left:Float) {
-		// canvas.componentGraphics.resize(width, height);
 		canvas.percentWidth = 100;
 		canvas.percentHeight = 100;
 		canvas.top = top;
@@ -129,7 +123,6 @@ class Chart extends Absolute {
 		var x_axis_start = ChartTools.setAxisStartPoint(options.margin, 0, false);
 		var x_axis_end = ChartTools.setAxisEndPoint(x_axis_start, x_axis_length, false);
 		x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, options);
-		trace("set xaxis", x_axis);
 	}
 
 	private function setYAxis(x_axis_length:Float, y_axis_length:Float) {
@@ -139,7 +132,6 @@ class Chart extends Absolute {
 	}
 
 	private function drawXAxis() {
-		trace("x_axis", x_axis);
 		var x_ticks = x_axis.draw(canvas.componentGraphics, y_axis.ticks[y_tick_info.zero].position, label_layer);
 		return x_ticks;
 	}

@@ -1,5 +1,7 @@
 # Upcoming Features
-- Make Chart responsive
+- [x] Make Chart responsive 
+- Add grouping for values
+- Add legend
 - Add linechart
 - Add Barchart
 - Repeat x or y values, depending on the larger array

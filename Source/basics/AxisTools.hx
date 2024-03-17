@@ -1,5 +1,7 @@
 package basics;
 
+import haxe.ds.Vector;
+
 typedef TickInfo = {
 	num:Int,
 	step:Int,
@@ -48,5 +50,20 @@ class AxisTools {
 			return 0;
 		}
 		return max / dist;
+	}
+
+	public static function calcSubTickNum(dist:Float, num:Int, big_step:Float) {
+		var prec = (big_step < 1 ? -1 : 1) * Math.floor(Math.log(big_step) / Math.log(10)) + 1;
+		var step = big_step / num;
+		var dists = dist / num;
+		return {dists: dists, step: step, prec: prec};
+	}
+
+	public static function calcTickPos(num:Int, dist_between_ticks:Float, start:Float, is_y:Bool) {
+		var pos = new Vector(num);
+		for (i in 0...pos.length) {
+			pos[i] = is_y ? start - dist_between_ticks * i : start + dist_between_ticks * i;
+		}
+		return pos;
 	}
 }
