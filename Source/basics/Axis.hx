@@ -1,5 +1,6 @@
 package basics;
 
+import haxe.ui.containers.Absolute;
 import basics.AxisInfo.TickInfo;
 import js.html.audio.DistanceModelType;
 import haxe.ui.core.Screen;
@@ -45,16 +46,16 @@ class Axis {
 		}
 	}
 
-	public function draw(graphics:ComponentGraphics, other_margin:Float) {
+	public function draw(graphics:ComponentGraphics, other_margin:Float, label_layer:Absolute) {
 		setOtherMargin(other_margin);
 		graphics.strokeStyle(options.color);
 		graphics.moveTo(start.x, start.y);
 		graphics.lineTo(end.x, end.y);
 		for (tick in ticks) {
-			tick.draw(graphics, start, is_y);
+			tick.draw(graphics, start, is_y, label_layer);
 		}
 		for (tick in sub_ticks) {
-			tick.draw(graphics, start, is_y);
+			tick.draw(graphics, start, is_y, label_layer);
 		}
 		return ticks;
 	}

@@ -1,5 +1,7 @@
 package basics;
 
+import haxe.ui.events.UIEvent;
+import haxe.ui.containers.Absolute;
 import basics.Options.Option;
 import basics.AxisInfo.TickInfo;
 import haxe.ui.containers.VBox;
@@ -21,7 +23,8 @@ typedef ChartInfo = {
 	y_dist:AxisDist,
 }
 
-class Chart {
+@:build(haxe.ui.ComponentBuilder.build("Assets/chart.xml"))
+class Chart extends Absolute {
 	private var x_points:Array<Float>;
 	private var y_points:Array<Float>;
 
@@ -31,8 +34,14 @@ class Chart {
 	private var options:Options;
 	private var x_axis:Axis;
 	private var y_axis:Axis;
+	private var label_layer:Absolute;
 
 	public function new(x_points:Array<Float>, y_points:Array<Float>, ?top:Float, ?left:Float, ?width:Float, ?height:Float) {
+		super();
+		label_layer = new Absolute();
+		addComponent(label_layer);
+		var screen = Screen.instance;
+		screen.registerEvent("resize", onResize);
 		options = new Options();
 		this.x_points = x_points;
 		this.y_points = y_points;
@@ -43,13 +52,22 @@ class Chart {
 		setTickInfo();
 	}
 
-	private var canvas:Canvas;
-	private var width:Float;
-	private var height:Float;
+	private function onResize(e:UIEvent) {
+		trace("Resize");
+		var screen = Screen.instance;
+		setDimensions(screen.width, screen.height);
+		createCanvas(top, left);
+		sortPoints();
+		setAxis();
+		setTickInfo();
+		canvas.componentGraphics.clear();
+		label_layer.removeAllComponents();
+		draw();
+	}
 
 	private function createCanvas(top:Float, left:Float) {
-		canvas = haxe.ui.ComponentBuilder.fromFile("Assets/chart.xml", {width: width, height: height});
-		canvas.percentWidth = 50;
+		// canvas.componentGraphics.resize(width, height);
+		canvas.percentWidth = 100;
 		canvas.percentHeight = 100;
 		canvas.top = top;
 		canvas.left = left;
@@ -57,9 +75,12 @@ class Chart {
 
 	private function setDimensions(width:Float, height:Float) {
 		var screen = Screen.instance;
+		trace(screen.height, screen.width);
 		this.width = width == null ? screen.width / 2 : width;
 		var new_height = height == null ? screen.height / 2 : height;
 		this.height = new_height == 0 ? 500 : new_height;
+		label_layer.percentHeight = 100;
+		label_layer.percentWidth = 100;
 	}
 
 	private var min_x:Float;
@@ -84,7 +105,7 @@ class Chart {
 		}
 		var axis_info = drawAxis();
 		drawPoints(axis_info);
-		return canvas;
+		return this;
 	}
 
 	private function setTickInfo() {
@@ -124,12 +145,12 @@ class Chart {
 	}
 
 	private function drawXAxis() {
-		var x_ticks = x_axis.draw(canvas.componentGraphics, y_axis.ticks[y_tick_info.zero].position);
+		var x_ticks = x_axis.draw(canvas.componentGraphics, y_axis.ticks[y_tick_info.zero].position, label_layer);
 		return x_ticks;
 	}
 
 	private function drawYAxis() {
-		var y_ticks = y_axis.draw(canvas.componentGraphics, x_axis.ticks[x_tick_info.zero].position);
+		var y_ticks = y_axis.draw(canvas.componentGraphics, x_axis.ticks[x_tick_info.zero].position, label_layer);
 		return y_ticks;
 	}
 

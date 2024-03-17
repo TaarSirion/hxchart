@@ -1,5 +1,6 @@
 package basics.ticks;
 
+import haxe.ui.containers.Absolute;
 import haxe.ui.util.Color;
 import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
@@ -42,6 +43,7 @@ class Ticks {
 	}
 
 	private var options:Options;
+	private var text_label:Label;
 
 	public function new(pos:Float, label:String, num:Float, is_sub:Bool = false, options:Options) {
 		this.position = pos;
@@ -49,14 +51,13 @@ class Ticks {
 		this.num = num;
 		this.is_sub = is_sub;
 		this.options = options;
+		text_label = new Label();
 	}
 
-	public function draw(graphics:ComponentGraphics, start:Point, is_y:Bool) {
-		var screen = Screen.instance;
-		var text_label = new Label();
+	public function draw(graphics:ComponentGraphics, start:Point, is_y:Bool, label_layer:Absolute) {
 		var tick_length = (is_sub ? options.tick_sublength : options.tick_length);
 		var tick_fontsize = (is_sub ? options.tick_subfontsize : options.tick_fontsize);
-
+		trace("drawing chart");
 		text_label.width = 20;
 		text_label.text = label;
 		text_label.customStyle.fontSize = tick_fontsize;
@@ -69,18 +70,18 @@ class Ticks {
 		if (label == '0' && is_y) {
 			text_label.left = start.x - 15;
 			text_label.top = position + 5;
-			screen.addComponent(text_label);
+			label_layer.addComponent(text_label);
 		} else if (is_y) {
 			text_label.customStyle.textAlign = "right";
 			text_label.left = start.x - 18 - 12;
 			text_label.top = position - tick_fontsize / 2;
-			screen.addComponent(text_label);
+			label_layer.addComponent(text_label);
 			graphics.moveTo(start.x - tick_length, position);
 			graphics.lineTo(start.x + tick_length, position);
 		} else {
 			text_label.left = position - tick_fontsize / 2;
 			text_label.top = start.y + 10;
-			screen.addComponent(text_label);
+			label_layer.addComponent(text_label);
 			graphics.moveTo(position, start.y - tick_length);
 			graphics.lineTo(position, start.y + tick_length);
 		}
