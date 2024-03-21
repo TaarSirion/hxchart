@@ -50,25 +50,9 @@ class Point {
 		var y_tick_info = chart_info.y_tick_info;
 		var x_dist = chart_info.x_dist;
 		var y_dist = chart_info.y_dist;
-		calcXCoord(axis_info, x_tick_info, x_dist);
-		calcYCoord(axis_info, y_tick_info, y_dist);
-	}
-
-	private function calcXCoord(axis_info:AxisInfo, x_tick_info:TickInfo, x_dist:AxisDist) {
-		var x_ratio = x_val / axis_info.x_ticks[axis_info.x_ticks.length - 1].num;
-		x = axis_info.x_ticks[x_tick_info.zero].position + x_dist.pos_dist * x_ratio;
-		if (x_val < 0) {
-			x_ratio = x_val / axis_info.x_ticks[0].num;
-			x = axis_info.x_ticks[x_tick_info.zero].position - x_dist.neg_dist * x_ratio;
-		}
-	}
-
-	private function calcYCoord(axis_info:AxisInfo, y_tick_info:TickInfo, y_dist:AxisDist) {
-		var y_ratio = y_val / axis_info.y_ticks[axis_info.y_ticks.length - 1].num;
-		y = axis_info.y_ticks[y_tick_info.zero].position - y_dist.pos_dist * y_ratio;
-		if (y_val < 0) {
-			y_ratio = y_val / axis_info.y_ticks[0].num;
-			y = axis_info.y_ticks[y_tick_info.zero].position + y_dist.neg_dist * y_ratio;
-		}
+		x = PointTools.calcXCoord(x_val, axis_info.x_ticks[axis_info.x_ticks.length - 1].num, axis_info.x_ticks[0].num,
+			axis_info.x_ticks[x_tick_info.zero].position, x_dist);
+		y = PointTools.calcYCoord(y_val, axis_info.y_ticks[axis_info.y_ticks.length - 1].num, axis_info.y_ticks[0].num,
+			axis_info.y_ticks[y_tick_info.zero].position, y_dist);
 	}
 }
