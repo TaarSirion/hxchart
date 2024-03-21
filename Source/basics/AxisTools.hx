@@ -19,7 +19,7 @@ class AxisTools {
 		return Math.floor(tick_num * (1 - pos_ratio));
 	}
 
-	public static function calcTickNum(min:Float, max:Float):TickInfo {
+	public static function calcTickInfo(min:Float, max:Float):TickInfo {
 		var ten_pow = 1;
 		if (max > 0) {
 			ten_pow = Math.floor(Math.log(max) / Math.log(10));

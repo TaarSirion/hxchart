@@ -30,10 +30,6 @@ class ChartTools {
 		};
 	}
 
-	public static function setTickInfo(min:Float, max:Float) {
-		return AxisTools.calcTickNum(min, max);
-	}
-
 	public static function calcAxisLength(length:Float, margin:Float) {
 		return length - 2 * margin;
 	}

@@ -13,7 +13,8 @@ class Main {
 	public static function main() {
 		Toolkit.init();
 		var app = new HaxeUIApp();
-		var chart = new Chart([0.5, -1, 2, -0.5], [0.5, 1, -2, -1]);
+		var chart = new Chart();
+		chart.setPoints([0.5, -1, 2, -0.5], [0.5, 1, -2, -1]);
 		chart.setOptions([{name: point_size, value: 2}, {name: color, value: Color.fromString("blue")}]);
 
 		app.ready(function() {

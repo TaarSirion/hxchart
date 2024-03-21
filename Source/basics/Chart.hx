@@ -37,6 +37,8 @@ class Chart extends Absolute {
 		options = new Options();
 		label_layer.percentHeight = 100;
 		label_layer.percentWidth = 100;
+		setDimensions(width, height);
+		createCanvas(top, left);
 	}
 
 	public function setPoints(x_points:Array<Float>, y_points:Array<Float>, ?group:Array<Int>) {
@@ -49,20 +51,20 @@ class Chart extends Absolute {
 		for (i in 0...x_points.length) {
 			points.push(new Point(x_points[i], y_points[i], options, group[i]));
 		}
-		setChart(top, left, width, height);
+		setChart();
 	}
 
 	private function onResize(e:UIEvent) {
 		var screen = Screen.instance;
-		setChart(this.top, this.left, screen.width, screen.height);
+		setDimensions(screen.width, screen.height);
+		createCanvas(top, left);
+		setChart();
 		canvas.componentGraphics.clear();
 		label_layer.removeAllComponents();
 		draw();
 	}
 
-	private function setChart(top:Float, left:Float, width:Float, height:Float) {
-		setDimensions(width, height);
-		createCanvas(top, left);
+	private function setChart() {
 		sortPoints();
 		setAxis();
 		setTickInfo();
@@ -108,8 +110,8 @@ class Chart extends Absolute {
 	}
 
 	private function setTickInfo() {
-		x_tick_info = ChartTools.setTickInfo(min_x, max_x);
-		y_tick_info = ChartTools.setTickInfo(min_y, max_y);
+		x_tick_info = AxisTools.calcTickInfo(min_x, max_x);
+		y_tick_info = AxisTools.calcTickInfo(min_y, max_y);
 	}
 
 	private var margin_bottom:Float = 60;

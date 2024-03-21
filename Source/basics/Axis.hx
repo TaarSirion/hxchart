@@ -60,7 +60,7 @@ class Axis {
 	}
 
 	private function setTickPosition(min:Float, max:Float) {
-		var tick_calc = AxisTools.calcTickNum(min, max);
+		var tick_calc = AxisTools.calcTickInfo(min, max);
 		var start_p = is_y ? start.y - options.tick_margin : start.x + options.tick_margin;
 		var end_p = is_y ? end.y + options.tick_margin : end.x - options.tick_margin;
 		var dist = is_y ? start_p - end_p : end_p - start_p;
