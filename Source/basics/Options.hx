@@ -92,7 +92,7 @@ class Options {
 		return legend_padding = padding;
 	}
 
-	public var legend_align(default, set):LegendPosition = right;
+	public var legend_align(default, set):LegendPosition = topright;
 
 	function set_legend_align(align:LegendPosition) {
 		return legend_align = align;

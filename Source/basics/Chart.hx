@@ -1,5 +1,6 @@
 package basics;
 
+import haxe.ui.themes.ThemeManager;
 import basics.legend.Legend;
 import basics.axis.AxisInfo;
 import basics.axis.Axis;
@@ -74,7 +75,6 @@ class Chart extends Absolute {
 		setDimensions(screen.width, screen.height);
 		createCanvas(top, left);
 		setChart();
-		removeComponent(legend);
 		canvas.componentGraphics.clear();
 		label_layer.removeAllComponents();
 		draw();
@@ -122,7 +122,6 @@ class Chart extends Absolute {
 	public function draw() {
 		var axis_info = drawAxis();
 		drawPoints(axis_info);
-		addComponent(legend);
 		legend.draw(this);
 		return this;
 	}
