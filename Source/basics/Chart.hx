@@ -1,12 +1,16 @@
 package basics;
 
+import basics.axis.AxisInfo;
+import basics.axis.Axis;
 import haxe.ui.events.UIEvent;
 import haxe.ui.containers.Absolute;
 import basics.Options.Option;
-import basics.AxisTools.TickInfo;
+import basics.axis.AxisTools.TickInfo;
 import basics.ChartTools.AxisDist;
 import haxe.ui.core.Screen;
 import haxe.ui.components.Canvas;
+import basics.points.Point;
+import basics.axis.AxisTools;
 
 typedef ChartInfo = {
 	axis_info:AxisInfo,
@@ -18,7 +22,7 @@ typedef ChartInfo = {
 
 @:build(haxe.ui.ComponentBuilder.build("Assets/chart.xml"))
 class Chart extends Absolute {
-	private var points:Array<Point>;
+	private var points:Array<Point> = [];
 
 	private var x_tick_info:TickInfo;
 	private var y_tick_info:TickInfo;

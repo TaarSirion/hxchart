@@ -1,4 +1,4 @@
-package basics;
+package basics.axis;
 
 import haxe.ds.Vector;
 

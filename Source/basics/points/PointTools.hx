@@ -1,7 +1,6 @@
-package basics;
+package basics.points;
 
 import basics.ChartTools.AxisDist;
-import basics.AxisTools.TickInfo;
 
 class PointTools {
 	public static function calcXCoord(x_val:Float, max_num:Float, min_num:Float, zero_pos:Float, x_dist:AxisDist) {

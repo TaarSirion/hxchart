@@ -1,4 +1,4 @@
-package basics;
+package basics.axis;
 
 import basics.ticks.Ticks;
 

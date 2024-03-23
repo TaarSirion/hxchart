@@ -1,7 +1,8 @@
-package basics;
+package basics.axis;
 
+import basics.axis.Axis;
 import haxe.ui.containers.Absolute;
-import basics.AxisTools.TickInfo;
+import basics.axis.AxisTools.TickInfo;
 import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import haxe.ui.components.Canvas;

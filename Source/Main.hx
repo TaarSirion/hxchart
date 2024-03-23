@@ -6,7 +6,7 @@ import haxe.ui.components.Canvas;
 import haxe.ui.Toolkit;
 import haxe.ui.HaxeUIApp;
 import haxe.ui.geom.Point;
-import basics.Axis;
+import basics.axis.Axis;
 import haxe.ui.util.Color;
 
 class Main {

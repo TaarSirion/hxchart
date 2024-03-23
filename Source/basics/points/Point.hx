@@ -1,7 +1,7 @@
-package basics;
+package basics.points;
 
 import haxe.ui.events.MouseEvent;
-import basics.AxisTools.TickInfo;
+import basics.axis.AxisTools.TickInfo;
 import basics.Chart.ChartInfo;
 import haxe.ui.core.Screen;
 import basics.ChartTools.AxisDist;
