@@ -1,5 +1,6 @@
 package basics;
 
+import basics.legend.LegendTools.LegendPosition;
 import haxe.ui.util.Color;
 
 enum OptionEnum {
@@ -77,6 +78,24 @@ class Options {
 
 	function set_tick_sublength(length:Float) {
 		return this.tick_sublength = length;
+	}
+
+	public var legend_margin(default, set):Float = 10;
+
+	function set_legend_margin(margin:Float) {
+		return legend_margin = margin;
+	}
+
+	public var legend_padding(default, set):Float = 10;
+
+	function set_legend_padding(padding:Float) {
+		return legend_padding = padding;
+	}
+
+	public var legend_align(default, set):LegendPosition = right;
+
+	function set_legend_align(align:LegendPosition) {
+		return legend_align = align;
 	}
 
 	public function new() {}

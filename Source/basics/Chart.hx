@@ -1,11 +1,11 @@
 package basics;
 
+import basics.legend.Legend;
 import basics.axis.AxisInfo;
 import basics.axis.Axis;
 import haxe.ui.events.UIEvent;
 import haxe.ui.containers.Absolute;
 import basics.Options.Option;
-import basics.axis.AxisTools.TickInfo;
 import basics.ChartTools.AxisDist;
 import haxe.ui.core.Screen;
 import haxe.ui.components.Canvas;
@@ -31,29 +31,40 @@ class Chart extends Absolute {
 	private var x_axis:Axis;
 	private var y_axis:Axis;
 	private var label_layer:Absolute;
+	private var legend:Legend;
 
 	public function new(?top:Float, ?left:Float, ?width:Float, ?height:Float) {
 		super();
+		options = new Options();
 		label_layer = new Absolute();
 		addComponent(label_layer);
 		var screen = Screen.instance;
 		screen.registerEvent("resize", onResize);
-		options = new Options();
+		legend = new Legend(options);
 		label_layer.percentHeight = 100;
 		label_layer.percentWidth = 100;
 		setDimensions(width, height);
 		createCanvas(top, left);
 	}
 
-	public function setPoints(x_points:Array<Float>, y_points:Array<Float>, ?group:Array<Int>) {
-		if (group == null) {
-			group = [];
+	public function setPoints(x_points:Array<Float>, y_points:Array<Float>, ?groups:Array<Int>) {
+		if (groups == null) {
+			groups = [];
 			for (i in 0...x_points.length) {
-				group.push(1);
+				groups.push(1);
 			}
 		}
 		for (i in 0...x_points.length) {
-			points.push(new Point(x_points[i], y_points[i], options, group[i]));
+			points.push(new Point(x_points[i], y_points[i], options, groups[i]));
+		}
+		var unique_groups = [];
+		for (i => val in groups) {
+			if (groups.indexOf(val) == i) {
+				unique_groups.push(val);
+			}
+		}
+		for (group in unique_groups) {
+			legend.addText(group + "");
 		}
 		setChart();
 	}
@@ -63,6 +74,7 @@ class Chart extends Absolute {
 		setDimensions(screen.width, screen.height);
 		createCanvas(top, left);
 		setChart();
+		removeComponent(legend);
 		canvas.componentGraphics.clear();
 		label_layer.removeAllComponents();
 		draw();
@@ -110,6 +122,8 @@ class Chart extends Absolute {
 	public function draw() {
 		var axis_info = drawAxis();
 		drawPoints(axis_info);
+		addComponent(legend);
+		legend.draw(this);
 		return this;
 	}
 
