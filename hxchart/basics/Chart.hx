@@ -21,6 +21,9 @@ typedef ChartInfo = {
 	y_dist:AxisDist,
 }
 
+/**
+ * Basic `Chart` displaying points on a 2d coordinate system.
+ */
 class Chart extends Absolute {
 	private var canvas:Canvas;
 
@@ -35,6 +38,13 @@ class Chart extends Absolute {
 	private var label_layer:Absolute;
 	private var legend:Legend;
 
+	/**
+	 * [Create a new object of type Chart]
+	 * @param top Initial top position of the chart.
+	 * @param left Initial left position of the chart.
+	 * @param width Initial width of the chart. Will at default use 500px.
+	 * @param height Initial height of the chart. Will at default use 500px.
+	 */
 	public function new(?top:Float, ?left:Float, ?width:Float, ?height:Float) {
 		super();
 		options = new Options();
@@ -51,6 +61,12 @@ class Chart extends Absolute {
 		createCanvas(top, left);
 	}
 
+	/**
+	 * [Set the points to be displayed in the chart]
+	 * @param x_points An array of x values the points should have. Beware this will match the first x value to the first y value.
+	 * @param y_points An array of y values the points should have. Beware this will match the first x value to the first y value.
+	 * @param groups An array of groups the points belong to. Currently this has no effect.
+	 */
 	public function setPoints(x_points:Array<Float>, y_points:Array<Float>, ?groups:Array<Int>) {
 		if (groups == null) {
 			groups = [];
@@ -98,9 +114,8 @@ class Chart extends Absolute {
 
 	private function setDimensions(width:Float, height:Float) {
 		var screen = Screen.instance;
-		this.width = width == null ? screen.width / 2 : width;
-		var new_height = height == null ? screen.height / 2 : height;
-		this.height = new_height == 0 ? 500 : new_height;
+		this.width = width == null ? 500 : width;
+		this.height = height == null ? 500 : height;
 	}
 
 	private var min_x:Float;
@@ -122,6 +137,9 @@ class Chart extends Absolute {
 		max_y = minmax.max_y;
 	}
 
+	/**
+	 * [Draw the chart. This will explicitly call the functions for generating the chart.]
+	 */
 	public function draw() {
 		var axis_info = drawAxis();
 		drawPoints(axis_info);
@@ -194,6 +212,10 @@ class Chart extends Absolute {
 		}
 	}
 
+	/**
+	 * [Set options for a chart]
+	 * @param options An array of `Option`. Each option need to have a name and value.
+	 */
 	public function setOptions(options:Array<Option>) {
 		for (option in options) {
 			switch option.name {
