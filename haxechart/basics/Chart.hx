@@ -122,7 +122,7 @@ class Chart extends Absolute {
 	public function draw() {
 		var axis_info = drawAxis();
 		drawPoints(axis_info);
-		legend.draw(this);
+		// legend.draw(this);
 		return this;
 	}
 
