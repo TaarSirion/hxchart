@@ -1,4 +1,4 @@
-package basics.ticks;
+package hxchart.basics.ticks;
 
 import haxe.ui.containers.Absolute;
 import haxe.ui.util.Color;

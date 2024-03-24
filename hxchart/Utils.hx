@@ -1,3 +1,5 @@
+package hxchart;
+
 import haxe.ui.geom.Point;
 
 class Utils {

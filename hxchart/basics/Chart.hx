@@ -1,17 +1,16 @@
-package basics;
+package hxchart.basics;
 
-import haxe.ui.themes.ThemeManager;
-import basics.legend.Legend;
-import basics.axis.AxisInfo;
-import basics.axis.Axis;
+import hxchart.basics.legend.Legend;
+import hxchart.basics.axis.AxisInfo;
+import hxchart.basics.axis.Axis;
 import haxe.ui.events.UIEvent;
 import haxe.ui.containers.Absolute;
-import basics.Options.Option;
-import basics.ChartTools.AxisDist;
+import hxchart.basics.Options.Option;
+import hxchart.basics.ChartTools.AxisDist;
 import haxe.ui.core.Screen;
 import haxe.ui.components.Canvas;
-import basics.points.Point;
-import basics.axis.AxisTools;
+import hxchart.basics.points.Point;
+import hxchart.basics.axis.AxisTools;
 
 typedef ChartInfo = {
 	axis_info:AxisInfo,

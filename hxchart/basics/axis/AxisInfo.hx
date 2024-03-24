@@ -1,6 +1,6 @@
-package basics.axis;
+package hxchart.basics.axis;
 
-import basics.ticks.Ticks;
+import hxchart.basics.ticks.Ticks;
 
 typedef AxisInfo = {
 	x_ticks:Array<Ticks>,

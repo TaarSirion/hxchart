@@ -1,6 +1,6 @@
-package basics.points;
+package hxchart.basics.points;
 
-import basics.ChartTools.AxisDist;
+import hxchart.basics.ChartTools.AxisDist;
 
 class PointTools {
 	public static function calcXCoord(x_val:Float, max_num:Float, min_num:Float, zero_pos:Float, x_dist:AxisDist) {

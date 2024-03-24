@@ -1,12 +1,12 @@
-package basics.axis;
+package hxchart.basics.axis;
 
-import basics.axis.Axis;
+import hxchart.basics.axis.Axis;
 import haxe.ui.containers.Absolute;
-import basics.axis.AxisTools.TickInfo;
+import hxchart.basics.axis.AxisTools.TickInfo;
 import haxe.ui.core.Screen;
 import haxe.ui.core.Component;
 import haxe.ui.components.Canvas;
-import basics.ticks.Ticks;
+import hxchart.basics.ticks.Ticks;
 import haxe.ui.util.Color;
 import haxe.ui.graphics.ComponentGraphics;
 import haxe.ui.geom.Point;

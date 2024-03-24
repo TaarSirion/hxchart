@@ -7,7 +7,7 @@
     "version": "0.0.1",
     "classPath": "hxchart/",
     "releasenote": "Initial release",
-    "contributors": ["Leon"],
+    "contributors": ["TaarSirion"],
     "dependencies": {
         "haxeui-core": "1.6.0"
     }

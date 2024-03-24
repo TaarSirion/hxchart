@@ -1,4 +1,4 @@
-package basics.legend;
+package hxchart.basics.legend;
 
 import haxe.ui.geom.Point;
 

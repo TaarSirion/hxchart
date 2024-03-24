@@ -1,6 +1,6 @@
-package basics;
+package hxchart.basics;
 
-import basics.legend.LegendTools.LegendPosition;
+import hxchart.basics.legend.LegendTools.LegendPosition;
 import haxe.ui.util.Color;
 
 enum OptionEnum {

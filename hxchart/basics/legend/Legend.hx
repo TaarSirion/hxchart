@@ -1,4 +1,4 @@
-package basics.legend;
+package hxchart.basics.legend;
 
 import haxe.ui.containers.VBox;
 import haxe.ui.themes.ThemeManager;
@@ -12,7 +12,7 @@ import haxe.ui.core.TextDisplay;
 import haxe.ui.styles.StyleLookupMap;
 import haxe.ui.util.Color;
 import haxe.ui.components.Label;
-import basics.Options;
+import hxchart.basics.Options;
 import haxe.ui.containers.Absolute;
 
 class Legend extends Absolute {

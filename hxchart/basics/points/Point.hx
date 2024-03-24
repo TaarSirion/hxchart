@@ -1,10 +1,8 @@
-package basics.points;
+package hxchart.basics.points;
 
 import haxe.ui.events.MouseEvent;
-import basics.axis.AxisTools.TickInfo;
-import basics.Chart.ChartInfo;
+import hxchart.basics.Chart.ChartInfo;
 import haxe.ui.core.Screen;
-import basics.ChartTools.AxisDist;
 import haxe.ui.graphics.ComponentGraphics;
 
 class Point {

@@ -1,10 +1,11 @@
-package basics.axis;
+package hxchart.basics.axis;
 
 import haxe.ds.Vector;
+import hxchart.Utils;
 
 typedef TickInfo = {
 	num:Int,
-	step:Int,
+	step:Float,
 	min:Float,
 	prec:Int,
 	pos_ratio:Float,
@@ -26,7 +27,7 @@ class AxisTools {
 		} else if (max < 0) {
 			ten_pow = Math.floor(Math.log(Math.abs(min)) / Math.log(10));
 		}
-		var tick_step = cast(Math.pow(10, ten_pow), Int);
+		var tick_step = Math.pow(10, ten_pow);
 		var prec = tick_step < 1 ? -1 * ten_pow : ten_pow;
 		var nmax = max < 0 ? 0 : Utils.roundToPrec(max + tick_step, prec);
 		var nmin = min < 0 ? Utils.roundToPrec(min - tick_step, prec) : 0;
