@@ -1,7 +1,0 @@
--cp Source
--main Main
-
--lib haxeui-core
--lib haxeui-html5
-
--js Export/html/main.js
