@@ -1,5 +1,5 @@
 Export/
-hxchart/Main.hx
+local/
 hl.hxml
 html.hxml
 Haxechart.hxproj

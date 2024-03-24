@@ -57,7 +57,6 @@ class Ticks {
 	public function draw(graphics:ComponentGraphics, start:Point, is_y:Bool, label_layer:Absolute) {
 		var tick_length = (is_sub ? options.tick_sublength : options.tick_length);
 		var tick_fontsize = (is_sub ? options.tick_subfontsize : options.tick_fontsize);
-		trace("drawing chart");
 		text_label.width = 20;
 		text_label.text = label;
 		text_label.customStyle.fontSize = tick_fontsize;

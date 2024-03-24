@@ -1,3 +1,0 @@
-<absolute>
-    <canvas id="canvas" width="${width}" height="${height}"></canvas>
-</absolute>

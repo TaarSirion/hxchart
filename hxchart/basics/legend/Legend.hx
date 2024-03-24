@@ -15,23 +15,24 @@ import haxe.ui.components.Label;
 import basics.Options;
 import haxe.ui.containers.Absolute;
 
-@:build(haxe.ui.ComponentBuilder.build("Assets/legend.xml"))
 class Legend extends Absolute {
-	var options:Options;
-	var texts:Array<Label> = [];
-	var max_textlength:Float = 0;
-	var legend_title:Label;
+	private var options:Options;
+	private var texts:Array<Label> = [];
+	private var max_textlength:Float = 0;
+	private var legend_title:Label;
+	private var legend_container:VBox;
 
 	public function new(options:Options) {
 		super();
 		this.options = options;
+		legend_container = new VBox();
+		addComponent(legend_container);
 		legend_title = new Label();
 		legend_title.text = "Groups";
 		legend_title.customStyle.fontSize = 20;
 		var x = new TextDisplay();
 		x.parentComponent = legend_title;
 		x.text = text;
-		trace(x.textHeight);
 		max_textlength = Math.max(max_textlength, x.textWidth);
 	}
 
@@ -46,7 +47,7 @@ class Legend extends Absolute {
 	}
 
 	public function draw(chart:Absolute) {
-		legendContainer.removeAllComponents();
+		legend_container.removeAllComponents();
 		var x = new TextDisplay();
 		x.parentComponent = texts[0];
 		x.text = text;
@@ -58,12 +59,12 @@ class Legend extends Absolute {
 		this.top = coords.y;
 
 		chart.addComponent(this);
-		legendContainer.addComponent(legend_title);
+		legend_container.addComponent(legend_title);
 		for (i => label in texts) {
 			// label.left = options.legend_padding;
 			// label.top = options.legend_padding + label.height * i;
 			label.customStyle.fontSize = 16;
-			legendContainer.addComponent(label);
+			legend_container.addComponent(label);
 			trace("Text Display", label.getTextDisplay().width, label.getTextDisplay().textWidth, label.width, label.componentWidth);
 		}
 	}

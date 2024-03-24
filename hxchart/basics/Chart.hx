@@ -21,8 +21,9 @@ typedef ChartInfo = {
 	y_dist:AxisDist,
 }
 
-@:build(haxe.ui.ComponentBuilder.build("Assets/chart.xml"))
 class Chart extends Absolute {
+	private var canvas:Canvas;
+
 	private var points:Array<Point> = [];
 
 	private var x_tick_info:TickInfo;
@@ -37,6 +38,8 @@ class Chart extends Absolute {
 	public function new(?top:Float, ?left:Float, ?width:Float, ?height:Float) {
 		super();
 		options = new Options();
+		canvas = new Canvas();
+		addComponent(canvas);
 		label_layer = new Absolute();
 		addComponent(label_layer);
 		var screen = Screen.instance;
