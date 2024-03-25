@@ -1,5 +1,6 @@
 package hxchart.basics;
 
+import hxchart.basics.legend.LegendTools.LegendPosition;
 import hxchart.basics.legend.Legend;
 import hxchart.basics.axis.AxisInfo;
 import hxchart.basics.axis.Axis;
@@ -166,9 +167,11 @@ class Chart extends Absolute {
 	public function draw() {
 		var axis_info = drawAxis();
 		drawPoints(axis_info);
-		// legend.draw(this);
+		legend.draw(this);
 		return this;
 	}
+
+	public function setLegend(title:String, ?alignment:LegendPosition) {}
 
 	private function setTickInfo() {
 		x_tick_info = AxisTools.calcTickInfo(min_x, max_x);
