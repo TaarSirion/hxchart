@@ -17,7 +17,21 @@ class AxisTools {
 		if (pos_ratio == 1) {
 			return 0;
 		}
+		if (pos_ratio == 0) {
+			return tick_num - 1;
+		}
 		return Math.floor(tick_num * (1 - pos_ratio));
+	}
+
+	private static function calcTickNum(dist:Float, prec:Int, tick_step:Float, max:Float):Int {
+		var tick_num:Int = Math.round(dist * Math.pow(10, -prec)) + 1;
+		if (tick_step < 1) {
+			tick_num = Math.round(dist * Math.pow(10, prec)) + 1;
+		}
+		if (tick_num > 20) {
+			tick_num = 20;
+		}
+		return tick_num;
 	}
 
 	public static function calcTickInfo(min:Float, max:Float):TickInfo {
@@ -32,7 +46,7 @@ class AxisTools {
 		var nmax = max < 0 ? 0 : Utils.roundToPrec(max + tick_step, prec);
 		var nmin = min < 0 ? Utils.roundToPrec(min - tick_step, prec) : 0;
 		var dist = Math.abs(nmin) + nmax;
-		var tick_num = cast(dist * Math.pow(10, prec), Int) + 1;
+		var tick_num = calcTickNum(dist, prec, tick_step, nmax);
 		var pos_ratio = calcPosRatio(nmin, nmax, dist);
 		return ({
 			num: tick_num,
