@@ -3,6 +3,8 @@
 
 It is still in early development and rather featureless, but will hopefully see a lot of development over the coming months.
 
+![Two point charts](/images/charts.png?raw=true "two point charts")
+![Single point charts](/images/chart.png?raw=true "Single point charts")
 
 ## Installation
 ```
