@@ -90,7 +90,15 @@ class Chart extends Absolute {
 
 	private function onResize(e:UIEvent) {
 		var screen = Screen.instance;
-		setDimensions(screen.width, screen.height);
+		var w = init_width;
+		var h = init_height;
+		if (screen.width <= init_width) {
+			w = screen.width;
+		}
+		if (screen.height <= init_height) {
+			h = screen.height;
+		}
+		setDimensions(w, h);
 		createCanvas(top, left);
 		setChart();
 		canvas.componentGraphics.clear();
@@ -111,10 +119,19 @@ class Chart extends Absolute {
 		canvas.left = left;
 	}
 
+	private var init_width:Float = 0;
+	private var init_height:Float = 0;
+
 	private function setDimensions(width:Float, height:Float) {
 		var screen = Screen.instance;
-		this.width = width == null ? 500 : width;
+		this.width = width == null ? screen.width : width;
 		this.height = height == null ? 500 : height;
+		if (init_width == 0) {
+			init_width = this.width;
+		}
+		if (init_height == 0) {
+			init_height = this.height;
+		}
 	}
 
 	private var min_x:Float;
