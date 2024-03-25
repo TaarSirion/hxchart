@@ -32,6 +32,9 @@ class Utils {
 			}
 			var str_before_comma = sign + str.substr(0, str.length - prec);
 			var str_after_comma = removeTrailingZeros(str.substr(str.length - prec));
+			if (str_after_comma == '0') {
+				return str_before_comma;
+			}
 			return str_before_comma + '.' + str_after_comma;
 		}
 	}
