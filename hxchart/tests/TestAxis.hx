@@ -1,7 +1,7 @@
-package tests;
+package hxchart.tests;
 
 import utest.Assert;
-import basics.AxisTools;
+import hxchart.basics.axis.AxisTools;
 import utest.Test;
 
 class TestAxis extends Test {
@@ -26,6 +26,16 @@ class TestAxis extends Test {
 			prec: 0,
 			step: 1,
 			zero: 2
+		}, tick_info);
+
+		var tick_info = AxisTools.calcTickInfo(-0.5, 0.5);
+		Assert.same({
+			num: 12,
+			min: -0.6,
+			pos_ratio: 0.5,
+			prec: 1,
+			step: 0.1,
+			zero: 6
 		}, tick_info);
 	}
 

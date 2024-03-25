@@ -1,7 +1,0 @@
--cp Source
--main TestAll
-
--lib utest
--lib haxeui-core
-
---interp

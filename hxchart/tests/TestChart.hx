@@ -1,6 +1,6 @@
-package tests;
+package hxchart.tests;
 
-import basics.ChartTools;
+import hxchart.basics.ChartTools;
 import utest.Assert;
 
 class TestChart extends utest.Test {

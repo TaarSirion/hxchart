@@ -32,7 +32,7 @@ class AxisTools {
 		var nmax = max < 0 ? 0 : Utils.roundToPrec(max + tick_step, prec);
 		var nmin = min < 0 ? Utils.roundToPrec(min - tick_step, prec) : 0;
 		var dist = Math.abs(nmin) + nmax;
-		var tick_num = (max < 0 ? Math.ceil(dist / tick_step) : Math.floor(dist / tick_step)) + 1;
+		var tick_num = cast(dist * Math.pow(10, prec), Int) + 1;
 		var pos_ratio = calcPosRatio(nmin, nmax, dist);
 		return ({
 			num: tick_num,

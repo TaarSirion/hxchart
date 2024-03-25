@@ -1,5 +1,6 @@
 package hxchart.basics.points;
 
+import thx.Floats;
 import haxe.ui.events.MouseEvent;
 import hxchart.basics.Chart.ChartInfo;
 import haxe.ui.core.Screen;

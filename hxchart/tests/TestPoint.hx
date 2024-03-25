@@ -1,6 +1,6 @@
-package tests;
+package hxchart.tests;
 
-import basics.PointTools;
+import hxchart.basics.points.PointTools;
 import utest.Assert;
 
 class TestPoint extends utest.Test {
@@ -13,6 +13,12 @@ class TestPoint extends utest.Test {
 
 		var x = PointTools.calcXCoord(0.5, 2, -2, 0, {pos_dist: 2, neg_dist: 2});
 		Assert.equals(0.5, x);
+
+		var x = PointTools.calcXCoord(0.5, 0.5, 0, 0, {pos_dist: 2, neg_dist: 0});
+		Assert.equals(2, x);
+
+		var x = PointTools.calcXCoord(0.5, 0.5, -0.5, 0, {pos_dist: 2, neg_dist: 2});
+		Assert.equals(2, x);
 	}
 
 	function testCalcYCoord() {
