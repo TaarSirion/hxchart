@@ -37,6 +37,9 @@ class Chart extends Absolute {
 	private var label_layer:Absolute;
 	private var legend:Legend;
 
+	private var init_top:Float = 0;
+	private var init_left:Float = 0;
+
 	/**
 	 * [Create a new object of type Chart]
 	 * @param top Initial top position of the chart.
@@ -46,10 +49,14 @@ class Chart extends Absolute {
 	 */
 	public function new(?top:Float, ?left:Float, ?width:Float, ?height:Float) {
 		super();
+		init_top = top;
+		init_left = left;
 		options = new Options();
 		canvas = new Canvas();
 		addComponent(canvas);
 		label_layer = new Absolute();
+		label_layer.top = top;
+		label_layer.left = left;
 		addComponent(label_layer);
 		var screen = Screen.instance;
 		screen.registerEvent("resize", onResize);
@@ -99,7 +106,7 @@ class Chart extends Absolute {
 			h = screen.height;
 		}
 		setDimensions(w, h);
-		createCanvas(top, left);
+		createCanvas(init_top, init_left);
 		setChart();
 		canvas.componentGraphics.clear();
 		label_layer.removeAllComponents();
