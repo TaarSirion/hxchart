@@ -30,7 +30,7 @@ class LegendTools {
 	}
 
 	public static function calcHeight(title_height:Float, text_height:Float, group_num:Int, padding:Float):Float {
-		var init_height = title_height + text_height * group_num + 2 * padding;
+		var init_height = title_height * 1.25 + text_height * group_num + 2 * padding * 1.25;
 		// if (init_height < 100) {
 		// 	return 100;
 		// }

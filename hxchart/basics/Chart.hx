@@ -1,5 +1,9 @@
 package hxchart.basics;
 
+import haxe.ui.Toolkit;
+import haxe.ui.styles.elements.Directive;
+import haxe.ui.styles.elements.RuleElement;
+import haxe.ui.styles.StyleSheet;
 import hxchart.basics.legend.LegendTools.LegendPosition;
 import hxchart.basics.legend.Legend;
 import hxchart.basics.axis.AxisInfo;

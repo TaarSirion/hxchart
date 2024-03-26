@@ -21,6 +21,14 @@ class Legend extends Absolute {
 	private var texts:Array<Label> = [];
 	private var max_textlength:Float = 0;
 	private var legend_title(default, set):String;
+	private var colors:Array<Color> = [
+		Color.fromString("black"),
+		Color.fromString("blue"),
+		Color.fromString("red"),
+		Color.fromString("green"),
+		Color.fromString("yellow"),
+		Color.fromString("cyan")
+	];
 
 	function set_legend_title(title:String) {
 		return legend_title = title;
@@ -35,23 +43,22 @@ class Legend extends Absolute {
 		this.options = options;
 		legend_text_container = new VBox();
 		legend_symbol_container = new Canvas();
-
-		this.customStyle.backgroundColor = Color.fromComponents(240, 240, 240, 1).toInt();
-		this.customStyle.borderSize = 1;
-		this.customStyle.borderStyle = "dashed";
-		this.customStyle.borderColor = Color.fromString("black").toInt();
-		this.invalidateComponentStyle();
-		trace(customStyle.hasBorder, customStyle.borderType);
+		this.addClass("legendClass", true);
+		this.styleSheet = new StyleSheet();
+		this.styleSheet.parse(".legendClass{ 
+				border: 1px solid black; 
+				background-color: rgb(245, 245, 245);
+			}
+			.legendTitle {
+				text-align: center;
+			}
+		");
 		addComponent(legend_symbol_container);
-		legend_symbol_container.height = this.height;
-		legend_symbol_container.width = this.width;
-
 		addComponent(legend_text_container);
 		legend_title_label = new Label();
 		legend_title_label.text = "Groups";
 		legend_title_label.customStyle.fontSize = 20;
-		legend_title_label.customStyle.textAlign = "center";
-		legend_title_label.invalidateComponentStyle();
+		legend_title_label.addClass("legendTitle");
 
 		var x = new TextDisplay();
 		x.parentComponent = legend_title_label;
@@ -71,12 +78,21 @@ class Legend extends Absolute {
 
 	public function draw(chart:Absolute) {
 		legend_text_container.removeAllComponents();
+		legend_symbol_container.componentGraphics.clear();
 		var x = new TextDisplay();
 		x.parentComponent = texts[0];
 		x.text = text;
 
 		width = LegendTools.calcWidth(max_textlength, chart.width, options.legend_padding);
-		height = LegendTools.calcHeight(legend_title_label.customStyle.fontSize, 16, texts.length, options.legend_padding);
+		height = LegendTools.calcHeight(20, 16, texts.length, options.legend_padding);
+		legend_text_container.height = height - 2 * options.legend_padding;
+		legend_text_container.width = width - 2 * options.legend_padding;
+		legend_text_container.left = options.legend_padding;
+		legend_text_container.top = options.legend_padding;
+		legend_symbol_container.height = this.height;
+		legend_symbol_container.width = this.width;
+		legend_title_label.width = legend_text_container.width;
+
 		var coords = LegendTools.calcPosition(width, height, chart.width, chart.height, options.legend_margin, options.legend_padding, options.legend_align);
 		this.left = coords.x;
 		this.top = coords.y;
@@ -84,12 +100,13 @@ class Legend extends Absolute {
 		chart.addComponent(this);
 		legend_text_container.addComponent(legend_title_label);
 		for (i => label in texts) {
-			// label.left = options.legend_padding;
-			// label.top = options.legend_padding + label.height * i;
+			label.width = legend_text_container.width / 2;
 			label.customStyle.fontSize = 16;
-			label.customStyle.textAlign = "right";
-			label.invalidateComponentStyle();
+			label.customStyle.textAlign = "center";
 			legend_text_container.addComponent(label);
+			legend_symbol_container.componentGraphics.fillStyle(colors[i]);
+			legend_symbol_container.componentGraphics.circle(options.legend_padding + 1 + legend_text_container.width / 8,
+				options.legend_padding + 20 * 1.25 + 1.25 * 12 * (i + 1), 2);
 		}
 	}
 }
