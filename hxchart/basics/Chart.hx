@@ -132,8 +132,7 @@ class Chart extends Absolute {
 		setChart();
 		canvas.componentGraphics.clear();
 		trace(label_layer.numComponents);
-		label_layer.removeAllComponents();
-		legend = new Legend(options);
+		label_layer.removeAllComponents(false);
 		draw();
 	}
 
