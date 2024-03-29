@@ -1,5 +1,6 @@
 package hxchart.basics;
 
+import hxchart.basics.colors.ColorPalettes;
 import haxe.ui.Toolkit;
 import haxe.ui.styles.elements.Directive;
 import haxe.ui.styles.elements.RuleElement;
@@ -32,6 +33,7 @@ class Chart extends Absolute {
 	private var canvas:Canvas;
 
 	private var points:Array<Point> = [];
+	private var point_groups:Map<String, Int>;
 
 	private var x_tick_info:TickInfo;
 	private var y_tick_info:TickInfo;
@@ -78,25 +80,31 @@ class Chart extends Absolute {
 	 * @param y_points An array of y values the points should have. Beware this will match the first x value to the first y value.
 	 * @param groups An array of groups the points belong to. Currently this has no effect.
 	 */
-	public function setPoints(x_points:Array<Float>, y_points:Array<Float>, ?groups:Array<Int>) {
+	public function setPoints(x_points:Array<Float>, y_points:Array<Float>, ?groups:Array<String>) {
 		if (groups == null) {
 			groups = [];
 			for (i in 0...x_points.length) {
-				groups.push(1);
+				groups.push("1");
+			}
+		}
+		var j = 0;
+		point_groups = new Map();
+		for (i => val in groups) {
+			if (groups.indexOf(val) == i) {
+				point_groups.set(val, j);
+				j++;
 			}
 		}
 		for (i in 0...x_points.length) {
-			points.push(new Point(x_points[i], y_points[i], options, groups[i]));
+			points.push(new Point(x_points[i], y_points[i], options, point_groups.get(groups[i])));
 		}
-		var unique_groups = [];
-		for (i => val in groups) {
-			if (groups.indexOf(val) == i) {
-				unique_groups.push(val);
-			}
+
+		if (j > 0 && options.point_color.length == 1) {
+			options.point_color = ColorPalettes.defaultColors(j + 1);
 		}
-		for (group in unique_groups) {
-			legend.addText(group + "");
-		}
+		trace(options.point_color);
+
+		legend.addGroups(point_groups);
 		setChart();
 	}
 
@@ -263,8 +271,8 @@ class Chart extends Absolute {
 				case color:
 					var old_color = this.options.color;
 					this.options.color = option.value;
-					if (old_color.toInt() == this.options.point_color.toInt()) {
-						this.options.point_color = option.value;
+					if (old_color.toInt() == this.options.point_color[0].toInt()) {
+						this.options.point_color[0] = option.value;
 					}
 					if (old_color.toInt() == this.options.tick_color.toInt()) {
 						this.options.tick_color = option.value;

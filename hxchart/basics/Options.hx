@@ -38,9 +38,9 @@ class Options {
 		return this.color = color;
 	}
 
-	public var point_color(default, set):Color = Color.fromString("black");
+	public var point_color(default, set):Array<Color> = [Color.fromString("black")];
 
-	function set_point_color(color:Color) {
+	function set_point_color(color:Array<Color>) {
 		return this.point_color = color;
 	}
 

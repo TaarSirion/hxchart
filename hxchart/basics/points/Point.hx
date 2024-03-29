@@ -17,7 +17,7 @@ class Point {
 
 	private var options:Options;
 
-	public function new(x_val:Float, y_val:Float, options:Options, group:Int = 1) {
+	public function new(x_val:Float, y_val:Float, options:Options, group:Int = 0) {
 		this.x_val = x_val;
 		this.y_val = y_val;
 		this.group = group;
@@ -27,7 +27,7 @@ class Point {
 	public function draw(graphics:ComponentGraphics) {
 		var screen = Screen.instance;
 		screen.registerEvent("click", onClick);
-		graphics.strokeStyle(options.point_color, 1);
+		graphics.strokeStyle(options.point_color[group], 1);
 		graphics.circle(x, y, options.point_size);
 	}
 
