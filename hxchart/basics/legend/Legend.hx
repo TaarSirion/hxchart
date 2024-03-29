@@ -40,6 +40,12 @@ class Legend extends VBox {
 		this.styleSheet.parse(".legendClass{ 
 				border: 1px solid black; 
 				background-color: rgb(245, 245, 245);
+				margin: "
+			+ options.legend_margin
+			+ ";
+				padding: "
+			+ options.legend_padding
+			+ ";
 			}
 			.legendTitle {
 				text-align: center;
@@ -72,13 +78,13 @@ class Legend extends VBox {
 		x.parentComponent = label;
 		x.text = text;
 		max_textlength = Math.max(max_textlength, x.textWidth * 1.6);
-		trace("Legend Text", text, x.textWidth, x.textHeight, max_textlength, label.width);
 	}
 
 	public function calcPosition(layer:Absolute) {
 		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
 		this.left = coords.x;
 		this.top = coords.y;
+		legend_title_label.width = width - 2 * options.legend_padding;
 	}
 
 	public function draw(chart:Absolute) {
@@ -89,7 +95,6 @@ class Legend extends VBox {
 
 		for (i => label in texts) {
 			var label_box = new HBox();
-			// label.width = legend_text_container.width - 10;
 			label.customStyle.textAlign = "left";
 			var canvas = new Canvas();
 			canvas.width = 10;
@@ -100,19 +105,5 @@ class Legend extends VBox {
 			canvas.componentGraphics.fillStyle(options.point_color[i]);
 			canvas.componentGraphics.circle(5, (16 * 1.25 + 4) / 2, 3);
 		}
-
-		// width = LegendTools.calcWidth(max_textlength, chart.width, options.legend_padding);
-		// height = LegendTools.calcHeight(legend_title_label.customStyle.fontSize, texts[0].customStyle.fontSize, texts.length, options.legend_padding);
-		// legend_text_container.height = height - 2 * options.legend_padding;
-		// legend_text_container.width = width - 2 * options.legend_padding;
-		// legend_text_container.left = options.legend_padding;
-		// legend_text_container.top = options.legend_padding;
-		// legend_symbol_container.height = this.height;
-		// legend_symbol_container.width = this.width;
-		// legend_title_label.width = legend_text_container.width;
-
-		// chart.addComponent(this);
-		// legend_text_container.addComponent(legend_title_label);
-		// trace(legend_title_label.width, legend_title_label.componentWidth, legend_title_label.actualComponentWidth);
 	}
 }
