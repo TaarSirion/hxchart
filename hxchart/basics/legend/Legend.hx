@@ -17,7 +17,7 @@ import haxe.ui.components.Label;
 import hxchart.basics.Options;
 import haxe.ui.containers.Absolute;
 
-class Legend extends Absolute {
+class Legend extends VBox {
 	private var options:Options;
 	private var texts:Array<Label> = [];
 	private var max_textlength:Float = 0;
@@ -35,7 +35,6 @@ class Legend extends Absolute {
 		super();
 		this.options = options;
 		legend_text_container = new VBox();
-		legend_symbol_container = new Canvas();
 		this.addClass("legendClass", true);
 		this.styleSheet = new StyleSheet();
 		this.styleSheet.parse(".legendClass{ 
@@ -46,7 +45,6 @@ class Legend extends Absolute {
 				text-align: center;
 			}
 		");
-		addComponent(legend_symbol_container);
 		addComponent(legend_text_container);
 		legend_title_label = new Label();
 		legend_title_label.text = "Groups";
@@ -77,39 +75,44 @@ class Legend extends Absolute {
 		trace("Legend Text", text, x.textWidth, x.textHeight, max_textlength, label.width);
 	}
 
-	public function draw(chart:Absolute) {
-		legend_text_container.removeAllComponents();
-		legend_symbol_container.componentGraphics.clear();
-
-		width = LegendTools.calcWidth(max_textlength, chart.width, options.legend_padding);
-		height = LegendTools.calcHeight(legend_title_label.customStyle.fontSize, texts[0].customStyle.fontSize, texts.length, options.legend_padding);
-		legend_text_container.height = height - 2 * options.legend_padding;
-		legend_text_container.width = width - 2 * options.legend_padding;
-		legend_text_container.left = options.legend_padding;
-		legend_text_container.top = options.legend_padding;
-		legend_symbol_container.height = this.height;
-		legend_symbol_container.width = this.width;
-		legend_title_label.width = legend_text_container.width;
-
-		var coords = LegendTools.calcPosition(width, height, chart.width, chart.height, options.legend_margin, options.legend_padding, options.legend_align);
+	public function calcPosition(layer:Absolute) {
+		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
 		this.left = coords.x;
 		this.top = coords.y;
+	}
+
+	public function draw(chart:Absolute) {
+		this.removeAllComponents(false);
 		chart.addComponent(this);
-		legend_text_container.addComponent(legend_title_label);
-		trace(legend_title_label.width, legend_title_label.componentWidth, legend_title_label.actualComponentWidth);
+		this.addComponent(legend_title_label);
+		calcPosition(chart);
 
 		for (i => label in texts) {
 			var label_box = new HBox();
-			label.width = legend_text_container.width - 10;
+			// label.width = legend_text_container.width - 10;
 			label.customStyle.textAlign = "left";
 			var canvas = new Canvas();
 			canvas.width = 10;
 			canvas.height = 16 * 1.25 + 4;
 			label_box.addComponent(canvas);
 			label_box.addComponent(label);
-			legend_text_container.addComponent(label_box);
+			this.addComponent(label_box);
 			canvas.componentGraphics.fillStyle(options.point_color[i]);
 			canvas.componentGraphics.circle(5, (16 * 1.25 + 4) / 2, 3);
 		}
+
+		// width = LegendTools.calcWidth(max_textlength, chart.width, options.legend_padding);
+		// height = LegendTools.calcHeight(legend_title_label.customStyle.fontSize, texts[0].customStyle.fontSize, texts.length, options.legend_padding);
+		// legend_text_container.height = height - 2 * options.legend_padding;
+		// legend_text_container.width = width - 2 * options.legend_padding;
+		// legend_text_container.left = options.legend_padding;
+		// legend_text_container.top = options.legend_padding;
+		// legend_symbol_container.height = this.height;
+		// legend_symbol_container.width = this.width;
+		// legend_title_label.width = legend_text_container.width;
+
+		// chart.addComponent(this);
+		// legend_text_container.addComponent(legend_title_label);
+		// trace(legend_title_label.width, legend_title_label.componentWidth, legend_title_label.actualComponentWidth);
 	}
 }

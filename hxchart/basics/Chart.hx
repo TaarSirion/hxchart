@@ -64,12 +64,13 @@ class Chart extends Absolute {
 		label_layer = new Absolute();
 		label_layer.top = top;
 		label_layer.left = left;
+		label_layer.percentHeight = 100;
+		label_layer.percentWidth = 100;
 		addComponent(label_layer);
 		var screen = Screen.instance;
 		screen.registerEvent("resize", onResize);
+
 		legend = new Legend(options);
-		label_layer.percentHeight = 100;
-		label_layer.percentWidth = 100;
 		setDimensions(width, height);
 		createCanvas(top, left);
 	}
@@ -108,6 +109,14 @@ class Chart extends Absolute {
 		setChart();
 	}
 
+	private override function onReady() {
+		trace(label_layer.width);
+		if (width == 0) {
+			return;
+		}
+		legend.calcPosition(label_layer);
+	}
+
 	private function onResize(e:UIEvent) {
 		var screen = Screen.instance;
 		var w = init_width;
@@ -122,7 +131,9 @@ class Chart extends Absolute {
 		createCanvas(init_top, init_left);
 		setChart();
 		canvas.componentGraphics.clear();
+		trace(label_layer.numComponents);
 		label_layer.removeAllComponents();
+		legend = new Legend(options);
 		draw();
 	}
 
@@ -179,7 +190,7 @@ class Chart extends Absolute {
 	public function draw() {
 		var axis_info = drawAxis();
 		drawPoints(axis_info);
-		legend.draw(this);
+		legend.draw(label_layer);
 		return this;
 	}
 
