@@ -48,6 +48,29 @@ class Legend extends VBox {
 		this.options = options;
 		legend_text_container = new VBox();
 		this.addClass("legendClass", true);
+		setStyleSheet();
+		addComponent(legend_text_container);
+		setTitle("Groups");
+	}
+
+	public function setTitle(title:String) {
+		legend_title_label = new Label();
+		legend_title_label.text = title;
+		legend_title_label.customStyle.fontSize = options.legend_title_fontsize;
+		legend_title_label.addClass("legendTitle");
+
+		var x = new TextDisplay();
+		x.parentComponent = legend_title_label;
+		x.text = text;
+		max_textlength = Math.max(max_textlength, x.textWidth * (options.legend_title_fontsize / 10));
+	}
+
+	public function setOptions(legend_options:LegendOptions) {
+		options.setLegendOptions(legend_options);
+		setStyleSheet();
+	}
+
+	private function setStyleSheet() {
 		this.styleSheet = new StyleSheet();
 		this.styleSheet.parse(".legendClass{ 
 				border: "
@@ -69,20 +92,6 @@ class Legend extends VBox {
 				text-align: center;
 			}
 		");
-		addComponent(legend_text_container);
-		setTitle("Groups");
-	}
-
-	public function setTitle(title:String) {
-		legend_title_label = new Label();
-		legend_title_label.text = title;
-		legend_title_label.customStyle.fontSize = options.legend_title_fontsize;
-		legend_title_label.addClass("legendTitle");
-
-		var x = new TextDisplay();
-		x.parentComponent = legend_title_label;
-		x.text = text;
-		max_textlength = Math.max(max_textlength, x.textWidth * (options.legend_title_fontsize / 10));
 	}
 
 	public function setGroups(groups:Map<String, Int>) {

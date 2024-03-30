@@ -194,7 +194,7 @@ class Chart extends Absolute {
 	}
 
 	public function setLegend(legends:Array<String>, title:String = "Groups", options:LegendOptions) {
-		this.options.setLegendOptions(options);
+		legend.setOptions(options);
 		this.options.use_legend = true;
 		this.options.used_set_legend = true;
 		var groups = new Map();
@@ -303,7 +303,7 @@ class Chart extends Absolute {
 				case point_color:
 					this.options.point_color = option.value;
 				case legend_options:
-					this.options.setLegendOptions(option.value);
+					legend.setOptions(option.value);
 				case use_legend:
 					if (!this.options.used_set_legend) {
 						this.options.use_legend = option.value;
