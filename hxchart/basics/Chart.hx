@@ -193,7 +193,18 @@ class Chart extends Absolute {
 		return this;
 	}
 
-	public function setLegend(title:String, ?alignment:LegendPosition) {}
+	public function setLegend(legends:Array<String>, title:String = "Groups", options:LegendOptions) {
+		this.options.setLegendOptions(options);
+		this.options.use_legend = true;
+		this.options.used_set_legend = true;
+		var groups = new Map();
+		for (i => text in legends) {
+			groups.set(text, i);
+		}
+		legend.setGroups(groups);
+		legend.setTitle(title);
+		legend.draw(label_layer);
+	}
 
 	private function setTickInfo() {
 		x_tick_info = AxisTools.calcTickInfo(min_x, max_x);
@@ -291,6 +302,12 @@ class Chart extends Absolute {
 					this.options.point_size = option.value;
 				case point_color:
 					this.options.point_color = option.value;
+				case legend_options:
+					this.options.setLegendOptions(option.value);
+				case use_legend:
+					if (!this.options.used_set_legend) {
+						this.options.use_legend = option.value;
+					}
 			}
 		}
 	}
