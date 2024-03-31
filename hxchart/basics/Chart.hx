@@ -1,5 +1,6 @@
 package hxchart.basics;
 
+import haxe.ui.util.Color;
 import hxchart.basics.colors.ColorPalettes;
 import haxe.ui.Toolkit;
 import haxe.ui.styles.elements.Directive;
@@ -67,10 +68,12 @@ class Chart extends Absolute {
 		label_layer.percentHeight = 100;
 		label_layer.percentWidth = 100;
 		addComponent(label_layer);
+
 		var screen = Screen.instance;
 		screen.registerEvent("resize", onResize);
 
 		legend = new Legend(options);
+		label_layer.addComponent(legend);
 		setDimensions(width, height);
 		createCanvas(top, left);
 	}
@@ -189,7 +192,7 @@ class Chart extends Absolute {
 	public function draw() {
 		var axis_info = drawAxis();
 		drawPoints(axis_info);
-		legend.draw(label_layer);
+		// legend.draw(label_layer);
 		return this;
 	}
 
@@ -200,10 +203,11 @@ class Chart extends Absolute {
 		var groups = new Map();
 		for (i => text in legends) {
 			groups.set(text, i);
+			legend.addNode({text: text, color: Color.fromString("black")});
 		}
-		legend.setGroups(groups);
-		legend.setTitle(title);
-		legend.draw(label_layer);
+		// legend.setGroups(groups);
+		// legend.setTitle(title);
+		// legend.draw(label_layer);
 	}
 
 	private function setTickInfo() {

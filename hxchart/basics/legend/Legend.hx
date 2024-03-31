@@ -1,5 +1,11 @@
 package hxchart.basics.legend;
 
+import hxchart.basics.legend.LegendNode.LegendNodeData;
+import haxe.ui.core.Component;
+import haxe.ui.util.Variant;
+import haxe.ui.behaviours.Behaviour;
+import haxe.ui.behaviours.DataBehaviour;
+import haxe.ui.core.CompositeBuilder;
 import haxe.ui.util.Color;
 import hxchart.basics.legend.LegendTools.LegendPosition;
 import haxe.ui.containers.HBox;
@@ -30,15 +36,18 @@ typedef LegendOptions = {
 	?padding:Float
 }
 
+@:composite(Builder)
 class Legend extends VBox {
-	private var options:Options;
+	public var options(default, null):Options;
+
+	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
 
 	private var texts:Array<Label> = [];
+	private var legend_texts:Array<String> = [];
 	private var max_textlength:Float = 0;
 
 	private var legend_title_label:Label;
 	private var legend_text_container:VBox;
-	private var legend_symbol_container:Canvas;
 
 	public function new(options:Options) {
 		super();
@@ -144,19 +153,63 @@ class Legend extends VBox {
 			label_box.addComponent(canvas);
 			label_box.addComponent(label);
 			this.addComponent(label_box);
-			drawSymbol(canvas, i);
+			// drawSymbol(canvas, i);
 		}
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class AddNode extends Behaviour {
+	public override function call(param:Any = null):Variant {
+		var node = new LegendNode(cast(_component, Legend));
+		node.data = param;
+		_component.addComponent(node);
+		return node;
+	}
+}
+
+@:dox(hide) @:noCompletion
+@:access(haxe.ui.core.Component)
+class Builder extends CompositeBuilder {
+	private var _legend:Legend;
+	private var _text_container:VBox;
+
+	public function new(legend:Legend) {
+		super(legend);
+		_legend = legend;
+		_text_container = new VBox();
+		_legend.addComponent(_text_container);
+	}
+
+	public override function onReady() {
+		var width = _legend.width;
+		var height = _legend.height;
+		var layer = _legend.parentComponent;
+		var options = _legend.options;
+		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
+		_legend.left = coords.x;
+		_legend.top = coords.y;
+	}
+
+	public override function addComponent(child:Component):Component {
+		if (child is LegendNode) {
+			var _child = cast(child, LegendNode);
+			_text_container.addComponent(_child);
+			drawSymbol(_child.canvas, _text_container.numComponents - 1);
+		}
+
+		return null;
 	}
 
 	private function drawSymbol(canvas:Canvas, i:Int) {
-		canvas.componentGraphics.fillStyle(options.point_color[i]);
-		if (options.legend_symbol_filled) {
+		canvas.componentGraphics.fillStyle(_legend.options.point_color[i]);
+		if (_legend.options.legend_symbol_filled) {
 			canvas.componentGraphics.rectangle(2, 2, 6, 6);
 			return;
 		}
-		switch options.legend_symbol_type {
+		switch _legend.options.legend_symbol_type {
 			case point:
-				canvas.componentGraphics.circle(5, (options.legend_text_fontsize * 1.25 + 4) / 2, 3);
+				canvas.componentGraphics.circle(5, (_legend.options.legend_text_fontsize * 1.25 + 4) / 2, 3);
 			case line:
 				canvas.componentGraphics.moveTo(2, 5);
 				canvas.componentGraphics.lineTo(8, 5);
