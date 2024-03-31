@@ -161,9 +161,10 @@ class Legend extends VBox {
 @:dox(hide) @:noCompletion
 private class AddNode extends Behaviour {
 	public override function call(param:Any = null):Variant {
-		var node = new LegendNode(cast(_component, Legend));
+		var legend = cast(_component, Legend);
+		var node = new LegendNode(legend);
 		node.data = param;
-		_component.addComponent(node);
+		legend.addComponent(node);
 		return node;
 	}
 }
@@ -193,26 +194,8 @@ class Builder extends CompositeBuilder {
 
 	public override function addComponent(child:Component):Component {
 		if (child is LegendNode) {
-			var _child = cast(child, LegendNode);
-			_text_container.addComponent(_child);
-			drawSymbol(_child.canvas, _text_container.numComponents - 1);
+			return _text_container.addComponent(child);
 		}
-
 		return null;
-	}
-
-	private function drawSymbol(canvas:Canvas, i:Int) {
-		canvas.componentGraphics.fillStyle(_legend.options.point_color[i]);
-		if (_legend.options.legend_symbol_filled) {
-			canvas.componentGraphics.rectangle(2, 2, 6, 6);
-			return;
-		}
-		switch _legend.options.legend_symbol_type {
-			case point:
-				canvas.componentGraphics.circle(5, (_legend.options.legend_text_fontsize * 1.25 + 4) / 2, 3);
-			case line:
-				canvas.componentGraphics.moveTo(2, 5);
-				canvas.componentGraphics.lineTo(8, 5);
-		}
 	}
 }
