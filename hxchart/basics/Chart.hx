@@ -137,8 +137,8 @@ class Chart extends Absolute {
 
 	private function setChart() {
 		sortPoints();
-		setAxis();
 		setTickInfo();
+		setAxis();
 	}
 
 	private function createCanvas(top:Float, left:Float) {
@@ -186,8 +186,8 @@ class Chart extends Absolute {
 	 * [Draw the chart. This will explicitly call the functions for generating the chart.]
 	 */
 	public function draw() {
-		var axis_info = drawAxis();
-		drawPoints(axis_info);
+		// var axis_info = drawAxis();
+		// drawPoints(axis_info);
 		// legend.draw(label_layer);
 		return this;
 	}
@@ -229,27 +229,33 @@ class Chart extends Absolute {
 		var x_axis_length = ChartTools.calcAxisLength(width, options.margin);
 		setXAxis(x_axis_length, y_axis_length);
 		setYAxis(x_axis_length, y_axis_length);
+		// trace(x_axis.ticks.length, x_tick_info.zero);
+		// y_axis.left = x_axis.ticks[x_tick_info.zero].position;
+		// x_axis.top = y_axis.ticks[y_tick_info.zero].position;
 	}
 
 	private function setXAxis(x_axis_length:Float, y_axis_length:Float) {
 		var x_axis_start = ChartTools.setAxisStartPoint(options.margin, 0, false);
 		var x_axis_end = ChartTools.setAxisEndPoint(x_axis_start, x_axis_length, false);
 		x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, options);
+		addComponent(x_axis);
 	}
 
 	private function setYAxis(x_axis_length:Float, y_axis_length:Float) {
 		var y_axis_end = ChartTools.setAxisStartPoint(options.margin, 0, true);
+		var x_axis_start = ChartTools.setAxisStartPoint(options.margin, 0, false);
 		var y_axis_start = ChartTools.setAxisEndPoint(y_axis_end, y_axis_length, true);
 		y_axis = new Axis(y_axis_start, y_axis_end, min_y, max_y, true, options);
+		addComponent(y_axis);
 	}
 
 	private function drawXAxis() {
-		var x_ticks = x_axis.draw(canvas.componentGraphics, y_axis.ticks[y_tick_info.zero].position, label_layer);
+		var x_ticks = x_axis.ticks; // draw(canvas.componentGraphics, y_axis.ticks[y_tick_info.zero].position, label_layer);
 		return x_ticks;
 	}
 
 	private function drawYAxis() {
-		var y_ticks = y_axis.draw(canvas.componentGraphics, x_axis.ticks[x_tick_info.zero].position, label_layer);
+		var y_ticks = y_axis.ticks; // draw(canvas.componentGraphics, x_axis.ticks[x_tick_info.zero].position, label_layer);
 		return y_ticks;
 	}
 

@@ -1,5 +1,10 @@
 package hxchart.basics.axis;
 
+import haxe.ui.util.Variant;
+import haxe.ui.data.ListDataSource;
+import haxe.ui.data.DataSource;
+import haxe.ui.behaviours.DataBehaviour;
+import haxe.ui.core.CompositeBuilder;
 import hxchart.basics.axis.Axis;
 import haxe.ui.containers.Absolute;
 import hxchart.basics.axis.AxisTools.TickInfo;
@@ -11,56 +16,101 @@ import haxe.ui.util.Color;
 import haxe.ui.graphics.ComponentGraphics;
 import haxe.ui.geom.Point;
 
-class Axis {
-	private var start:Point;
-	private var end:Point;
-	private var is_y:Bool;
-	private var min:Float;
-	private var max:Float;
+@:composite(AxisBuilder)
+class Axis extends Absolute {
+	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
+	@:behaviour(PointsBehaviour) public var pointsDS:DataSource<Point>;
+	@:behaviour(TickBehaviour) public var ticksDS:DataSource<Float>;
 
-	private var options:Options;
+	public var is_y:Bool;
+	public var ticks(default, set):Array<Ticks>;
 
-	public var ticks(default, null):Array<Ticks>;
+	private function set_ticks(ticks:Array<Ticks>) {
+		return this.ticks = ticks;
+	}
 
-	private var sub_ticks:Array<Ticks>;
+	public var sub_ticks(default, set):Array<Ticks>;
+
+	private function set_sub_ticks(ticks:Array<Ticks>) {
+		return this.sub_ticks = ticks;
+	}
 
 	public function new(start:Point, end:Point, min:Float, max:Float, is_y:Bool, options:Options) {
-		this.start = start;
-		this.end = end;
-		this.is_y = is_y;
-		this.min = min;
-		this.max = max;
-		this.options = options;
-		ticks = [];
-		sub_ticks = [];
-		setTickPosition(min, max);
+		super();
+		optionsDS.add(options);
+		pointsDS.add(start);
+		pointsDS.add(end);
+		ticksDS.add(min);
+		ticksDS.add(max);
 	}
 
-	private function setOtherMargin(value:Float) {
-		if (is_y) {
-			start.x = value;
-			end.x = value;
-		} else {
-			start.y = value;
-			end.y = value;
+	// private function setOtherMargin(value:Float) {
+	// 	if (is_y) {
+	// 		start.x = value;
+	// 		end.x = value;
+	// 	} else {
+	// 		start.y = value;
+	// 		end.y = value;
+	// 	}
+	// }
+}
+
+@:dox(hide) @:noCompletion
+private class OptionsBehaviour extends DataBehaviour {
+	private override function validateData() {
+		var optionDS:DataSource<Options> = _value;
+		// if (optionDS.get(0) != null) {
+		// 	setStyleSheet(optionDS.get(0));
+		// }
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class PointsBehaviour extends DataBehaviour {
+	private override function validateData() {
+		var pointsDS:DataSource<Point> = _value;
+		if (pointsDS.get(0) != null && pointsDS.get(1) != null) {
+			draw();
 		}
 	}
 
-	public function draw(graphics:ComponentGraphics, other_margin:Float, label_layer:Absolute) {
-		setOtherMargin(other_margin);
-		graphics.strokeStyle(options.color);
-		graphics.moveTo(start.x, start.y);
-		graphics.lineTo(end.x, end.y);
-		for (tick in ticks) {
-			tick.draw(graphics, start, is_y, label_layer);
+	private function draw() {
+		trace("Drawing axis");
+		// setOtherMargin(other_margin);
+		var start = cast(_component, Axis).pointsDS.get(0);
+		var end = cast(_component, Axis).pointsDS.get(1);
+		var is_y = cast(_component, Axis).is_y;
+		var options = cast(_component, Axis).optionsDS.get(0);
+		var canvas = _component.findComponent(null, Canvas);
+		var layer = _component.findComponent(null, Absolute);
+		if (canvas != null) {
+			canvas.componentGraphics.strokeStyle(options.color);
+			canvas.componentGraphics.moveTo(start.x, start.y);
+			canvas.componentGraphics.lineTo(end.x, end.y);
+			// return ticks;
 		}
-		for (tick in sub_ticks) {
-			tick.draw(graphics, start, is_y, label_layer);
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class TickBehaviour extends DataBehaviour {
+	public override function set(value:Variant) {
+		super.set(value);
+	}
+
+	private override function validateData() {
+		var ticksDS:DataSource<Float> = _value;
+		if (ticksDS.get(0) != null && ticksDS.get(1) != null) {
+			setTickPosition(ticksDS.get(0), ticksDS.get(1));
 		}
-		return ticks;
 	}
 
 	private function setTickPosition(min:Float, max:Float) {
+		var start = cast(_component, Axis).pointsDS.get(0);
+		var end = cast(_component, Axis).pointsDS.get(1);
+		var is_y = cast(_component, Axis).is_y;
+		var options = cast(_component, Axis).optionsDS.get(0);
+		var ticks = cast(_component, Axis).ticks;
 		var tick_calc = AxisTools.calcTickInfo(min, max);
 		var start_p = is_y ? start.y - options.tick_margin : start.x + options.tick_margin;
 		var end_p = is_y ? end.y + options.tick_margin : end.x - options.tick_margin;
@@ -71,10 +121,17 @@ class Axis {
 			var label = Utils.floatToStringPrecision(tick_calc.min + tick_calc.step * i, tick_calc.prec);
 			ticks.push(new Ticks(pos[i], label, tick_calc.min + tick_calc.step * i, false, options));
 		}
-		setSubTicks(tick_calc, dist_between_ticks);
+		setSubTicks(tick_calc, dist_between_ticks, is_y, options);
+		var canvas = _component.findComponent(null, Canvas);
+		var layer = _component.findComponent(null, Absolute);
+		for (tick in ticks) {
+			tick.draw(canvas.componentGraphics, start, is_y, layer);
+		}
 	}
 
-	private function setSubTicks(tick_calc:TickInfo, dist_between_ticks:Float) {
+	private function setSubTicks(tick_calc:TickInfo, dist_between_ticks:Float, is_y:Bool, options:Options) {
+		var ticks = cast(_component, Axis).ticks;
+		var sub_ticks = cast(_component, Axis).sub_ticks;
 		var sub_num = AxisTools.setSubTickNum(tick_calc.num);
 		var sub_tick = AxisTools.calcSubTickInfo(dist_between_ticks, sub_num, tick_calc.step);
 		for (i in 0...(tick_calc.num - 1)) {
@@ -85,5 +142,38 @@ class Axis {
 				sub_ticks.push(new Ticks(d, Utils.floatToStringPrecision(l, sub_tick.prec + 1), l, true, options));
 			}
 		}
+		var canvas = _component.findComponent(null, Canvas);
+		var layer = _component.findComponent(null, Absolute);
+		var start = cast(_component, Axis).pointsDS.get(0);
+		for (tick in sub_ticks) {
+			tick.draw(canvas.componentGraphics, start, is_y, layer);
+		}
+	}
+}
+
+private class AxisBuilder extends CompositeBuilder {
+	var _axis:Axis;
+	var _tickLabelLayer:Absolute;
+	var _tickCanvasLayer:Canvas;
+
+	public function new(axis:Axis) {
+		super(axis);
+		trace("Axis Builder");
+		_axis = axis;
+		_axis.ticks = [];
+		_axis.sub_ticks = [];
+		_axis.pointsDS = new ListDataSource();
+		_axis.ticksDS = new ListDataSource();
+		_axis.optionsDS = new ListDataSource();
+		_tickLabelLayer = new Absolute();
+		_tickCanvasLayer = new Canvas();
+		_axis.addComponent(_tickCanvasLayer);
+		_axis.addComponent(_tickLabelLayer);
+	}
+
+	public override function onReady() {
+		var parent = _axis.parentComponent;
+		_tickCanvasLayer.width = _axis.width;
+		_tickCanvasLayer.height = _axis.height;
 	}
 }

@@ -51,6 +51,7 @@ class Legend extends VBox {
 		if (!options.use_legend) {
 			return;
 		}
+		trace("Before Opt");
 		optionsDS.add(options);
 	}
 
@@ -75,6 +76,11 @@ private class LegendLayout extends DefaultLayout {
 
 @:dox(hide) @:noCompletion
 private class OptionsBehaviour extends DataBehaviour {
+	override function set(value:Variant) {
+		trace("Value", value);
+		super.set(value);
+	}
+
 	private override function validateData() {
 		var optionDS:DataSource<Options> = _value;
 		if (optionDS.get(0) != null) {
