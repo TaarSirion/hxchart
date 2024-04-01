@@ -1,5 +1,8 @@
 package hxchart.basics.legend;
 
+import haxe.ui.layouts.DefaultLayout;
+import haxe.ui.data.ListDataSource;
+import haxe.ui.data.DataSource;
 import hxchart.basics.legend.LegendNode.LegendNodeData;
 import haxe.ui.core.Component;
 import haxe.ui.util.Variant;
@@ -36,52 +39,53 @@ typedef LegendOptions = {
 	?padding:Float
 }
 
-@:composite(Builder)
+@:composite(Builder, LegendLayout)
 class Legend extends VBox {
-	public var options(default, null):Options;
+	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
+	@:behaviour(TitleBehaviour) public var legendTitle:String;
 
 	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
-
-	private var texts:Array<Label> = [];
-	private var legend_texts:Array<String> = [];
-	private var max_textlength:Float = 0;
-
-	private var legend_title_label:Label;
-	private var legend_text_container:VBox;
 
 	public function new(options:Options) {
 		super();
 		if (!options.use_legend) {
 			return;
 		}
-		this.options = options;
-		legend_text_container = new VBox();
-		this.addClass("legendClass", true);
-		setStyleSheet();
-		addComponent(legend_text_container);
-		setTitle("Groups");
-	}
-
-	public function setTitle(title:String) {
-		legend_title_label = new Label();
-		legend_title_label.text = title;
-		legend_title_label.customStyle.fontSize = options.legend_title_fontsize;
-		legend_title_label.addClass("legendTitle");
-
-		var x = new TextDisplay();
-		x.parentComponent = legend_title_label;
-		x.text = text;
-		max_textlength = Math.max(max_textlength, x.textWidth * (options.legend_title_fontsize / 10));
+		optionsDS.add(options);
 	}
 
 	public function setOptions(legend_options:LegendOptions) {
-		options.setLegendOptions(legend_options);
-		setStyleSheet();
+		optionsDS.get(0).setLegendOptions(legend_options);
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class LegendLayout extends DefaultLayout {
+	public override function repositionChildren() {
+		var _legend:Legend = cast(_component, Legend);
+		var width = _legend.width;
+		var height = _legend.height;
+		var layer = _legend.parentComponent;
+		var options = _legend.optionsDS.get(0);
+		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
+		_legend.left = coords.x;
+		_legend.top = coords.y;
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class OptionsBehaviour extends DataBehaviour {
+	private override function validateData() {
+		var optionDS:DataSource<Options> = _value;
+		if (optionDS.get(0) != null) {
+			setStyleSheet(optionDS.get(0));
+		}
 	}
 
-	private function setStyleSheet() {
-		this.styleSheet = new StyleSheet();
-		this.styleSheet.parse(".legendClass{ 
+	private function setStyleSheet(options:Options) {
+		_component.styleSheet = new StyleSheet();
+		_component.styleSheet.parse("
+		.legend-class{ 
 				border: "
 			+ options.legend_border_size
 			+ "px "
@@ -96,64 +100,34 @@ class Legend extends VBox {
 				padding: "
 			+ options.legend_padding
 			+ ";
+			font-family: "
+			+ options.legend_fontfamily
+			+ ";
 			}
-			.legendTitle {
+			.legend-title {
 				text-align: center;
+				font-size: "
+			+ options.legend_title_fontsize
+			+ ";
+			}
+			.legend-text {
+				font-size: "
+			+ options.legend_text_fontsize
+			+ ";
 			}
 		");
 	}
+}
 
-	public function setGroups(groups:Map<String, Int>) {
-		texts = [];
-		for (key in groups.keys()) {
-			addText(key);
-		}
-	}
-
-	public function addGroups(groups:Map<String, Int>) {
-		for (key in groups.keys()) {
-			addText(key);
-		}
-	}
-
-	public function addText(text:String) {
+@:dox(hide) @:noCompletion
+private class TitleBehaviour extends DataBehaviour {
+	private override function validateData() {
 		var label = new Label();
-		label.customStyle.fontSize = options.legend_text_fontsize;
-		label.text = text;
-		trace("Text ", text, options.legend_text_fontsize);
-		texts.push(label);
-		var x = new TextDisplay();
-		x.parentComponent = label;
-		x.text = text;
-		max_textlength = Math.max(max_textlength, x.textWidth * (options.legend_text_fontsize / 10));
-	}
-
-	public function calcPosition(layer:Absolute) {
-		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
-		this.left = coords.x;
-		this.top = coords.y;
-		legend_title_label.width = width - 2 * options.legend_padding;
-	}
-
-	public function draw(chart:Absolute) {
-		if (!options.use_legend) {
-			return;
-		}
-		this.removeAllComponents(false);
-		chart.addComponent(this);
-		this.addComponent(legend_title_label);
-		calcPosition(chart);
-
-		for (i => label in texts) {
-			var label_box = new HBox();
-			label.customStyle.textAlign = "left";
-			var canvas = new Canvas();
-			canvas.width = 10;
-			canvas.height = options.legend_text_fontsize * 1.25 + 4;
-			label_box.addComponent(canvas);
-			label_box.addComponent(label);
-			this.addComponent(label_box);
-			// drawSymbol(canvas, i);
+		label.text = _value;
+		label.addClass("legend-title");
+		var textContainer = _component.findComponent("legend-container", VBox);
+		if (textContainer != null) {
+			textContainer.addComponentAt(label, 0);
 		}
 	}
 }
@@ -178,7 +152,10 @@ class Builder extends CompositeBuilder {
 	public function new(legend:Legend) {
 		super(legend);
 		_legend = legend;
+		_legend.addClass("legend-class");
+		_legend.optionsDS = new ListDataSource();
 		_text_container = new VBox();
+		_text_container.id = "legend-container";
 		_legend.addComponent(_text_container);
 	}
 
@@ -186,7 +163,7 @@ class Builder extends CompositeBuilder {
 		var width = _legend.width;
 		var height = _legend.height;
 		var layer = _legend.parentComponent;
-		var options = _legend.options;
+		var options = _legend.optionsDS.get(0);
 		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
 		_legend.left = coords.x;
 		_legend.top = coords.y;

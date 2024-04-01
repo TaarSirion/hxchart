@@ -43,6 +43,8 @@ class Chart extends Absolute {
 	private var x_axis:Axis;
 	private var y_axis:Axis;
 	private var label_layer:Absolute;
+	private var legendLayer:Absolute;
+
 	private var legend:Legend;
 
 	private var init_top:Float = 0;
@@ -68,12 +70,17 @@ class Chart extends Absolute {
 		label_layer.percentHeight = 100;
 		label_layer.percentWidth = 100;
 		addComponent(label_layer);
-
+		legendLayer = new Absolute();
+		legendLayer.top = top;
+		legendLayer.left = left;
+		legendLayer.percentHeight = 100;
+		legendLayer.percentWidth = 100;
+		addComponent(legendLayer);
 		var screen = Screen.instance;
 		screen.registerEvent("resize", onResize);
 
 		legend = new Legend(options);
-		label_layer.addComponent(legend);
+		legendLayer.addComponent(legend);
 		setDimensions(width, height);
 		createCanvas(top, left);
 	}
@@ -107,17 +114,7 @@ class Chart extends Absolute {
 			options.point_color = ColorPalettes.defaultColors(j + 1);
 		}
 		trace(options.point_color);
-
-		legend.addGroups(point_groups);
 		setChart();
-	}
-
-	private override function onReady() {
-		trace(label_layer.width);
-		if (width == 0) {
-			return;
-		}
-		legend.calcPosition(label_layer);
 	}
 
 	private function onResize(e:UIEvent) {
@@ -134,7 +131,6 @@ class Chart extends Absolute {
 		createCanvas(init_top, init_left);
 		setChart();
 		canvas.componentGraphics.clear();
-		trace(label_layer.numComponents);
 		label_layer.removeAllComponents(false);
 		draw();
 	}
@@ -198,6 +194,7 @@ class Chart extends Absolute {
 
 	public function setLegend(legends:Array<String>, title:String = "Groups", options:LegendOptions) {
 		legend.setOptions(options);
+		legend.legendTitle = title;
 		this.options.use_legend = true;
 		this.options.used_set_legend = true;
 		var groups = new Map();
