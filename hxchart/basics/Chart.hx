@@ -189,7 +189,15 @@ class Chart extends Absolute {
 		// var axis_info = drawAxis();
 		// drawPoints(axis_info);
 		// legend.draw(label_layer);
+		trace("drawing chart");
 		return this;
+	}
+
+	public override function onReady() {
+		super.onReady();
+		y_axis.left = x_axis.ticks[x_tick_info.zero].left;
+		// trace(y_axis.ticks.length, y_tick_info.zero, y_axis.ticks[y_tick_info.zero].label);
+		x_axis.top = y_axis.ticks[y_tick_info.zero].top;
 	}
 
 	public function setLegend(legends:Array<String>, title:String = "Groups", options:LegendOptions) {
@@ -229,9 +237,8 @@ class Chart extends Absolute {
 		var x_axis_length = ChartTools.calcAxisLength(width, options.margin);
 		setXAxis(x_axis_length, y_axis_length);
 		setYAxis(x_axis_length, y_axis_length);
-		// trace(x_axis.ticks.length, x_tick_info.zero);
-		// y_axis.left = x_axis.ticks[x_tick_info.zero].position;
-		// x_axis.top = y_axis.ticks[y_tick_info.zero].position;
+
+		// trace(x_axis.ticks.length, x_axis.ticks);
 	}
 
 	private function setXAxis(x_axis_length:Float, y_axis_length:Float) {
@@ -243,7 +250,6 @@ class Chart extends Absolute {
 
 	private function setYAxis(x_axis_length:Float, y_axis_length:Float) {
 		var y_axis_end = ChartTools.setAxisStartPoint(options.margin, 0, true);
-		var x_axis_start = ChartTools.setAxisStartPoint(options.margin, 0, false);
 		var y_axis_start = ChartTools.setAxisEndPoint(y_axis_end, y_axis_length, true);
 		y_axis = new Axis(y_axis_start, y_axis_end, min_y, max_y, true, options);
 		addComponent(y_axis);
@@ -251,6 +257,7 @@ class Chart extends Absolute {
 
 	private function drawXAxis() {
 		var x_ticks = x_axis.ticks; // draw(canvas.componentGraphics, y_axis.ticks[y_tick_info.zero].position, label_layer);
+		trace("after get ticks");
 		return x_ticks;
 	}
 
