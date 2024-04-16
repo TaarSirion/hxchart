@@ -42,7 +42,6 @@ class Chart extends Absolute {
 	private var options:Options;
 	private var x_axis:Axis;
 	private var y_axis:Axis;
-	private var label_layer:Absolute;
 	private var legendLayer:Absolute;
 
 	private var legend:Legend;
@@ -64,12 +63,6 @@ class Chart extends Absolute {
 		options = new Options();
 		canvas = new Canvas();
 		addComponent(canvas);
-		label_layer = new Absolute();
-		label_layer.top = top;
-		label_layer.left = left;
-		label_layer.percentHeight = 100;
-		label_layer.percentWidth = 100;
-		addComponent(label_layer);
 		legendLayer = new Absolute();
 		legendLayer.top = top;
 		legendLayer.left = left;
@@ -129,10 +122,9 @@ class Chart extends Absolute {
 		}
 		setDimensions(w, h);
 		createCanvas(init_top, init_left);
-		setChart();
+		// setChart();
+
 		canvas.componentGraphics.clear();
-		label_layer.removeAllComponents(false);
-		draw();
 	}
 
 	private function setChart() {
@@ -195,9 +187,10 @@ class Chart extends Absolute {
 
 	public override function onReady() {
 		super.onReady();
-		y_axis.left = x_axis.ticks[x_tick_info.zero].left;
-		// trace(y_axis.ticks.length, y_tick_info.zero, y_axis.ticks[y_tick_info.zero].label);
-		x_axis.top = y_axis.ticks[y_tick_info.zero].top;
+		y_axis.left = x_axis.ticks[x_tick_info.zero].left - 15;
+		y_axis.width += 15;
+		x_axis.top = y_axis.ticks[y_tick_info.zero].top - 15;
+		x_axis.height += 15;
 	}
 
 	public function setLegend(legends:Array<String>, title:String = "Groups", options:LegendOptions) {
@@ -210,9 +203,6 @@ class Chart extends Absolute {
 			groups.set(text, i);
 			legend.addNode({text: text, color: Color.fromString("black")});
 		}
-		// legend.setGroups(groups);
-		// legend.setTitle(title);
-		// legend.draw(label_layer);
 	}
 
 	private function setTickInfo() {
@@ -237,7 +227,6 @@ class Chart extends Absolute {
 		var x_axis_length = ChartTools.calcAxisLength(width, options.margin);
 		setXAxis(x_axis_length, y_axis_length);
 		setYAxis(x_axis_length, y_axis_length);
-
 		// trace(x_axis.ticks.length, x_axis.ticks);
 	}
 
@@ -257,7 +246,6 @@ class Chart extends Absolute {
 
 	private function drawXAxis() {
 		var x_ticks = x_axis.ticks; // draw(canvas.componentGraphics, y_axis.ticks[y_tick_info.zero].position, label_layer);
-		trace("after get ticks");
 		return x_ticks;
 	}
 

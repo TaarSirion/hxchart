@@ -34,11 +34,11 @@ class ChartTools {
 		return length - 2 * margin;
 	}
 
-	public static function setAxisStartPoint(margin:Float, axis_margin:Float, is_y:Bool) {
+	public static function setAxisStartPoint(margin:Float, axis_margin:Float, is_y:Bool, offset:Int = 15) {
 		if (is_y) {
-			return new haxe.ui.geom.Point(axis_margin, margin);
+			return new haxe.ui.geom.Point(axis_margin + offset, margin);
 		}
-		return new haxe.ui.geom.Point(margin, axis_margin);
+		return new haxe.ui.geom.Point(margin, axis_margin + offset);
 	}
 
 	public static function setAxisEndPoint(start_point:haxe.ui.geom.Point, axis_length:Float, is_y:Bool) {

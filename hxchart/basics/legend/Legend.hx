@@ -71,13 +71,25 @@ private class LegendLayout extends DefaultLayout {
 		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
 		_legend.left = coords.x;
 		_legend.top = coords.y;
+		trace("Repositin legend");
+	}
+
+	public override function resizeChildren() {
+		trace("RESIZE LEGEND");
+		var _legend:Legend = cast(_component, Legend);
+		var width = _legend.width;
+		var height = _legend.height;
+		var layer = _legend.parentComponent;
+		var options = _legend.optionsDS.get(0);
+		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
+		_legend.left = coords.x;
+		_legend.top = coords.y;
 	}
 }
 
 @:dox(hide) @:noCompletion
 private class OptionsBehaviour extends DataBehaviour {
 	override function set(value:Variant) {
-		trace("Value", value);
 		super.set(value);
 	}
 

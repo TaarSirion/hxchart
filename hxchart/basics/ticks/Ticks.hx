@@ -108,7 +108,6 @@ private class TickLayout extends DefaultLayout {
 		_label.customStyle.fontSize = tick_fontsize;
 		_label.left = _tick.is_y ? -15 : 0;
 		_label.top = _tick.is_y ? 0 : 15;
-		trace("Label", _label.text, _label.left);
 		if (_tick.is_y) {
 			_tick.canvas.left = -tick_length / 2;
 			_tick.canvas.componentGraphics.moveTo(0, 0);
@@ -158,15 +157,14 @@ class TickBuilder extends CompositeBuilder {
 		var tick_fontsize = (is_sub ? options.tick_subfontsize : options.tick_fontsize);
 		_tick.canvas.componentGraphics.strokeStyle(options.tick_color);
 		_label.customStyle.fontSize = tick_fontsize;
-		_label.left = _tick.is_y ? -15 : 0;
+		_label.left = 0;
 		_label.top = _tick.is_y ? 0 : 15;
-		trace("Label", _label.text, _label.left);
 		if (_tick.is_y) {
-			_tick.canvas.left = -tick_length / 2;
+			_tick.canvas.left = 15 - tick_length / 2;
 			_tick.canvas.componentGraphics.moveTo(0, 0);
 			_tick.canvas.componentGraphics.lineTo(tick_length, 0);
 		} else {
-			_tick.canvas.top = -tick_length / 2;
+			_tick.canvas.top = 15 - tick_length / 2;
 			_tick.canvas.componentGraphics.moveTo(0, 0);
 			_tick.canvas.componentGraphics.lineTo(0, tick_length);
 		}

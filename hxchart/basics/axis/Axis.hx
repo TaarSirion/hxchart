@@ -1,5 +1,6 @@
 package hxchart.basics.axis;
 
+import haxe.ui.layouts.DefaultLayout;
 import haxe.ui.util.Variant;
 import haxe.ui.data.ListDataSource;
 import haxe.ui.data.DataSource;
@@ -11,7 +12,7 @@ import haxe.ui.components.Canvas;
 import hxchart.basics.ticks.Ticks;
 import haxe.ui.geom.Point;
 
-@:composite(AxisBuilder)
+@:composite(AxisBuilder, Layout)
 class Axis extends Absolute {
 	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
 	@:behaviour(PointsBehaviour) public var pointsDS:DataSource<Point>;
@@ -39,16 +40,14 @@ class Axis extends Absolute {
 		ticksDS.add(max);
 		this.is_y = is_y;
 	}
+}
 
-	// private function setOtherMargin(value:Float) {
-	// 	if (is_y) {
-	// 		start.x = value;
-	// 		end.x = value;
-	// 	} else {
-	// 		start.y = value;
-	// 		end.y = value;
-	// 	}
-	// }
+@:dox(hide) @:noCompletion
+private class Layout extends DefaultLayout {
+	public override function repositionChildren() {
+		var axis = cast(_component, Axis);
+		trace("A");
+	}
 }
 
 @:dox(hide) @:noCompletion
@@ -71,20 +70,14 @@ private class PointsBehaviour extends DataBehaviour {
 	}
 
 	private function draw() {
-		trace("Drawing axis");
-		// setOtherMargin(other_margin);
 		var start = cast(_component, Axis).pointsDS.get(0);
 		var end = cast(_component, Axis).pointsDS.get(1);
-		var is_y = cast(_component, Axis).is_y;
 		var options = cast(_component, Axis).optionsDS.get(0);
 		var canvas = _component.findComponent(null, Canvas);
-		trace(canvas);
-		var layer = _component.findComponent(null, Absolute);
 		if (canvas != null) {
 			canvas.componentGraphics.strokeStyle(options.color);
 			canvas.componentGraphics.moveTo(start.x, start.y);
 			canvas.componentGraphics.lineTo(end.x, end.y);
-			// return ticks;
 		}
 	}
 }
@@ -125,10 +118,10 @@ private class TickBehaviour extends DataBehaviour {
 			tick.num = tick_calc.min + tick_calc.step * i;
 			if (is_y) {
 				tick.top = pos[i];
-				tick.left = _component.left - 15;
+				tick.left = 0;
 			} else {
 				tick.left = pos[i];
-				tick.top = _component.top - 15;
+				tick.top = 0;
 			}
 			ticks.push(tick); // new Ticks(pos[i], label, tick_calc.min + tick_calc.step * i, false, options, is_y));
 			layer.addComponent(tick);
@@ -156,10 +149,10 @@ private class TickBehaviour extends DataBehaviour {
 				tick.num = l;
 				if (is_y) {
 					tick.top = d;
-					tick.left = _component.left - 15;
+					tick.left = 0;
 				} else {
 					tick.left = d;
-					tick.top = _component.top - 15;
+					tick.top = 0;
 				}
 				sub_ticks.push(tick);
 				layer.addComponent(tick);
@@ -195,7 +188,12 @@ private class AxisBuilder extends CompositeBuilder {
 
 	public override function onReady() {
 		var parent = _axis.parentComponent;
-		_tickCanvasLayer.width = _axis.width;
-		_tickCanvasLayer.height = _axis.height;
+		trace("Axis y?", _axis.is_y, _axis.width, _axis.height);
+		var sub_width = _axis.width + (_axis.is_y ? 15 : 0);
+		var sub_height = _axis.height + (_axis.is_y ? 15 : 0);
+		_tickCanvasLayer.width = sub_width;
+		_tickLabelLayer.width = sub_width;
+		_tickCanvasLayer.height = sub_height;
+		_tickLabelLayer.height = sub_height;
 	}
 }
