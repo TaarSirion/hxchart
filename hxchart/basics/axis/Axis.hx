@@ -84,33 +84,41 @@ private class PointsBehaviour extends DataBehaviour {
 
 @:dox(hide) @:noCompletion
 private class TickBehaviour extends DataBehaviour {
+	var start:Point;
+	var end:Point;
+
+	var is_y:Bool;
+	var options:Options;
+	var ticks:Array<Ticks>;
+	var sub_ticks:Array<Ticks>;
+
+	var layer:Absolute;
+
 	public override function set(value:Variant) {
 		super.set(value);
-		trace("here");
 	}
 
 	private override function validateData() {
 		var ticksDS:DataSource<Float> = _value;
-		trace("validate ticksds");
 		if (ticksDS.get(0) != null && ticksDS.get(1) != null) {
+			start = cast(_component, Axis).pointsDS.get(0);
+			end = cast(_component, Axis).pointsDS.get(1);
+			is_y = cast(_component, Axis).is_y;
+			options = cast(_component, Axis).optionsDS.get(0);
+			ticks = cast(_component, Axis).ticks;
+			sub_ticks = cast(_component, Axis).sub_ticks;
+			layer = _component.findComponent(null, Absolute);
 			setTickPosition(ticksDS.get(0), ticksDS.get(1));
 		}
 	}
 
 	private function setTickPosition(min:Float, max:Float) {
-		trace("setting ticks");
-		var start = cast(_component, Axis).pointsDS.get(0);
-		var end = cast(_component, Axis).pointsDS.get(1);
-		var is_y = cast(_component, Axis).is_y;
-		var options = cast(_component, Axis).optionsDS.get(0);
-		var ticks = cast(_component, Axis).ticks;
 		var tick_calc = AxisTools.calcTickInfo(min, max);
 		var start_p = is_y ? start.y - options.tick_margin : start.x + options.tick_margin;
 		var end_p = is_y ? end.y + options.tick_margin : end.x - options.tick_margin;
 		var dist = is_y ? start_p - end_p : end_p - start_p;
 		var dist_between_ticks = dist / (tick_calc.num - 1);
 		var pos = AxisTools.calcTickPos(tick_calc.num, dist_between_ticks, start_p, is_y);
-		var layer = _component.findComponent(null, Absolute);
 		for (i in 0...tick_calc.num) {
 			var label = Utils.floatToStringPrecision(tick_calc.min + tick_calc.step * i, tick_calc.prec);
 			var tick = new Ticks(false, options, is_y);
@@ -123,28 +131,21 @@ private class TickBehaviour extends DataBehaviour {
 				tick.left = pos[i];
 				tick.top = 0;
 			}
-			ticks.push(tick); // new Ticks(pos[i], label, tick_calc.min + tick_calc.step * i, false, options, is_y));
+			ticks.push(tick);
 			layer.addComponent(tick);
 		}
-		setSubTicks(tick_calc, dist_between_ticks, is_y, options);
-		// var canvas = _component.findComponent(null, Canvas);
-		// for (tick in ticks) {
-		// 	tick.draw(canvas.componentGraphics, start, is_y, layer);
-		// }
+		setSubTicks(tick_calc, dist_between_ticks);
 	}
 
-	private function setSubTicks(tick_calc:TickInfo, dist_between_ticks:Float, is_y:Bool, options:Options) {
-		var ticks = cast(_component, Axis).ticks;
-		var sub_ticks = cast(_component, Axis).sub_ticks;
+	private function setSubTicks(tick_calc:TickInfo, dist_between_ticks:Float) {
 		var sub_num = AxisTools.setSubTickNum(tick_calc.num);
 		var sub_tick = AxisTools.calcSubTickInfo(dist_between_ticks, sub_num, tick_calc.step);
-		var layer = _component.findComponent(null, Absolute);
 		for (i in 0...(tick_calc.num - 1)) {
 			var start = is_y ? ticks[i].top : ticks[i].left;
 			for (j in 0...(sub_num - 1)) {
 				var l = ticks[i].num + sub_tick.step * (j + 1);
 				var d = start + (is_y ? -sub_tick.dists : sub_tick.dists) * (j + 1);
-				var tick = new Ticks(true, options, is_y); // new Ticks(d, Utils.floatToStringPrecision(l, sub_tick.prec + 1), l, true, options)
+				var tick = new Ticks(true, options, is_y);
 				tick.text = Utils.floatToStringPrecision(l, sub_tick.prec + 1);
 				tick.num = l;
 				if (is_y) {
@@ -158,11 +159,6 @@ private class TickBehaviour extends DataBehaviour {
 				layer.addComponent(tick);
 			}
 		}
-		// var canvas = _component.findComponent(null, Canvas);
-		// var start = cast(_component, Axis).pointsDS.get(0);
-		// for (tick in sub_ticks) {
-		// 	tick.draw(canvas.componentGraphics, start, is_y, layer);
-		// }
 	}
 }
 
@@ -173,7 +169,6 @@ private class AxisBuilder extends CompositeBuilder {
 
 	public function new(axis:Axis) {
 		super(axis);
-		trace("Axis Builder");
 		_axis = axis;
 		_axis.ticks = [];
 		_axis.sub_ticks = [];
@@ -188,7 +183,6 @@ private class AxisBuilder extends CompositeBuilder {
 
 	public override function onReady() {
 		var parent = _axis.parentComponent;
-		trace("Axis y?", _axis.is_y, _axis.width, _axis.height);
 		var sub_width = _axis.width + (_axis.is_y ? 15 : 0);
 		var sub_height = _axis.height + (_axis.is_y ? 15 : 0);
 		_tickCanvasLayer.width = sub_width;

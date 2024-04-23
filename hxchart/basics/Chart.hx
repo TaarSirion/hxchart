@@ -1,5 +1,8 @@
 package hxchart.basics;
 
+import haxe.ui.util.Variant;
+import haxe.ui.data.DataSource;
+import haxe.ui.core.CompositeBuilder;
 import haxe.ui.util.Color;
 import hxchart.basics.colors.ColorPalettes;
 import haxe.ui.Toolkit;
@@ -18,6 +21,8 @@ import haxe.ui.core.Screen;
 import haxe.ui.components.Canvas;
 import hxchart.basics.points.Point;
 import hxchart.basics.axis.AxisTools;
+import haxe.ui.behaviours.DataBehaviour;
+import haxe.ui.behaviours.ValueBehaviour;
 
 typedef ChartInfo = {
 	axis_info:AxisInfo,
@@ -31,7 +36,8 @@ typedef ChartInfo = {
  * Basic `Chart` displaying points on a 2d coordinate system.
  */
 class Chart extends Absolute {
-	private var canvas:Canvas;
+	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
+	@:behaviour(CanvasBehaviour) public var canvas:Canvas;
 
 	private var points:Array<Point> = [];
 	private var point_groups:Map<String, Int>;
@@ -255,11 +261,11 @@ class Chart extends Absolute {
 	}
 
 	private function drawPoints(axis_info:AxisInfo) {
-		var x_coord_min = axis_info.x_ticks[0].position;
-		var x_coord_max = axis_info.x_ticks[axis_info.x_ticks.length - 1].position;
+		var x_coord_min = axis_info.x_ticks[0].left;
+		var x_coord_max = axis_info.x_ticks[axis_info.x_ticks.length - 1].left;
 		var x_dist = ChartTools.calcAxisDists(x_coord_min, x_coord_max, x_tick_info.pos_ratio);
-		var y_coord_min = axis_info.y_ticks[0].position;
-		var y_coord_max = axis_info.y_ticks[axis_info.y_ticks.length - 1].position;
+		var y_coord_min = axis_info.y_ticks[0].top;
+		var y_coord_max = axis_info.y_ticks[axis_info.y_ticks.length - 1].top;
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, y_tick_info.pos_ratio);
 		for (point in points) {
 			point.setPosition({
@@ -312,5 +318,53 @@ class Chart extends Absolute {
 					}
 			}
 		}
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class OptionsBehaviour extends DataBehaviour {
+	override function set(value:Variant) {
+		super.set(value);
+	}
+
+	private override function validateData() {
+		var optionDS:DataSource<Options> = _value;
+		if (optionDS.get(0) != null) {
+			setStyleSheet(optionDS.get(0));
+		}
+	}
+
+	private function setStyleSheet(options:Options) {
+		_component.styleSheet = new StyleSheet();
+		_component.styleSheet.parse("");
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class CanvasBehaviour extends DataBehaviour {
+	private override function validateData() {
+		if (_component.findComponent(null, Canvas) == null) {
+			_component.addComponent(_value);
+		}
+	}
+}
+
+class Builder extends CompositeBuilder {
+	var _chart:Chart;
+
+	public function new(chart:Chart) {
+		super(chart);
+		_chart = chart;
+		_chart.optionsDS.add(new Options());
+		_chart.canvas = new Canvas();
+		var legendLayer = new Absolute();
+		legendLayer.top = _chart.top;
+		legendLayer.left = _chart.left;
+		legendLayer.percentHeight = 100;
+		legendLayer.percentWidth = 100;
+		legendLayer.addClass("legend-layer");
+		_chart.addComponent(legendLayer);
+		var legend = new Legend(_chart.optionsDS.get(0));
+		legendLayer.addComponent(legend);
 	}
 }

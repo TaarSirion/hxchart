@@ -50,8 +50,8 @@ class Point {
 		var x_dist = chart_info.x_dist;
 		var y_dist = chart_info.y_dist;
 		x = PointTools.calcXCoord(x_val, axis_info.x_ticks[axis_info.x_ticks.length - 1].num, axis_info.x_ticks[0].num,
-			axis_info.x_ticks[x_tick_info.zero].position, x_dist);
+			axis_info.x_ticks[x_tick_info.zero].left, x_dist);
 		y = PointTools.calcYCoord(y_val, axis_info.y_ticks[axis_info.y_ticks.length - 1].num, axis_info.y_ticks[0].num,
-			axis_info.y_ticks[y_tick_info.zero].position, y_dist);
+			axis_info.y_ticks[y_tick_info.zero].top, y_dist);
 	}
 }

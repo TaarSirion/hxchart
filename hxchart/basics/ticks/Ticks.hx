@@ -18,15 +18,6 @@ class Ticks extends Box {
 	@:clonable @:behaviour(TextBehaviour) public var text:String;
 
 	public var canvas:Canvas;
-	public var position(default, set):Float;
-
-	function get_position() {
-		return position;
-	}
-
-	function set_position(pos:Float) {
-		return position = pos;
-	}
 
 	public var num(default, set):Float;
 
@@ -61,36 +52,6 @@ class Ticks extends Box {
 		this.is_sub = is_sub;
 		this.options = options;
 		this.is_y = is_y;
-		// text_label = new Label();
-	}
-
-	public function draw(graphics:ComponentGraphics, start:Point, is_y:Bool, label_layer:Absolute) {
-		// text_label.width = 20;
-		// text_label.text = label;
-		// text_label.customStyle.fontSize = tick_fontsize;
-
-		// if (label == '0' && !is_y) {
-		// 	return;
-		// }
-
-		// if (label == '0' && is_y) {
-		// 	text_label.left = start.x - 15;
-		// 	text_label.top = position + 5;
-		// 	label_layer.addComponent(text_label);
-		// } else if (is_y) {
-		// 	text_label.customStyle.textAlign = "right";
-		// 	text_label.left = start.x - 18 - 12;
-		// 	text_label.top = position - tick_fontsize / 2;
-		// 	label_layer.addComponent(text_label);
-		// 	graphics.moveTo(start.x - tick_length, position);
-		// 	graphics.lineTo(start.x + tick_length, position);
-		// } else {
-		// 	text_label.left = position - tick_fontsize / 2;
-		// 	text_label.top = start.y + 10;
-		// 	label_layer.addComponent(text_label);
-		// 	graphics.moveTo(position, start.y - tick_length);
-		// 	graphics.lineTo(position, start.y + tick_length);
-		// }
 	}
 }
 
