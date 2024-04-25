@@ -1,5 +1,11 @@
 package hxchart.basics;
 
+import haxe.ui.geom.Size;
+import haxe.ui.components.Button;
+import haxe.ui.core.Component;
+import haxe.ui.data.ListDataSource;
+import haxe.ui.layouts.DefaultLayout;
+import haxe.ui.behaviours.Behaviour;
 import haxe.ui.util.Variant;
 import haxe.ui.data.DataSource;
 import haxe.ui.core.CompositeBuilder;
@@ -35,12 +41,26 @@ typedef ChartInfo = {
 /**
  * Basic `Chart` displaying points on a 2d coordinate system.
  */
+@:composite(Builder, ChartLayout)
 class Chart extends Absolute {
 	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
 	@:behaviour(CanvasBehaviour) public var canvas:Canvas;
 
-	private var points:Array<Point> = [];
-	private var point_groups:Map<String, Int>;
+	@:call(SetPoints) public function setPoints(data:PointAdd):Void;
+
+	@:call(SetLegend) public function setLegend(data:LegendAdd):Void;
+
+	public var points(default, set):Array<Point> = [];
+
+	function set_points(points:Array<Point>) {
+		return this.points = points;
+	}
+
+	public var point_groups(default, set):Map<String, Int>;
+
+	function set_point_groups(point_groups:Map<String, Int>) {
+		return this.point_groups = point_groups;
+	}
 
 	private var x_tick_info:TickInfo;
 	private var y_tick_info:TickInfo;
@@ -48,9 +68,18 @@ class Chart extends Absolute {
 	private var options:Options;
 	private var x_axis:Axis;
 	private var y_axis:Axis;
-	private var legendLayer:Absolute;
 
-	private var legend:Legend;
+	public var legendLayer(default, set):Absolute;
+
+	function set_legendLayer(legendLayer:Absolute) {
+		return this.legendLayer = legendLayer;
+	}
+
+	public var legend(default, set):Legend;
+
+	function set_legend(legend:Legend) {
+		return this.legend = legend;
+	}
 
 	private var init_top:Float = 0;
 	private var init_left:Float = 0;
@@ -62,76 +91,73 @@ class Chart extends Absolute {
 	 * @param width Initial width of the chart. Will at default use 500px.
 	 * @param height Initial height of the chart. Will at default use 500px.
 	 */
-	public function new(?top:Float, ?left:Float, ?width:Float, ?height:Float) {
+	public function new() {
 		super();
-		init_top = top;
-		init_left = left;
-		options = new Options();
-		canvas = new Canvas();
-		addComponent(canvas);
-		legendLayer = new Absolute();
-		legendLayer.top = top;
-		legendLayer.left = left;
-		legendLayer.percentHeight = 100;
-		legendLayer.percentWidth = 100;
-		addComponent(legendLayer);
-		var screen = Screen.instance;
-		screen.registerEvent("resize", onResize);
+		// init_top = top;
+		// init_left = left;
+		// options = new Options();
+		// canvas = new Canvas();
+		// addComponent(canvas);
+		// legendLayer = new Absolute();
+		// legendLayer.top = top;
+		// legendLayer.left = left;
+		// legendLayer.percentHeight = 100;
+		// legendLayer.percentWidth = 100;
+		// addComponent(legendLayer);
+		// var screen = Screen.instance;
+		// // screen.registerEvent("resize", onResize);
 
-		legend = new Legend(options);
-		legendLayer.addComponent(legend);
-		setDimensions(width, height);
-		createCanvas(top, left);
+		// legend = new Legend(options);
+		// legendLayer.addComponent(legend);
+		// setDimensions(width, height);
+		// createCanvas(top, left);
 	}
 
-	/**
-	 * [Set the points to be displayed in the chart]
-	 * @param x_points An array of x values the points should have. Beware this will match the first x value to the first y value.
-	 * @param y_points An array of y values the points should have. Beware this will match the first x value to the first y value.
-	 * @param groups An array of groups the points belong to. Currently this has no effect.
-	 */
-	public function setPoints(x_points:Array<Float>, y_points:Array<Float>, ?groups:Array<String>) {
-		if (groups == null) {
-			groups = [];
-			for (i in 0...x_points.length) {
-				groups.push("1");
-			}
-		}
-		var j = 0;
-		point_groups = new Map();
-		for (i => val in groups) {
-			if (groups.indexOf(val) == i) {
-				point_groups.set(val, j);
-				j++;
-			}
-		}
-		for (i in 0...x_points.length) {
-			points.push(new Point(x_points[i], y_points[i], options, point_groups.get(groups[i])));
-		}
-
-		if (j > 0 && options.point_color.length == 1) {
-			options.point_color = ColorPalettes.defaultColors(j + 1);
-		}
-		trace(options.point_color);
-		setChart();
-	}
-
-	private function onResize(e:UIEvent) {
-		var screen = Screen.instance;
-		var w = init_width;
-		var h = init_height;
-		if (screen.width <= init_width) {
-			w = screen.width;
-		}
-		if (screen.height <= init_height) {
-			h = screen.height;
-		}
-		setDimensions(w, h);
-		createCanvas(init_top, init_left);
-		// setChart();
-
-		canvas.componentGraphics.clear();
-	}
+	// /**
+	//  * [Set the points to be displayed in the chart]
+	//  * @param x_points An array of x values the points should have. Beware this will match the first x value to the first y value.
+	//  * @param y_points An array of y values the points should have. Beware this will match the first x value to the first y value.
+	//  * @param groups An array of groups the points belong to. Currently this has no effect.
+	//  */
+	// public function setPoints(x_points:Array<Float>, y_points:Array<Float>, ?groups:Array<String>) {
+	// 	if (groups == null) {
+	// 		groups = [];
+	// 		for (i in 0...x_points.length) {
+	// 			groups.push("1");
+	// 		}
+	// 	}
+	// 	var j = 0;
+	// 	point_groups = new Map();
+	// 	for (i => val in groups) {
+	// 		if (groups.indexOf(val) == i) {
+	// 			point_groups.set(val, j);
+	// 			j++;
+	// 		}
+	// 	}
+	// 	for (i in 0...x_points.length) {
+	// 		points.push(new Point(x_points[i], y_points[i], options, point_groups.get(groups[i])));
+	// 	}
+	// 	if (j > 0 && options.point_color.length == 1) {
+	// 		options.point_color = ColorPalettes.defaultColors(j + 1);
+	// 	}
+	// 	trace(options.point_color);
+	// 	setChart();
+	// }
+	// private function onResize(e:UIEvent) {
+	// 	var screen = Screen.instance;
+	// 	var w = init_width;
+	// 	var h = init_height;
+	// 	if (screen.width <= init_width) {
+	// 		w = screen.width;
+	// 	}
+	// 	if (screen.height <= init_height) {
+	// 		h = screen.height;
+	// 	}
+	// 	setDimensions(w, h);
+	// 	createCanvas(init_top, init_left);
+	// 	// setChart();
+	// 	canvas.componentGraphics.clear();
+	// }
 
 	private function setChart() {
 		sortPoints();
@@ -191,25 +217,13 @@ class Chart extends Absolute {
 		return this;
 	}
 
-	public override function onReady() {
-		super.onReady();
-		y_axis.left = x_axis.ticks[x_tick_info.zero].left - 15;
-		y_axis.width += 15;
-		x_axis.top = y_axis.ticks[y_tick_info.zero].top - 15;
-		x_axis.height += 15;
-	}
-
-	public function setLegend(legends:Array<String>, title:String = "Groups", options:LegendOptions) {
-		legend.setOptions(options);
-		legend.legendTitle = title;
-		this.options.use_legend = true;
-		this.options.used_set_legend = true;
-		var groups = new Map();
-		for (i => text in legends) {
-			groups.set(text, i);
-			legend.addNode({text: text, color: Color.fromString("black")});
-		}
-	}
+	// public override function onReady() {
+	// 	super.onReady();
+	// 	y_axis.left = x_axis.ticks[x_tick_info.zero].left - 15;
+	// 	y_axis.width += 15;
+	// 	x_axis.top = y_axis.ticks[y_tick_info.zero].top - 15;
+	// 	x_axis.height += 15;
+	// }
 
 	private function setTickInfo() {
 		x_tick_info = AxisTools.calcTickInfo(min_x, max_x);
@@ -228,7 +242,9 @@ class Chart extends Absolute {
 		};
 	}
 
-	private function setAxis() {
+	public function setAxis() {
+		var options = optionsDS.get(0);
+		trace("Height", height);
 		var y_axis_length = ChartTools.calcAxisLength(height, options.margin);
 		var x_axis_length = ChartTools.calcAxisLength(width, options.margin);
 		setXAxis(x_axis_length, y_axis_length);
@@ -237,16 +253,21 @@ class Chart extends Absolute {
 	}
 
 	private function setXAxis(x_axis_length:Float, y_axis_length:Float) {
+		var options = optionsDS.get(0);
 		var x_axis_start = ChartTools.setAxisStartPoint(options.margin, 0, false);
 		var x_axis_end = ChartTools.setAxisEndPoint(x_axis_start, x_axis_length, false);
+		trace(x_axis_start, x_axis_end);
 		x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, options);
+		trace(x_axis.left, x_axis.top, x_axis.width, x_axis.height);
 		addComponent(x_axis);
 	}
 
 	private function setYAxis(x_axis_length:Float, y_axis_length:Float) {
+		var options = optionsDS.get(0);
 		var y_axis_end = ChartTools.setAxisStartPoint(options.margin, 0, true);
 		var y_axis_start = ChartTools.setAxisEndPoint(y_axis_end, y_axis_length, true);
 		y_axis = new Axis(y_axis_start, y_axis_end, min_y, max_y, true, options);
+
 		addComponent(y_axis);
 	}
 
@@ -322,6 +343,31 @@ class Chart extends Absolute {
 }
 
 @:dox(hide) @:noCompletion
+private class ChartLayout extends DefaultLayout {
+	public override function repositionChildren() {
+		trace("reposition");
+		var chart:Chart = cast(_component, Chart);
+		chart.setAxis();
+	}
+
+	public override function resizeChildren() {
+		trace("resizeChildren");
+		var chart:Chart = cast(_component, Chart);
+		chart.setAxis();
+	}
+
+	override function autoSize():Bool {
+		trace("Autosize");
+		return super.autoSize();
+	}
+
+	override function calcAutoSize(exclusions:Array<Component> = null):Size {
+		trace("Calc auto");
+		return super.calcAutoSize(exclusions);
+	}
+}
+
+@:dox(hide) @:noCompletion
 private class OptionsBehaviour extends DataBehaviour {
 	override function set(value:Variant) {
 		super.set(value);
@@ -349,22 +395,97 @@ private class CanvasBehaviour extends DataBehaviour {
 	}
 }
 
+typedef PointAdd = {
+	x_points:Array<Float>,
+	y_points:Array<Float>,
+	groups:Array<String>
+}
+
+@:dox(hide) @:noCompletion
+private class SetPoints extends Behaviour {
+	public override function call(param:Any = null):Variant {
+		var chart = cast(_component, Chart);
+		var options = chart.optionsDS.get(0);
+		var params:PointAdd = param;
+		if (params.groups == null) {
+			params.groups = [];
+			for (i in 0...params.x_points.length) {
+				params.groups.push("1");
+			}
+		}
+		var j = 0;
+		chart.point_groups = new Map();
+		for (i => val in params.groups) {
+			if (params.groups.indexOf(val) == i) {
+				chart.point_groups.set(val, j);
+				j++;
+			}
+		}
+		for (i in 0...params.x_points.length) {
+			chart.points.push(new Point(params.x_points[i], params.y_points[i], options, chart.point_groups.get(params.groups[i])));
+		}
+
+		if (j > 0 && options.point_color.length == 1) {
+			options.point_color = ColorPalettes.defaultColors(j + 1);
+		}
+		return chart;
+	}
+}
+
+typedef LegendAdd = {
+	legends:Array<String>,
+	title:String,
+	options:LegendOptions
+}
+
+@:dox(hide) @:noCompletion
+private class SetLegend extends Behaviour {
+	public override function call(param:Any = null):Variant {
+		var chart = cast(_component, Chart);
+		var params:LegendAdd = param;
+		var options = chart.optionsDS.get(0);
+		chart.legend.setOptions(params.options);
+		if (params.title == null) {
+			params.title = "Groups";
+		}
+		chart.legend.legendTitle = params.title;
+		options.use_legend = true;
+		options.used_set_legend = true;
+		var groups = new Map();
+		for (i => text in params.legends) {
+			groups.set(text, i);
+			chart.legend.addNode({text: text, color: Color.fromString("black")});
+		}
+		return null;
+	}
+}
+
 class Builder extends CompositeBuilder {
 	var _chart:Chart;
 
 	public function new(chart:Chart) {
 		super(chart);
 		_chart = chart;
+		_chart.optionsDS = new ListDataSource();
 		_chart.optionsDS.add(new Options());
 		_chart.canvas = new Canvas();
-		var legendLayer = new Absolute();
-		legendLayer.top = _chart.top;
-		legendLayer.left = _chart.left;
-		legendLayer.percentHeight = 100;
-		legendLayer.percentWidth = 100;
-		legendLayer.addClass("legend-layer");
-		_chart.addComponent(legendLayer);
-		var legend = new Legend(_chart.optionsDS.get(0));
-		legendLayer.addComponent(legend);
+		_chart.legendLayer = new Absolute();
+		_chart.legendLayer.top = _chart.top;
+		_chart.legendLayer.left = _chart.left;
+		_chart.legendLayer.percentHeight = 100;
+		_chart.legendLayer.percentWidth = 100;
+		_chart.legendLayer.addClass("legend-layer");
+		_chart.addComponent(_chart.legendLayer);
+		_chart.legend = new Legend(_chart.optionsDS.get(0));
+		_chart.legendLayer.addComponent(_chart.legend);
+	}
+
+	override function onReady() {
+		_chart.setAxis();
+	}
+
+	override function addComponent(child:Component):Component {
+		trace("adding component");
+		return super.addComponent(child);
 	}
 }
