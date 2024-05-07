@@ -101,6 +101,7 @@ private class TickBehaviour extends DataBehaviour {
 	private override function validateData() {
 		var ticksDS:DataSource<Float> = _value;
 		if (ticksDS.get(0) != null && ticksDS.get(1) != null) {
+			trace("Validating TICKS");
 			start = cast(_component, Axis).pointsDS.get(0);
 			end = cast(_component, Axis).pointsDS.get(1);
 			is_y = cast(_component, Axis).is_y;
@@ -134,6 +135,8 @@ private class TickBehaviour extends DataBehaviour {
 			ticks.push(tick);
 			layer.addComponent(tick);
 		}
+		var axis = cast(_component, Axis);
+		axis.ticks = ticks;
 		setSubTicks(tick_calc, dist_between_ticks);
 	}
 
@@ -159,6 +162,8 @@ private class TickBehaviour extends DataBehaviour {
 				layer.addComponent(tick);
 			}
 		}
+		var axis = cast(_component, Axis);
+		axis.sub_ticks = sub_ticks;
 	}
 }
 

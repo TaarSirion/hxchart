@@ -38,6 +38,11 @@ typedef ChartInfo = {
 	y_dist:AxisDist,
 }
 
+typedef TickInfos = {
+	x:TickInfo,
+	y:TickInfo,
+}
+
 /**
  * Basic `Chart` displaying points on a 2d coordinate system.
  */
@@ -45,6 +50,8 @@ typedef ChartInfo = {
 class Chart extends Absolute {
 	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
 	@:behaviour(CanvasBehaviour) public var canvas:Canvas;
+
+	@:call(SetTickInfo) public function setTickInfo(data:hxchart.basics.ChartTools.ChartMinMax):Void;
 
 	@:call(SetPoints) public function setPoints(data:PointAdd):Void;
 
@@ -62,12 +69,13 @@ class Chart extends Absolute {
 		return this.point_groups = point_groups;
 	}
 
-	private var x_tick_info:TickInfo;
-	private var y_tick_info:TickInfo;
+	public var x_tick_info:TickInfo;
+	public var y_tick_info:TickInfo;
 
 	private var options:Options;
-	private var x_axis:Axis;
-	private var y_axis:Axis;
+
+	public var x_axis:Axis;
+	public var y_axis:Axis;
 
 	public var legendLayer(default, set):Absolute;
 
@@ -161,7 +169,7 @@ class Chart extends Absolute {
 
 	private function setChart() {
 		sortPoints();
-		setTickInfo();
+		// setTickInfo();
 		setAxis();
 	}
 
@@ -192,7 +200,7 @@ class Chart extends Absolute {
 	private var min_y:Float;
 	private var max_y:Float;
 
-	private function sortPoints() {
+	public function sortPoints() {
 		var x_points = points.map(function(p) {
 			return p.x_val;
 		});
@@ -204,6 +212,7 @@ class Chart extends Absolute {
 		max_x = minmax.max_x;
 		min_y = minmax.min_y;
 		max_y = minmax.max_y;
+		return minmax;
 	}
 
 	/**
@@ -224,12 +233,13 @@ class Chart extends Absolute {
 	// 	x_axis.top = y_axis.ticks[y_tick_info.zero].top - 15;
 	// 	x_axis.height += 15;
 	// }
-
-	private function setTickInfo() {
-		x_tick_info = AxisTools.calcTickInfo(min_x, max_x);
-		y_tick_info = AxisTools.calcTickInfo(min_y, max_y);
-	}
-
+	// public function setTickInfo() {
+	// 	var infos:TickInfos = {
+	// 		x: AxisTools.calcTickInfo(min_x, max_x),
+	// 		y: AxisTools.calcTickInfo(min_y, max_y)
+	// 	};
+	// 	tickInfos.add(infos);
+	// }
 	private var margin_bottom:Float = 60;
 	private var margin_left:Float = 60;
 
@@ -256,9 +266,7 @@ class Chart extends Absolute {
 		var options = optionsDS.get(0);
 		var x_axis_start = ChartTools.setAxisStartPoint(options.margin, 0, false);
 		var x_axis_end = ChartTools.setAxisEndPoint(x_axis_start, x_axis_length, false);
-		trace(x_axis_start, x_axis_end);
 		x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, options);
-		trace(x_axis.left, x_axis.top, x_axis.width, x_axis.height);
 		addComponent(x_axis);
 	}
 
@@ -267,7 +275,6 @@ class Chart extends Absolute {
 		var y_axis_end = ChartTools.setAxisStartPoint(options.margin, 0, true);
 		var y_axis_start = ChartTools.setAxisEndPoint(y_axis_end, y_axis_length, true);
 		y_axis = new Axis(y_axis_start, y_axis_end, min_y, max_y, true, options);
-
 		addComponent(y_axis);
 	}
 
@@ -395,6 +402,23 @@ private class CanvasBehaviour extends DataBehaviour {
 	}
 }
 
+@:dox(hide) @:noCompletion
+private class SetTickInfo extends Behaviour {
+	public override function call(param:Any = null):Variant {
+		var pointInfo:hxchart.basics.ChartTools.ChartMinMax = param;
+		var infos:TickInfos = {
+			x: AxisTools.calcTickInfo(pointInfo.min_x, pointInfo.max_x),
+			y: AxisTools.calcTickInfo(pointInfo.min_y, pointInfo.max_y)
+		}
+		var chart = cast(_component, Chart);
+		chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left - 15;
+		chart.y_axis.width += 15;
+		chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top - 15;
+		chart.x_axis.height += 15;
+		return chart;
+	}
+}
+
 typedef PointAdd = {
 	x_points:Array<Float>,
 	y_points:Array<Float>,
@@ -481,7 +505,13 @@ class Builder extends CompositeBuilder {
 	}
 
 	override function onReady() {
+		var minmax = _chart.sortPoints();
 		_chart.setAxis();
+		_chart.setTickInfo(minmax);
+		// _chart.y_axis.left = _chart.x_axis.ticks[_chart.x_tick_info.zero].left - 15;
+		// _chart.y_axis.width += 15;
+		// _chart.x_axis.top = _chart.y_axis.ticks[_chart.y_tick_info.zero].top - 15;
+		// _chart.x_axis.height += 15;
 	}
 
 	override function addComponent(child:Component):Component {
