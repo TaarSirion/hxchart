@@ -58,6 +58,7 @@ class Ticks extends Box {
 @:dox(hide) @:noCompletion
 private class TickLayout extends DefaultLayout {
 	public override function repositionChildren() {
+		trace("REPSOTININ");
 		var _tick = cast(_component, Ticks);
 		var _label = _component.findComponent(null, Label);
 		var is_sub = _tick.is_sub;
@@ -69,6 +70,7 @@ private class TickLayout extends DefaultLayout {
 		_label.customStyle.fontSize = tick_fontsize;
 		_label.left = _tick.is_y ? -15 : 0;
 		_label.top = _tick.is_y ? 0 : 15;
+		_tick.canvas.componentGraphics.clear();
 		if (_tick.is_y) {
 			_tick.canvas.left = -tick_length / 2;
 			_tick.canvas.componentGraphics.moveTo(0, 0);
@@ -120,6 +122,7 @@ class TickBuilder extends CompositeBuilder {
 		_label.customStyle.fontSize = tick_fontsize;
 		_label.left = 0;
 		_label.top = _tick.is_y ? 0 : 15;
+		_tick.canvas.componentGraphics.clear();
 		if (_tick.is_y) {
 			_tick.canvas.left = 15 - tick_length / 2;
 			_tick.canvas.componentGraphics.moveTo(0, 0);

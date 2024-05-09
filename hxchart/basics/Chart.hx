@@ -267,6 +267,7 @@ class Chart extends Absolute {
 		var x_axis_start = ChartTools.setAxisStartPoint(options.margin, 0, false);
 		var x_axis_end = ChartTools.setAxisEndPoint(x_axis_start, x_axis_length, false);
 		x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, options);
+		x_axis.width = width;
 		addComponent(x_axis);
 	}
 
@@ -275,6 +276,7 @@ class Chart extends Absolute {
 		var y_axis_end = ChartTools.setAxisStartPoint(options.margin, 0, true);
 		var y_axis_start = ChartTools.setAxisEndPoint(y_axis_end, y_axis_length, true);
 		y_axis = new Axis(y_axis_start, y_axis_end, min_y, max_y, true, options);
+		y_axis.height = height;
 		addComponent(y_axis);
 	}
 
@@ -405,16 +407,19 @@ private class CanvasBehaviour extends DataBehaviour {
 @:dox(hide) @:noCompletion
 private class SetTickInfo extends Behaviour {
 	public override function call(param:Any = null):Variant {
+		trace("AAAA");
 		var pointInfo:hxchart.basics.ChartTools.ChartMinMax = param;
 		var infos:TickInfos = {
 			x: AxisTools.calcTickInfo(pointInfo.min_x, pointInfo.max_x),
 			y: AxisTools.calcTickInfo(pointInfo.min_y, pointInfo.max_y)
 		}
 		var chart = cast(_component, Chart);
+		trace("CHart axis info stuff");
+		trace(chart.x_axis.height);
 		chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left - 15;
-		chart.y_axis.width += 15;
+		chart.y_axis.width = 30;
 		chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top - 15;
-		chart.x_axis.height += 15;
+		chart.x_axis.height = 30;
 		return chart;
 	}
 }
@@ -490,6 +495,8 @@ class Builder extends CompositeBuilder {
 	public function new(chart:Chart) {
 		super(chart);
 		_chart = chart;
+		_chart.width = 500;
+		_chart.height = 500;
 		_chart.optionsDS = new ListDataSource();
 		_chart.optionsDS.add(new Options());
 		_chart.canvas = new Canvas();
@@ -508,10 +515,6 @@ class Builder extends CompositeBuilder {
 		var minmax = _chart.sortPoints();
 		_chart.setAxis();
 		_chart.setTickInfo(minmax);
-		// _chart.y_axis.left = _chart.x_axis.ticks[_chart.x_tick_info.zero].left - 15;
-		// _chart.y_axis.width += 15;
-		// _chart.x_axis.top = _chart.y_axis.ticks[_chart.y_tick_info.zero].top - 15;
-		// _chart.x_axis.height += 15;
 	}
 
 	override function addComponent(child:Component):Component {

@@ -1,5 +1,6 @@
 package hxchart.basics.axis;
 
+import haxe.ui.behaviours.Behaviour;
 import haxe.ui.layouts.DefaultLayout;
 import haxe.ui.util.Variant;
 import haxe.ui.data.ListDataSource;
@@ -16,7 +17,8 @@ import haxe.ui.geom.Point;
 class Axis extends Absolute {
 	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
 	@:behaviour(PointsBehaviour) public var pointsDS:DataSource<Point>;
-	@:behaviour(TickBehaviour) public var ticksDS:DataSource<Float>;
+
+	@:call(SetTicks) public function setTicks(data:Point):Void;
 
 	public var is_y:Bool;
 	public var ticks(default, set):Array<Ticks>;
@@ -36,9 +38,8 @@ class Axis extends Absolute {
 		optionsDS.add(options);
 		pointsDS.add(start);
 		pointsDS.add(end);
-		ticksDS.add(min);
-		ticksDS.add(max);
 		this.is_y = is_y;
+		setTicks(new Point(min, max));
 	}
 }
 
@@ -70,9 +71,10 @@ private class PointsBehaviour extends DataBehaviour {
 	}
 
 	private function draw() {
-		var start = cast(_component, Axis).pointsDS.get(0);
-		var end = cast(_component, Axis).pointsDS.get(1);
-		var options = cast(_component, Axis).optionsDS.get(0);
+		var axis = cast(_component, Axis);
+		var start = axis.pointsDS.get(0);
+		var end = axis.pointsDS.get(1);
+		var options = axis.optionsDS.get(0);
 		var canvas = _component.findComponent(null, Canvas);
 		if (canvas != null) {
 			canvas.componentGraphics.strokeStyle(options.color);
@@ -83,7 +85,7 @@ private class PointsBehaviour extends DataBehaviour {
 }
 
 @:dox(hide) @:noCompletion
-private class TickBehaviour extends DataBehaviour {
+private class SetTicks extends Behaviour {
 	var start:Point;
 	var end:Point;
 
@@ -94,23 +96,17 @@ private class TickBehaviour extends DataBehaviour {
 
 	var layer:Absolute;
 
-	public override function set(value:Variant) {
-		super.set(value);
-	}
-
-	private override function validateData() {
-		var ticksDS:DataSource<Float> = _value;
-		if (ticksDS.get(0) != null && ticksDS.get(1) != null) {
-			trace("Validating TICKS");
-			start = cast(_component, Axis).pointsDS.get(0);
-			end = cast(_component, Axis).pointsDS.get(1);
-			is_y = cast(_component, Axis).is_y;
-			options = cast(_component, Axis).optionsDS.get(0);
-			ticks = cast(_component, Axis).ticks;
-			sub_ticks = cast(_component, Axis).sub_ticks;
-			layer = _component.findComponent(null, Absolute);
-			setTickPosition(ticksDS.get(0), ticksDS.get(1));
-		}
+	public override function call(param:Any = null):Variant {
+		var minmax:Point = param;
+		start = cast(_component, Axis).pointsDS.get(0);
+		end = cast(_component, Axis).pointsDS.get(1);
+		is_y = cast(_component, Axis).is_y;
+		options = cast(_component, Axis).optionsDS.get(0);
+		ticks = cast(_component, Axis).ticks;
+		sub_ticks = cast(_component, Axis).sub_ticks;
+		layer = _component.findComponent(null, Absolute);
+		setTickPosition(minmax.x, minmax.y);
+		return null;
 	}
 
 	private function setTickPosition(min:Float, max:Float) {
@@ -178,7 +174,7 @@ private class AxisBuilder extends CompositeBuilder {
 		_axis.ticks = [];
 		_axis.sub_ticks = [];
 		_axis.pointsDS = new ListDataSource();
-		_axis.ticksDS = new ListDataSource();
+		// _axis.ticksDS = new ListDataSource();
 		_axis.optionsDS = new ListDataSource();
 		_tickLabelLayer = new Absolute();
 		_tickCanvasLayer = new Canvas();
@@ -188,8 +184,10 @@ private class AxisBuilder extends CompositeBuilder {
 
 	public override function onReady() {
 		var parent = _axis.parentComponent;
+		trace(parent.className);
 		var sub_width = _axis.width + (_axis.is_y ? 15 : 0);
-		var sub_height = _axis.height + (_axis.is_y ? 15 : 0);
+		var sub_height = _axis.height + (_axis.is_y ? 0 : 15);
+		trace("BB", sub_width, sub_height, _axis.height, _axis.width);
 		_tickCanvasLayer.width = sub_width;
 		_tickLabelLayer.width = sub_width;
 		_tickCanvasLayer.height = sub_height;
