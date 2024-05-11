@@ -337,7 +337,7 @@ private class SetLegend extends Behaviour {
 		var groups = new Map();
 		for (i => text in params.legends) {
 			groups.set(text, i);
-			chart.legend.addNode({text: text, color: Color.fromString("black")});
+			chart.legend.addNode({text: text, color: options.point_color[i]});
 		}
 		return null;
 	}
