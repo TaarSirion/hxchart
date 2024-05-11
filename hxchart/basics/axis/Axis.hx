@@ -15,12 +15,13 @@ import haxe.ui.geom.Point;
 
 @:composite(AxisBuilder, Layout)
 class Axis extends Absolute {
-	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
-	@:behaviour(PointsBehaviour) public var pointsDS:DataSource<Point>;
-
 	@:call(SetTicks) public function setTicks(data:Point):Void;
 
+	@:call(Draw) private function draw():Void;
+
 	public var is_y:Bool;
+	public var startPoint:Point;
+	public var endPoint:Point;
 	public var ticks(default, set):Array<Ticks>;
 
 	private function set_ticks(ticks:Array<Ticks>) {
@@ -33,13 +34,23 @@ class Axis extends Absolute {
 		return this.sub_ticks = ticks;
 	}
 
-	public function new(start:Point, end:Point, min:Float, max:Float, is_y:Bool, options:Options) {
+	public var options:Options;
+
+	public function new() {
 		super();
-		optionsDS.add(options);
-		pointsDS.add(start);
-		pointsDS.add(end);
-		this.is_y = is_y;
-		setTicks(new Point(min, max));
+		startPoint = new Point(0, 0);
+		endPoint = new Point(0, 0);
+	}
+
+	public function setStartToEnd(axisLength:Float) {
+		if (is_y) {
+			endPoint = ChartTools.setAxisStartPoint(options.margin, 0, is_y);
+			startPoint = ChartTools.setAxisEndPoint(endPoint, axisLength, is_y);
+		} else {
+			startPoint = ChartTools.setAxisStartPoint(options.margin, 0, is_y);
+			endPoint = ChartTools.setAxisEndPoint(startPoint, axisLength, is_y);
+		}
+		draw();
 	}
 }
 
@@ -52,35 +63,17 @@ private class Layout extends DefaultLayout {
 }
 
 @:dox(hide) @:noCompletion
-private class OptionsBehaviour extends DataBehaviour {
-	private override function validateData() {
-		var optionDS:DataSource<Options> = _value;
-		// if (optionDS.get(0) != null) {
-		// 	setStyleSheet(optionDS.get(0));
-		// }
-	}
-}
-
-@:dox(hide) @:noCompletion
-private class PointsBehaviour extends DataBehaviour {
-	private override function validateData() {
-		var pointsDS:DataSource<Point> = _value;
-		if (pointsDS.get(0) != null && pointsDS.get(1) != null) {
-			draw();
-		}
-	}
-
-	private function draw() {
+private class Draw extends Behaviour {
+	public override function call(param:Any = null):Variant {
 		var axis = cast(_component, Axis);
-		var start = axis.pointsDS.get(0);
-		var end = axis.pointsDS.get(1);
-		var options = axis.optionsDS.get(0);
+		var options = axis.options;
 		var canvas = _component.findComponent(null, Canvas);
 		if (canvas != null) {
 			canvas.componentGraphics.strokeStyle(options.color);
-			canvas.componentGraphics.moveTo(start.x, start.y);
-			canvas.componentGraphics.lineTo(end.x, end.y);
+			canvas.componentGraphics.moveTo(axis.startPoint.x, axis.startPoint.y);
+			canvas.componentGraphics.lineTo(axis.endPoint.x, axis.endPoint.y);
 		}
+		return null;
 	}
 }
 
@@ -98,10 +91,10 @@ private class SetTicks extends Behaviour {
 
 	public override function call(param:Any = null):Variant {
 		var minmax:Point = param;
-		start = cast(_component, Axis).pointsDS.get(0);
-		end = cast(_component, Axis).pointsDS.get(1);
+		start = cast(_component, Axis).startPoint;
+		end = cast(_component, Axis).endPoint;
 		is_y = cast(_component, Axis).is_y;
-		options = cast(_component, Axis).optionsDS.get(0);
+		options = cast(_component, Axis).options;
 		ticks = cast(_component, Axis).ticks;
 		sub_ticks = cast(_component, Axis).sub_ticks;
 		layer = _component.findComponent(null, Absolute);
@@ -173,9 +166,6 @@ private class AxisBuilder extends CompositeBuilder {
 		_axis = axis;
 		_axis.ticks = [];
 		_axis.sub_ticks = [];
-		_axis.pointsDS = new ListDataSource();
-		// _axis.ticksDS = new ListDataSource();
-		_axis.optionsDS = new ListDataSource();
 		_tickLabelLayer = new Absolute();
 		_tickCanvasLayer = new Canvas();
 		_axis.addComponent(_tickCanvasLayer);
@@ -184,10 +174,8 @@ private class AxisBuilder extends CompositeBuilder {
 
 	public override function onReady() {
 		var parent = _axis.parentComponent;
-		trace(parent.className);
 		var sub_width = _axis.width + (_axis.is_y ? 15 : 0);
 		var sub_height = _axis.height + (_axis.is_y ? 0 : 15);
-		trace("BB", sub_width, sub_height, _axis.height, _axis.width);
 		_tickCanvasLayer.width = sub_width;
 		_tickLabelLayer.width = sub_width;
 		_tickCanvasLayer.height = sub_height;

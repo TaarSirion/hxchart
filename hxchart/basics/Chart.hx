@@ -57,6 +57,10 @@ class Chart extends Absolute {
 
 	@:call(SetLegend) public function setLegend(data:LegendAdd):Void;
 
+	@:call(SetAxis) public function setAxis():Void;
+
+	@:call(DrawPoints) public function drawPoints():Void;
+
 	public var points(default, set):Array<Point> = [];
 
 	function set_points(points:Array<Point>) {
@@ -101,76 +105,6 @@ class Chart extends Absolute {
 	 */
 	public function new() {
 		super();
-		// init_top = top;
-		// init_left = left;
-		// options = new Options();
-		// canvas = new Canvas();
-		// addComponent(canvas);
-		// legendLayer = new Absolute();
-		// legendLayer.top = top;
-		// legendLayer.left = left;
-		// legendLayer.percentHeight = 100;
-		// legendLayer.percentWidth = 100;
-		// addComponent(legendLayer);
-		// var screen = Screen.instance;
-		// // screen.registerEvent("resize", onResize);
-
-		// legend = new Legend(options);
-		// legendLayer.addComponent(legend);
-		// setDimensions(width, height);
-		// createCanvas(top, left);
-	}
-
-	// /**
-	//  * [Set the points to be displayed in the chart]
-	//  * @param x_points An array of x values the points should have. Beware this will match the first x value to the first y value.
-	//  * @param y_points An array of y values the points should have. Beware this will match the first x value to the first y value.
-	//  * @param groups An array of groups the points belong to. Currently this has no effect.
-	//  */
-	// public function setPoints(x_points:Array<Float>, y_points:Array<Float>, ?groups:Array<String>) {
-	// 	if (groups == null) {
-	// 		groups = [];
-	// 		for (i in 0...x_points.length) {
-	// 			groups.push("1");
-	// 		}
-	// 	}
-	// 	var j = 0;
-	// 	point_groups = new Map();
-	// 	for (i => val in groups) {
-	// 		if (groups.indexOf(val) == i) {
-	// 			point_groups.set(val, j);
-	// 			j++;
-	// 		}
-	// 	}
-	// 	for (i in 0...x_points.length) {
-	// 		points.push(new Point(x_points[i], y_points[i], options, point_groups.get(groups[i])));
-	// 	}
-	// 	if (j > 0 && options.point_color.length == 1) {
-	// 		options.point_color = ColorPalettes.defaultColors(j + 1);
-	// 	}
-	// 	trace(options.point_color);
-	// 	setChart();
-	// }
-	// private function onResize(e:UIEvent) {
-	// 	var screen = Screen.instance;
-	// 	var w = init_width;
-	// 	var h = init_height;
-	// 	if (screen.width <= init_width) {
-	// 		w = screen.width;
-	// 	}
-	// 	if (screen.height <= init_height) {
-	// 		h = screen.height;
-	// 	}
-	// 	setDimensions(w, h);
-	// 	createCanvas(init_top, init_left);
-	// 	// setChart();
-	// 	canvas.componentGraphics.clear();
-	// }
-
-	private function setChart() {
-		sortPoints();
-		// setTickInfo();
-		setAxis();
 	}
 
 	private function createCanvas(top:Float, left:Float) {
@@ -195,10 +129,10 @@ class Chart extends Absolute {
 		}
 	}
 
-	private var min_x:Float;
-	private var max_x:Float;
-	private var min_y:Float;
-	private var max_y:Float;
+	public var min_x:Float;
+	public var max_x:Float;
+	public var min_y:Float;
+	public var max_y:Float;
 
 	public function sortPoints() {
 		var x_points = points.map(function(p) {
@@ -226,88 +160,8 @@ class Chart extends Absolute {
 		return this;
 	}
 
-	// public override function onReady() {
-	// 	super.onReady();
-	// 	y_axis.left = x_axis.ticks[x_tick_info.zero].left - 15;
-	// 	y_axis.width += 15;
-	// 	x_axis.top = y_axis.ticks[y_tick_info.zero].top - 15;
-	// 	x_axis.height += 15;
-	// }
-	// public function setTickInfo() {
-	// 	var infos:TickInfos = {
-	// 		x: AxisTools.calcTickInfo(min_x, max_x),
-	// 		y: AxisTools.calcTickInfo(min_y, max_y)
-	// 	};
-	// 	tickInfos.add(infos);
-	// }
 	private var margin_bottom:Float = 60;
 	private var margin_left:Float = 60;
-
-	private function drawAxis():AxisInfo {
-		var x_ticks = drawXAxis();
-		var y_ticks = drawYAxis();
-		return {
-			x_ticks: x_ticks,
-			y_ticks: y_ticks
-		};
-	}
-
-	public function setAxis() {
-		var options = optionsDS.get(0);
-		trace("Height", height);
-		var y_axis_length = ChartTools.calcAxisLength(height, options.margin);
-		var x_axis_length = ChartTools.calcAxisLength(width, options.margin);
-		setXAxis(x_axis_length, y_axis_length);
-		setYAxis(x_axis_length, y_axis_length);
-		// trace(x_axis.ticks.length, x_axis.ticks);
-	}
-
-	private function setXAxis(x_axis_length:Float, y_axis_length:Float) {
-		var options = optionsDS.get(0);
-		var x_axis_start = ChartTools.setAxisStartPoint(options.margin, 0, false);
-		var x_axis_end = ChartTools.setAxisEndPoint(x_axis_start, x_axis_length, false);
-		x_axis = new Axis(x_axis_start, x_axis_end, min_x, max_x, false, options);
-		x_axis.width = width;
-		addComponent(x_axis);
-	}
-
-	private function setYAxis(x_axis_length:Float, y_axis_length:Float) {
-		var options = optionsDS.get(0);
-		var y_axis_end = ChartTools.setAxisStartPoint(options.margin, 0, true);
-		var y_axis_start = ChartTools.setAxisEndPoint(y_axis_end, y_axis_length, true);
-		y_axis = new Axis(y_axis_start, y_axis_end, min_y, max_y, true, options);
-		y_axis.height = height;
-		addComponent(y_axis);
-	}
-
-	private function drawXAxis() {
-		var x_ticks = x_axis.ticks; // draw(canvas.componentGraphics, y_axis.ticks[y_tick_info.zero].position, label_layer);
-		return x_ticks;
-	}
-
-	private function drawYAxis() {
-		var y_ticks = y_axis.ticks; // draw(canvas.componentGraphics, x_axis.ticks[x_tick_info.zero].position, label_layer);
-		return y_ticks;
-	}
-
-	private function drawPoints(axis_info:AxisInfo) {
-		var x_coord_min = axis_info.x_ticks[0].left;
-		var x_coord_max = axis_info.x_ticks[axis_info.x_ticks.length - 1].left;
-		var x_dist = ChartTools.calcAxisDists(x_coord_min, x_coord_max, x_tick_info.pos_ratio);
-		var y_coord_min = axis_info.y_ticks[0].top;
-		var y_coord_max = axis_info.y_ticks[axis_info.y_ticks.length - 1].top;
-		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, y_tick_info.pos_ratio);
-		for (point in points) {
-			point.setPosition({
-				axis_info: axis_info,
-				x_dist: x_dist,
-				y_dist: y_dist,
-				y_tick_info: y_tick_info,
-				x_tick_info: x_tick_info
-			});
-			point.draw(canvas.componentGraphics);
-		}
-	}
 
 	/**
 	 * [Set options for a chart]
@@ -399,6 +253,7 @@ private class OptionsBehaviour extends DataBehaviour {
 private class CanvasBehaviour extends DataBehaviour {
 	private override function validateData() {
 		if (_component.findComponent(null, Canvas) == null) {
+			trace("Canvas");
 			_component.addComponent(_value);
 		}
 	}
@@ -407,19 +262,18 @@ private class CanvasBehaviour extends DataBehaviour {
 @:dox(hide) @:noCompletion
 private class SetTickInfo extends Behaviour {
 	public override function call(param:Any = null):Variant {
-		trace("AAAA");
 		var pointInfo:hxchart.basics.ChartTools.ChartMinMax = param;
 		var infos:TickInfos = {
 			x: AxisTools.calcTickInfo(pointInfo.min_x, pointInfo.max_x),
 			y: AxisTools.calcTickInfo(pointInfo.min_y, pointInfo.max_y)
 		}
 		var chart = cast(_component, Chart);
-		trace("CHart axis info stuff");
-		trace(chart.x_axis.height);
 		chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left - 15;
 		chart.y_axis.width = 30;
 		chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top - 15;
 		chart.x_axis.height = 30;
+		chart.x_tick_info = infos.x;
+		chart.y_tick_info = infos.y;
 		return chart;
 	}
 }
@@ -489,6 +343,66 @@ private class SetLegend extends Behaviour {
 	}
 }
 
+@:dox(hide) @:noCompletion
+private class SetAxis extends Behaviour {
+	public override function call(param:Any = null):Variant {
+		var chart = cast(_component, Chart);
+		var options = chart.optionsDS.get(0);
+		var y_axis_length = ChartTools.calcAxisLength(chart.height, options.margin);
+		var x_axis_length = ChartTools.calcAxisLength(chart.width, options.margin);
+		setXAxis(x_axis_length, options, chart);
+		setYAxis(y_axis_length, options, chart);
+		return null;
+	}
+
+	private function setXAxis(x_axis_length:Float, options:Options, chart:Chart) {
+		chart.x_axis = new Axis();
+		chart.x_axis.is_y = false;
+		chart.x_axis.options = options;
+		chart.x_axis.setStartToEnd(x_axis_length);
+		var minmax = new haxe.ui.geom.Point(chart.min_x, chart.max_x);
+		chart.x_axis.setTicks(minmax);
+		chart.x_axis.width = chart.width;
+		chart.addComponent(chart.x_axis);
+	}
+
+	private function setYAxis(y_axis_length:Float, options:Options, chart:Chart) {
+		chart.y_axis = new Axis();
+		chart.y_axis.is_y = true;
+		chart.y_axis.options = options;
+		chart.y_axis.setStartToEnd(y_axis_length);
+		var minmax = new haxe.ui.geom.Point(chart.min_y, chart.max_y);
+		chart.y_axis.setTicks(minmax);
+		chart.y_axis.height = chart.height;
+		chart.addComponent(chart.y_axis);
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class DrawPoints extends Behaviour {
+	public override function call(param:Any = null):Variant {
+		var chart = cast(_component, Chart);
+		trace(chart.x_tick_info);
+		var x_coord_min = chart.x_axis.ticks[0].left;
+		var x_coord_max = chart.x_axis.ticks[chart.x_axis.ticks.length - 1].left;
+		var x_dist = ChartTools.calcAxisDists(x_coord_min, x_coord_max, chart.x_tick_info.pos_ratio);
+		var y_coord_min = chart.y_axis.ticks[0].top;
+		var y_coord_max = chart.y_axis.ticks[chart.y_axis.ticks.length - 1].top;
+		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, chart.y_tick_info.pos_ratio);
+		for (point in chart.points) {
+			point.setPosition({
+				axis_info: {x_ticks: chart.x_axis.ticks, y_ticks: chart.y_axis.ticks},
+				x_dist: x_dist,
+				y_dist: y_dist,
+				y_tick_info: chart.y_tick_info,
+				x_tick_info: chart.x_tick_info
+			});
+			point.draw(chart.canvas.componentGraphics);
+		}
+		return null;
+	}
+}
+
 class Builder extends CompositeBuilder {
 	var _chart:Chart;
 
@@ -500,6 +414,8 @@ class Builder extends CompositeBuilder {
 		_chart.optionsDS = new ListDataSource();
 		_chart.optionsDS.add(new Options());
 		_chart.canvas = new Canvas();
+		_chart.canvas.width = _chart.width;
+		_chart.canvas.height = _chart.height;
 		_chart.legendLayer = new Absolute();
 		_chart.legendLayer.top = _chart.top;
 		_chart.legendLayer.left = _chart.left;
@@ -515,6 +431,7 @@ class Builder extends CompositeBuilder {
 		var minmax = _chart.sortPoints();
 		_chart.setAxis();
 		_chart.setTickInfo(minmax);
+		_chart.drawPoints();
 	}
 
 	override function addComponent(child:Component):Component {

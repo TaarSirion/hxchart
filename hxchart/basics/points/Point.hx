@@ -26,9 +26,10 @@ class Point {
 
 	public function draw(graphics:ComponentGraphics) {
 		var screen = Screen.instance;
-		screen.registerEvent("click", onClick);
+		// screen.registerEvent("click", onClick);
 		graphics.strokeStyle(options.point_color[group], 1);
 		graphics.circle(x, y, options.point_size);
+		trace("draw circle");
 	}
 
 	private function onClick(e:MouseEvent) {
