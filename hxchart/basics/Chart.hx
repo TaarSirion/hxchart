@@ -1,5 +1,6 @@
 package hxchart.basics;
 
+import hxchart.basics.points.PointLayer;
 import haxe.ui.geom.Size;
 import haxe.ui.components.Button;
 import haxe.ui.core.Component;
@@ -61,11 +62,7 @@ class Chart extends Absolute {
 
 	@:call(DrawPoints) public function drawPoints():Void;
 
-	public var points(default, set):Array<Point> = [];
-
-	function set_points(points:Array<Point>) {
-		return this.points = points;
-	}
+	public var pointlayer:PointLayer;
 
 	public var point_groups(default, set):Map<String, Int>;
 
@@ -135,13 +132,7 @@ class Chart extends Absolute {
 	public var max_y:Float;
 
 	public function sortPoints() {
-		var x_points = points.map(function(p) {
-			return p.x_val;
-		});
-		var y_points = points.map(function(p) {
-			return p.y_val;
-		});
-		var minmax = ChartTools.sortPoints(x_points, y_points);
+		var minmax = pointlayer.sortPoints();
 		min_x = minmax.min_x;
 		max_x = minmax.max_x;
 		min_y = minmax.min_y;
@@ -305,7 +296,8 @@ private class SetPoints extends Behaviour {
 			}
 		}
 		for (i in 0...params.x_points.length) {
-			chart.points.push(new Point(params.x_points[i], params.y_points[i], options, chart.point_groups.get(params.groups[i])));
+			var point = new Point(params.x_points[i], params.y_points[i], options, chart.point_groups.get(params.groups[i]));
+			chart.pointlayer.addPoint(point);
 		}
 
 		if (j > 0 && options.point_color.length == 1) {
@@ -389,16 +381,13 @@ private class DrawPoints extends Behaviour {
 		var y_coord_min = chart.y_axis.ticks[0].top;
 		var y_coord_max = chart.y_axis.ticks[chart.y_axis.ticks.length - 1].top;
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, chart.y_tick_info.pos_ratio);
-		for (point in chart.points) {
-			point.setPosition({
-				axis_info: {x_ticks: chart.x_axis.ticks, y_ticks: chart.y_axis.ticks},
-				x_dist: x_dist,
-				y_dist: y_dist,
-				y_tick_info: chart.y_tick_info,
-				x_tick_info: chart.x_tick_info
-			});
-			point.draw(chart.canvas.componentGraphics);
-		}
+		chart.pointlayer.setInfo({
+			axis_info: {x_ticks: chart.x_axis.ticks, y_ticks: chart.y_axis.ticks},
+			x_dist: x_dist,
+			y_dist: y_dist,
+			y_tick_info: chart.y_tick_info,
+			x_tick_info: chart.x_tick_info
+		});
 		return null;
 	}
 }
@@ -416,6 +405,9 @@ class Builder extends CompositeBuilder {
 		_chart.canvas = new Canvas();
 		_chart.canvas.width = _chart.width;
 		_chart.canvas.height = _chart.height;
+		_chart.pointlayer = new PointLayer();
+		_chart.pointlayer.width = _chart.width;
+		_chart.pointlayer.height = _chart.height;
 		_chart.legendLayer = new Absolute();
 		_chart.legendLayer.top = _chart.top;
 		_chart.legendLayer.left = _chart.left;
@@ -425,6 +417,7 @@ class Builder extends CompositeBuilder {
 		_chart.addComponent(_chart.legendLayer);
 		_chart.legend = new Legend(_chart.optionsDS.get(0));
 		_chart.legendLayer.addComponent(_chart.legend);
+		_chart.addComponent(_chart.pointlayer);
 	}
 
 	override function onReady() {
