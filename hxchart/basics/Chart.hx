@@ -291,7 +291,7 @@ private class SetPoints extends Behaviour {
 			options.point_color = ColorPalettes.defaultColors(j + 1);
 		}
 		for (i in 0...params.x_points.length) {
-			var point = new Point(params.x_points[i], params.y_points[i], options, chart.point_groups.get(params.groups[i]));
+			var point = new Point(params.x_points[i], params.y_points[i], chart.point_groups.get(params.groups[i]));
 			point.color = options.point_color[point.group];
 			chart.pointlayer.addPoint(point);
 		}

@@ -28,7 +28,6 @@ class Point {
 	public function draw(graphics:ComponentGraphics) {
 		graphics.strokeStyle(color, 1);
 		graphics.circle(x, y, pointSize);
-		trace("Draw point", color, pointSize);
 	}
 
 	private function onClick(e:MouseEvent) {
