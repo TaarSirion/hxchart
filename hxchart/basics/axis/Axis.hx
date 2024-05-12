@@ -44,10 +44,10 @@ class Axis extends Absolute {
 
 	public function setStartToEnd(axisLength:Float) {
 		if (is_y) {
-			endPoint = ChartTools.setAxisStartPoint(options.margin, 0, is_y);
+			endPoint = ChartTools.setAxisStartPoint(0, 0, is_y, 0);
 			startPoint = ChartTools.setAxisEndPoint(endPoint, axisLength, is_y);
 		} else {
-			startPoint = ChartTools.setAxisStartPoint(options.margin, 0, is_y);
+			startPoint = ChartTools.setAxisStartPoint(0, 0, is_y, 0);
 			endPoint = ChartTools.setAxisEndPoint(startPoint, axisLength, is_y);
 		}
 		draw();
@@ -58,7 +58,6 @@ class Axis extends Absolute {
 private class Layout extends DefaultLayout {
 	public override function repositionChildren() {
 		var axis = cast(_component, Axis);
-		trace("A");
 	}
 }
 
@@ -111,7 +110,7 @@ private class SetTicks extends Behaviour {
 		var pos = AxisTools.calcTickPos(tick_calc.num, dist_between_ticks, start_p, is_y);
 		for (i in 0...tick_calc.num) {
 			var label = Utils.floatToStringPrecision(tick_calc.min + tick_calc.step * i, tick_calc.prec);
-			var tick = new Ticks(false, options, is_y);
+			var tick = new Ticks(false, is_y);
 			tick.text = label;
 			tick.num = tick_calc.min + tick_calc.step * i;
 			if (is_y) {
@@ -137,7 +136,7 @@ private class SetTicks extends Behaviour {
 			for (j in 0...(sub_num - 1)) {
 				var l = ticks[i].num + sub_tick.step * (j + 1);
 				var d = start + (is_y ? -sub_tick.dists : sub_tick.dists) * (j + 1);
-				var tick = new Ticks(true, options, is_y);
+				var tick = new Ticks(true, is_y);
 				tick.text = Utils.floatToStringPrecision(l, sub_tick.prec + 1);
 				tick.num = l;
 				if (is_y) {
@@ -173,9 +172,8 @@ private class AxisBuilder extends CompositeBuilder {
 	}
 
 	public override function onReady() {
-		var parent = _axis.parentComponent;
-		var sub_width = _axis.width + (_axis.is_y ? 15 : 0);
-		var sub_height = _axis.height + (_axis.is_y ? 0 : 15);
+		var sub_width = _axis.width;
+		var sub_height = _axis.height;
 		_tickCanvasLayer.width = sub_width;
 		_tickLabelLayer.width = sub_width;
 		_tickCanvasLayer.height = sub_height;

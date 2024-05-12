@@ -251,9 +251,9 @@ private class SetTickInfo extends Behaviour {
 			y: AxisTools.calcTickInfo(pointInfo.min_y, pointInfo.max_y)
 		}
 		var chart = cast(_component, Chart);
-		chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left - 15;
+		chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left;
 		chart.y_axis.width = 30;
-		chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top - 15;
+		chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top;
 		chart.x_axis.height = 30;
 		chart.x_tick_info = infos.x;
 		chart.y_tick_info = infos.y;

@@ -20,8 +20,8 @@ import haxe.ui.geom.Point;
 class Ticks extends Box {
 	@:clonable @:behaviour(DefaultBehaviour, 10) public var fontSize:Null<Float>;
 	@:clonable @:behaviour(DefaultBehaviour, 8) public var subFontSize:Null<Float>;
-	@:clonable @:behaviour(DefaultBehaviour, 6) public var tickLength:Null<Float>;
-	@:clonable @:behaviour(DefaultBehaviour, 3) public var subTickLength:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 7) public var tickLength:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 4) public var subTickLength:Null<Float>;
 
 	@:clonable @:behaviour(TextBehaviour) public var text:String;
 
@@ -55,7 +55,7 @@ class Ticks extends Box {
 
 	public var options:Options;
 
-	public function new(is_sub:Bool = false, options:Options, is_y:Bool = false) {
+	public function new(is_sub:Bool = false, is_y:Bool = false) {
 		super();
 		this.is_sub = is_sub;
 		this.is_y = is_y;
@@ -66,7 +66,6 @@ class Ticks extends Box {
 @:dox(hide) @:noCompletion
 private class TickLayout extends DefaultLayout {
 	public override function repositionChildren() {
-		trace("REPSOTININ");
 		var _tick = cast(_component, Ticks);
 		var _label = _component.findComponent("tick-label", Label, null, "css");
 		TickUtils.drawTicks(_tick, _label);
@@ -110,21 +109,21 @@ class TickBuilder extends CompositeBuilder {
 class TickUtils {
 	public static function drawTicks(_tick:Ticks, _label:Label) {
 		var is_sub = _tick.is_sub;
-		var middle = 30;
-		var tickLength = middle + (is_sub ? _tick.subTickLength : _tick.tickLength);
-		var tickFontsize = (is_sub ? _tick.subFontSize : _tick.fontSize);
+		var tickLength = is_sub ? _tick.subTickLength : _tick.tickLength;
+		var tickFontsize = is_sub ? _tick.subFontSize : _tick.fontSize;
+		var tickTop = is_sub ? ((_tick.tickLength - _tick.subTickLength) / 2) : 0;
 		_tick.canvas.componentGraphics.strokeStyle(_tick.color);
 		_label.customStyle.fontSize = tickFontsize;
-		_label.left = _tick.is_y ? 0 : 0;
-		_label.top = _tick.is_y ? 0 : 15;
+		_label.left = _tick.is_y ? 5 : 0;
+		_label.top = _tick.is_y ? 0 : 5;
 		_tick.canvas.componentGraphics.clear();
 		if (_tick.is_y) {
 			_tick.canvas.left = -tickLength / 2;
-			_tick.canvas.componentGraphics.moveTo(middle, 0);
+			_tick.canvas.componentGraphics.moveTo(tickTop, 0);
 			_tick.canvas.componentGraphics.lineTo(tickLength, 0);
 		} else {
 			_tick.canvas.top = -tickLength / 2;
-			_tick.canvas.componentGraphics.moveTo(0, middle);
+			_tick.canvas.componentGraphics.moveTo(0, tickTop);
 			_tick.canvas.componentGraphics.lineTo(0, tickLength);
 		}
 	}
