@@ -1,20 +1,21 @@
 package hxchart.basics.axis;
 
+import haxe.ui.util.Color;
 import haxe.ui.behaviours.Behaviour;
 import haxe.ui.layouts.DefaultLayout;
 import haxe.ui.util.Variant;
-import haxe.ui.data.ListDataSource;
-import haxe.ui.data.DataSource;
-import haxe.ui.behaviours.DataBehaviour;
 import haxe.ui.core.CompositeBuilder;
 import haxe.ui.containers.Absolute;
 import hxchart.basics.axis.AxisTools.TickInfo;
 import haxe.ui.components.Canvas;
 import hxchart.basics.ticks.Ticks;
 import haxe.ui.geom.Point;
+import haxe.ui.behaviours.DefaultBehaviour;
 
 @:composite(AxisBuilder, Layout)
 class Axis extends Absolute {
+	@:clonable @:behaviour(DefaultBehaviour, 10) public var tickMargin:Null<Float>;
+
 	@:call(SetTicks) public function setTicks(data:Point):Void;
 
 	@:call(Draw) private function draw():Void;
@@ -34,12 +35,11 @@ class Axis extends Absolute {
 		return this.sub_ticks = ticks;
 	}
 
-	public var options:Options;
-
 	public function new() {
 		super();
 		startPoint = new Point(0, 0);
 		endPoint = new Point(0, 0);
+		color = Color.fromString("black");
 	}
 
 	public function setStartToEnd(axisLength:Float) {
@@ -65,10 +65,9 @@ private class Layout extends DefaultLayout {
 private class Draw extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var axis = cast(_component, Axis);
-		var options = axis.options;
 		var canvas = _component.findComponent(null, Canvas);
 		if (canvas != null) {
-			canvas.componentGraphics.strokeStyle(options.color);
+			canvas.componentGraphics.strokeStyle(axis.color);
 			canvas.componentGraphics.moveTo(axis.startPoint.x, axis.startPoint.y);
 			canvas.componentGraphics.lineTo(axis.endPoint.x, axis.endPoint.y);
 		}
@@ -78,11 +77,11 @@ private class Draw extends Behaviour {
 
 @:dox(hide) @:noCompletion
 private class SetTicks extends Behaviour {
+	var axis:Axis;
 	var start:Point;
 	var end:Point;
 
 	var is_y:Bool;
-	var options:Options;
 	var ticks:Array<Ticks>;
 	var sub_ticks:Array<Ticks>;
 
@@ -90,12 +89,12 @@ private class SetTicks extends Behaviour {
 
 	public override function call(param:Any = null):Variant {
 		var minmax:Point = param;
-		start = cast(_component, Axis).startPoint;
-		end = cast(_component, Axis).endPoint;
-		is_y = cast(_component, Axis).is_y;
-		options = cast(_component, Axis).options;
-		ticks = cast(_component, Axis).ticks;
-		sub_ticks = cast(_component, Axis).sub_ticks;
+		axis = cast(_component, Axis);
+		start = axis.startPoint;
+		end = axis.endPoint;
+		is_y = axis.is_y;
+		ticks = axis.ticks;
+		sub_ticks = axis.sub_ticks;
 		layer = _component.findComponent(null, Absolute);
 		setTickPosition(minmax.x, minmax.y);
 		return null;
@@ -103,8 +102,8 @@ private class SetTicks extends Behaviour {
 
 	private function setTickPosition(min:Float, max:Float) {
 		var tick_calc = AxisTools.calcTickInfo(min, max);
-		var start_p = is_y ? start.y - options.tick_margin : start.x + options.tick_margin;
-		var end_p = is_y ? end.y + options.tick_margin : end.x - options.tick_margin;
+		var start_p = is_y ? start.y - axis.tickMargin : start.x + axis.tickMargin;
+		var end_p = is_y ? end.y + axis.tickMargin : end.x - axis.tickMargin;
 		var dist = is_y ? start_p - end_p : end_p - start_p;
 		var dist_between_ticks = dist / (tick_calc.num - 1);
 		var pos = AxisTools.calcTickPos(tick_calc.num, dist_between_ticks, start_p, is_y);

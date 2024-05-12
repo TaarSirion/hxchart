@@ -342,7 +342,6 @@ private class SetAxis extends Behaviour {
 	private function setXAxis(x_axis_length:Float, options:Options, chart:Chart) {
 		chart.x_axis = new Axis();
 		chart.x_axis.is_y = false;
-		chart.x_axis.options = options;
 		chart.x_axis.setStartToEnd(x_axis_length);
 		var minmax = new haxe.ui.geom.Point(chart.min_x, chart.max_x);
 		chart.x_axis.setTicks(minmax);
@@ -353,7 +352,6 @@ private class SetAxis extends Behaviour {
 	private function setYAxis(y_axis_length:Float, options:Options, chart:Chart) {
 		chart.y_axis = new Axis();
 		chart.y_axis.is_y = true;
-		chart.y_axis.options = options;
 		chart.y_axis.setStartToEnd(y_axis_length);
 		var minmax = new haxe.ui.geom.Point(chart.min_y, chart.max_y);
 		chart.y_axis.setTicks(minmax);
