@@ -1,12 +1,16 @@
 package hxchart.basics.points;
 
-import thx.Floats;
+import haxe.ui.util.Color;
+import haxe.ui.behaviours.DefaultBehaviour;
 import haxe.ui.events.MouseEvent;
 import hxchart.basics.Chart.ChartInfo;
 import haxe.ui.core.Screen;
 import haxe.ui.graphics.ComponentGraphics;
 
 class Point {
+	public var pointSize:Null<Int> = 1;
+	public var color:Color = Color.fromString("black");
+
 	private var x:Float;
 	private var y:Float;
 
@@ -15,21 +19,16 @@ class Point {
 
 	public var group(default, null):Int;
 
-	private var options:Options;
-
-	public function new(x_val:Float, y_val:Float, options:Options, group:Int = 0) {
+	public function new(x_val:Float, y_val:Float, group:Int = 0) {
 		this.x_val = x_val;
 		this.y_val = y_val;
 		this.group = group;
-		this.options = options;
 	}
 
 	public function draw(graphics:ComponentGraphics) {
-		var screen = Screen.instance;
-		// screen.registerEvent("click", onClick);
-		graphics.strokeStyle(options.point_color[group], 1);
-		graphics.circle(x, y, options.point_size);
-		trace("draw circle");
+		graphics.strokeStyle(color, 1);
+		graphics.circle(x, y, pointSize);
+		trace("Draw point", color, pointSize);
 	}
 
 	private function onClick(e:MouseEvent) {
@@ -39,8 +38,8 @@ class Point {
 	}
 
 	private function isClickInside(x:Float, y:Float) {
-		var in_x = x >= this.x - options.point_size / 2 && x <= this.x + options.point_size / 2;
-		var in_y = y >= this.y - options.point_size / 2 && y <= this.y + options.point_size / 2;
+		var in_x = x >= this.x - pointSize / 2 && x <= this.x + pointSize / 2;
+		var in_y = y >= this.y - pointSize / 2 && y <= this.y + pointSize / 2;
 		return in_x && in_y;
 	}
 
