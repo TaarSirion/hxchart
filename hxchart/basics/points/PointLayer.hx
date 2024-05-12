@@ -1,5 +1,6 @@
 package hxchart.basics.points;
 
+import haxe.ui.styles.Style;
 import hxchart.basics.Chart.ChartInfo;
 import hxchart.basics.axis.AxisTools.TickInfo;
 import hxchart.basics.axis.AxisInfo;

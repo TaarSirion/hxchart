@@ -1,5 +1,8 @@
 package hxchart.basics.ticks;
 
+import haxe.ui.macros.ComponentMacros;
+import haxe.ui.util.ComponentUtil;
+import haxe.ui.behaviours.DefaultBehaviour;
 import haxe.ui.layouts.DefaultLayout;
 import haxe.ui.behaviours.DataBehaviour;
 import haxe.ui.containers.Box;
@@ -15,6 +18,11 @@ import haxe.ui.geom.Point;
 
 @:composite(TickBuilder, TickLayout)
 class Ticks extends Box {
+	@:clonable @:behaviour(DefaultBehaviour, 10) public var fontSize:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 8) public var subFontSize:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 6) public var tickLength:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 3) public var subTickLength:Null<Float>;
+
 	@:clonable @:behaviour(TextBehaviour) public var text:String;
 
 	public var canvas:Canvas;
@@ -50,8 +58,8 @@ class Ticks extends Box {
 	public function new(is_sub:Bool = false, options:Options, is_y:Bool = false) {
 		super();
 		this.is_sub = is_sub;
-		this.options = options;
 		this.is_y = is_y;
+		color = Color.fromString("black");
 	}
 }
 
@@ -60,26 +68,8 @@ private class TickLayout extends DefaultLayout {
 	public override function repositionChildren() {
 		trace("REPSOTININ");
 		var _tick = cast(_component, Ticks);
-		var _label = _component.findComponent(null, Label);
-		var is_sub = _tick.is_sub;
-		var options = _tick.options;
-
-		var tick_length = (is_sub ? options.tick_sublength : options.tick_length);
-		var tick_fontsize = (is_sub ? options.tick_subfontsize : options.tick_fontsize);
-		_tick.canvas.componentGraphics.strokeStyle(options.tick_color);
-		_label.customStyle.fontSize = tick_fontsize;
-		_label.left = _tick.is_y ? -15 : 0;
-		_label.top = _tick.is_y ? 0 : 15;
-		_tick.canvas.componentGraphics.clear();
-		if (_tick.is_y) {
-			_tick.canvas.left = -tick_length / 2;
-			_tick.canvas.componentGraphics.moveTo(0, 0);
-			_tick.canvas.componentGraphics.lineTo(tick_length, 0);
-		} else {
-			_tick.canvas.top = -tick_length / 2;
-			_tick.canvas.componentGraphics.moveTo(0, 0);
-			_tick.canvas.componentGraphics.lineTo(0, tick_length);
-		}
+		var _label = _component.findComponent("tick-label", Label, null, "css");
+		TickUtils.drawTicks(_tick, _label);
 	}
 }
 
@@ -113,24 +103,29 @@ class TickBuilder extends CompositeBuilder {
 
 	public override function onReady() {
 		super.onReady();
-		var is_sub = _tick.is_sub;
-		var options = _tick.options;
+		TickUtils.drawTicks(_tick, _label);
+	}
+}
 
-		var tick_length = (is_sub ? options.tick_sublength : options.tick_length);
-		var tick_fontsize = (is_sub ? options.tick_subfontsize : options.tick_fontsize);
-		_tick.canvas.componentGraphics.strokeStyle(options.tick_color);
-		_label.customStyle.fontSize = tick_fontsize;
-		_label.left = 0;
+class TickUtils {
+	public static function drawTicks(_tick:Ticks, _label:Label) {
+		var is_sub = _tick.is_sub;
+		var middle = 30;
+		var tickLength = middle + (is_sub ? _tick.subTickLength : _tick.tickLength);
+		var tickFontsize = (is_sub ? _tick.subFontSize : _tick.fontSize);
+		_tick.canvas.componentGraphics.strokeStyle(_tick.color);
+		_label.customStyle.fontSize = tickFontsize;
+		_label.left = _tick.is_y ? 0 : 0;
 		_label.top = _tick.is_y ? 0 : 15;
 		_tick.canvas.componentGraphics.clear();
 		if (_tick.is_y) {
-			_tick.canvas.left = 15 - tick_length / 2;
-			_tick.canvas.componentGraphics.moveTo(0, 0);
-			_tick.canvas.componentGraphics.lineTo(tick_length, 0);
+			_tick.canvas.left = -tickLength / 2;
+			_tick.canvas.componentGraphics.moveTo(middle, 0);
+			_tick.canvas.componentGraphics.lineTo(tickLength, 0);
 		} else {
-			_tick.canvas.top = 15 - tick_length / 2;
-			_tick.canvas.componentGraphics.moveTo(0, 0);
-			_tick.canvas.componentGraphics.lineTo(0, tick_length);
+			_tick.canvas.top = -tickLength / 2;
+			_tick.canvas.componentGraphics.moveTo(0, middle);
+			_tick.canvas.componentGraphics.lineTo(0, tickLength);
 		}
 	}
 }

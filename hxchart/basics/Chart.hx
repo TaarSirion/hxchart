@@ -1,5 +1,8 @@
 package hxchart.basics;
 
+import haxe.ui.core.ICompositeInteractiveComponent;
+import haxe.ui.macros.ComponentMacros;
+import haxe.ui.styles.Style;
 import hxchart.basics.points.PointLayer;
 import haxe.ui.geom.Size;
 import haxe.ui.components.Button;
@@ -138,17 +141,6 @@ class Chart extends Absolute {
 		min_y = minmax.min_y;
 		max_y = minmax.max_y;
 		return minmax;
-	}
-
-	/**
-	 * [Draw the chart. This will explicitly call the functions for generating the chart.]
-	 */
-	public function draw() {
-		// var axis_info = drawAxis();
-		// drawPoints(axis_info);
-		// legend.draw(label_layer);
-		trace("drawing chart");
-		return this;
 	}
 
 	private var margin_bottom:Float = 60;
