@@ -1,6 +1,5 @@
 package hxchart.basics;
 
-import hxchart.basics.legend.Legend.LegendOptions;
 import hxchart.basics.legend.Legend.LegendSymbols;
 import hxchart.basics.legend.LegendTools.LegendPosition;
 import haxe.ui.util.Color;
@@ -161,20 +160,6 @@ class Options {
 
 	function set_used_set_legend(used:Bool) {
 		return used_set_legend = used;
-	}
-
-	public function setLegendOptions(legend_options:LegendOptions) {
-		legend_align = legend_options.alignment != null ? legend_options.alignment : legend_align;
-		legend_border_color = legend_options.border_color != null ? legend_options.border_color : legend_border_color;
-		legend_border_size = legend_options.border_size != null ? legend_options.border_size : legend_border_size;
-		legend_border_style = legend_options.border_style != null ? legend_options.border_style : legend_border_style;
-		legend_fontfamily = legend_options.fontfamily != null ? legend_options.fontfamily : legend_fontfamily;
-		legend_margin = legend_options.margin != null ? legend_options.margin : legend_margin;
-		legend_padding = legend_options.padding != null ? legend_options.padding : legend_padding;
-		legend_symbol_filled = legend_options.symbold_filled != null ? legend_options.symbold_filled : legend_symbol_filled;
-		legend_symbol_type = legend_options.symbol_type != null ? legend_options.symbol_type : legend_symbol_type;
-		legend_text_fontsize = legend_options.text_fontsize != null ? legend_options.text_fontsize : legend_text_fontsize;
-		legend_title_fontsize = legend_options.title_fontsize != null ? legend_options.title_fontsize : legend_title_fontsize;
 	}
 
 	public function new() {}

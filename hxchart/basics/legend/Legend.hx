@@ -1,5 +1,7 @@
 package hxchart.basics.legend;
 
+import haxe.ui.styles.Style;
+import haxe.ui.components.Button;
 import haxe.ui.layouts.DefaultLayout;
 import haxe.ui.data.ListDataSource;
 import haxe.ui.data.DataSource;
@@ -18,45 +20,24 @@ import haxe.ui.styles.StyleSheet;
 import haxe.ui.core.TextDisplay;
 import haxe.ui.components.Label;
 import hxchart.basics.Options;
-import haxe.ui.containers.Absolute;
+import haxe.ui.behaviours.DefaultBehaviour;
 
 enum LegendSymbols {
 	point;
 	line;
 }
 
-typedef LegendOptions = {
-	?alignment:LegendPosition,
-	?border_style:String,
-	?border_size:Int,
-	?border_color:Color,
-	?title_fontsize:Int,
-	?text_fontsize:Int,
-	?fontfamily:String,
-	?symbold_filled:Bool,
-	?symbol_type:LegendSymbols,
-	?margin:Float,
-	?padding:Float
-}
-
 @:composite(Builder, LegendLayout)
 class Legend extends VBox {
-	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
+	@:clonable @:behaviour(DefaultBehaviour, 1) public var legendAlign:Null<Int>;
+	@:clonable @:behaviour(DefaultBehaviour, 20) public var fontSizeTitle:Null<Int>;
+
 	@:behaviour(TitleBehaviour) public var legendTitle:String;
 
 	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
 
 	public function new(options:Options) {
 		super();
-		if (!options.use_legend) {
-			return;
-		}
-		trace("Before Opt");
-		optionsDS.add(options);
-	}
-
-	public function setOptions(legend_options:LegendOptions) {
-		optionsDS.get(0).setLegendOptions(legend_options);
 	}
 }
 
@@ -67,8 +48,7 @@ private class LegendLayout extends DefaultLayout {
 		var width = _legend.width;
 		var height = _legend.height;
 		var layer = _legend.parentComponent;
-		var options = _legend.optionsDS.get(0);
-		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
+		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.legendAlign]);
 		_legend.left = coords.x;
 		_legend.top = coords.y;
 		trace("Repositin legend");
@@ -80,60 +60,9 @@ private class LegendLayout extends DefaultLayout {
 		var width = _legend.width;
 		var height = _legend.height;
 		var layer = _legend.parentComponent;
-		var options = _legend.optionsDS.get(0);
-		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
+		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.legendAlign]);
 		_legend.left = coords.x;
 		_legend.top = coords.y;
-	}
-}
-
-@:dox(hide) @:noCompletion
-private class OptionsBehaviour extends DataBehaviour {
-	override function set(value:Variant) {
-		super.set(value);
-	}
-
-	private override function validateData() {
-		var optionDS:DataSource<Options> = _value;
-		if (optionDS.get(0) != null) {
-			setStyleSheet(optionDS.get(0));
-		}
-	}
-
-	private function setStyleSheet(options:Options) {
-		_component.styleSheet = new StyleSheet();
-		_component.styleSheet.parse("
-		.legend-class{ 
-				border: "
-			+ options.legend_border_size
-			+ "px "
-			+ options.legend_border_style
-			+ " "
-			+ options.legend_border_color.toHex()
-			+ "; 
-				background-color: rgb(245, 245, 245);
-				margin: "
-			+ options.legend_margin
-			+ ";
-				padding: "
-			+ options.legend_padding
-			+ ";
-			font-family: "
-			+ options.legend_fontfamily
-			+ ";
-			}
-			.legend-title {
-				text-align: center;
-				font-size: "
-			+ options.legend_title_fontsize
-			+ ";
-			}
-			.legend-text {
-				font-size: "
-			+ options.legend_text_fontsize
-			+ ";
-			}
-		");
 	}
 }
 
@@ -171,18 +100,17 @@ class Builder extends CompositeBuilder {
 		super(legend);
 		_legend = legend;
 		_legend.addClass("legend-class");
-		_legend.optionsDS = new ListDataSource();
 		_text_container = new VBox();
 		_text_container.id = "legend-container";
 		_legend.addComponent(_text_container);
+		setStyleSheet();
 	}
 
 	public override function onReady() {
 		var width = _legend.width;
 		var height = _legend.height;
 		var layer = _legend.parentComponent;
-		var options = _legend.optionsDS.get(0);
-		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, options.legend_margin, options.legend_padding, options.legend_align);
+		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.legendAlign]);
 		_legend.left = coords.x;
 		_legend.top = coords.y;
 	}
@@ -192,5 +120,37 @@ class Builder extends CompositeBuilder {
 			return _text_container.addComponent(child);
 		}
 		return null;
+	}
+
+	private function setStyleSheet() {
+		_legend.styleSheet = new StyleSheet();
+		_legend.styleSheet.parse("
+			.legend-class{ 
+				border: 1px solid #000000;
+				background-color: rgb(245, 245, 245);
+				margin-right: 10px;
+				margin-top: 10px;
+				padding: 10px;
+				font-family: Arial;
+			}
+			.legend-title {
+				text-align: center;
+				font-size: "
+			+ _legend.fontSizeTitle
+			+ "px;
+			}
+		");
+	}
+
+	override function applyStyle(style:Style) {
+		super.applyStyle(style);
+		// var childWidth = Lambda.fold(_text_container.childComponents, function(item, res) {
+		// 	return Math.max(item.width, res);
+		// }, 0);
+
+		trace(_text_container.childComponents.map(function(x) return x.width));
+		// _legend.width = childWidth;
+		_legend.invalidateComponent();
+		trace("Applying this style");
 	}
 }

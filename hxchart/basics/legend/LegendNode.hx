@@ -1,5 +1,7 @@
 package hxchart.basics.legend;
 
+import haxe.ui.layouts.DefaultLayout;
+import haxe.ui.styles.Style;
 import haxe.ui.util.Variant;
 import haxe.ui.core.Component;
 import haxe.ui.util.Color;
@@ -8,14 +10,20 @@ import haxe.ui.core.CompositeBuilder;
 import haxe.ui.components.Label;
 import haxe.ui.containers.HBox;
 import haxe.ui.behaviours.DataBehaviour;
+import haxe.ui.behaviours.DefaultBehaviour;
 
 typedef LegendNodeData = {
 	text:String,
-	color:Color
+	color:Color,
+	fontSize:Int
 }
 
-@:composite(Builder)
+@:composite(Builder, LegendLayout)
 class LegendNode extends HBox {
+	@:style(layout) public var fontSize:Null<Float>;
+
+	@:clonable @:behaviour(DefaultBehaviour, "point") public var symbol:String;
+
 	@:clonable @:behaviour(TextBehaviour) public var text:String;
 	@:clonable @:behaviour(ColorBehaviour) public var symbolColor:String;
 
@@ -39,23 +47,32 @@ class LegendNode extends HBox {
 	private function set_data(value:LegendNodeData):LegendNodeData {
 		text = value.text;
 		symbolColor = value.color.toHex();
+		fontSize = value.fontSize;
 		_data = value;
 		return value;
 	}
 
 	public function drawSymbol() {
 		canvas.componentGraphics.clear();
-		if (legend.optionsDS.get(0).legend_symbol_filled) {
-			canvas.componentGraphics.rectangle(2, 2, 6, 6);
-			return;
-		}
-		switch legend.optionsDS.get(0).legend_symbol_type {
-			case point:
-				canvas.componentGraphics.circle(5, (legend.optionsDS.get(0).legend_text_fontsize * 1.25 + 4) / 2, 3);
-			case line:
-				canvas.componentGraphics.moveTo(2, 5);
-				canvas.componentGraphics.lineTo(8, 5);
-		}
+		// if (legend.optionsDS.get(0).legend_symbol_filled) {
+		// 	canvas.componentGraphics.rectangle(2, 2, 6, 6);
+		// 	return;
+		// }
+		// switch legend.optionsDS.get(0).legend_symbol_type {
+		// 	case point:
+
+		canvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
+		// 	case line:
+		// 		canvas.componentGraphics.moveTo(2, 5);
+		// 		canvas.componentGraphics.lineTo(8, 5);
+		// }
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class LegendLayout extends DefaultLayout {
+	override function resizeChildren() {
+		super.resizeChildren();
 	}
 }
 
@@ -65,6 +82,13 @@ private class TextBehaviour extends DataBehaviour {
 		var label = _component.findComponent("legend-text", Label, null, "css");
 		if (label != null) {
 			label.text = _value;
+			var legend = cast(_component, LegendNode);
+			label.getTextDisplay().textStyle.fontSize = legend.fontSize;
+			trace("Label change", label.text, label.width, label.getTextDisplay().width, label.getTextDisplay().textWidth, label.hasTextDisplay(),
+				label.hasTextInput());
+			label.createTextDisplay(_value);
+			trace("Label change2", label.text, label.width, label.getTextDisplay().width, label.getTextDisplay().textWidth, label.hasTextDisplay(),
+				label.hasTextInput(), legend.fontSize, label.style.fontSize);
 		}
 	}
 }
@@ -89,7 +113,7 @@ private class Builder extends CompositeBuilder {
 	private function new(legendNode:LegendNode) {
 		super(legendNode);
 		_legendNode = legendNode;
-
+		_legendNode.fontSize = 16;
 		var label = new Label();
 		label.addClass("legend-text");
 		label.text = "Legend Text";
@@ -97,8 +121,15 @@ private class Builder extends CompositeBuilder {
 		_legendNode.canvas = new Canvas();
 		_legendNode.canvas.addClass("legend-text-symbol");
 		_legendNode.canvas.width = 10;
-		_legendNode.canvas.height = _legendNode.legend.optionsDS.get(0).legend_text_fontsize * 1.25 + 4;
+		_legendNode.canvas.height = _legendNode.fontSize * 1.25 + 4;
 		_legendNode.addComponent(_legendNode.canvas);
 		_legendNode.addComponent(label);
+	}
+
+	override function applyStyle(style:Style) {
+		super.applyStyle(style);
+		_legendNode.canvas.height = _legendNode.fontSize * 1.25 + 4;
+		trace(_legendNode.width, _legendNode.childComponents[1].width);
+		_legendNode.width = 100;
 	}
 }

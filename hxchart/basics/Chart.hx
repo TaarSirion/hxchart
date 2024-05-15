@@ -1,11 +1,7 @@
 package hxchart.basics;
 
-import haxe.ui.core.ICompositeInteractiveComponent;
-import haxe.ui.macros.ComponentMacros;
-import haxe.ui.styles.Style;
 import hxchart.basics.points.PointLayer;
 import haxe.ui.geom.Size;
-import haxe.ui.components.Button;
 import haxe.ui.core.Component;
 import haxe.ui.data.ListDataSource;
 import haxe.ui.layouts.DefaultLayout;
@@ -13,13 +9,8 @@ import haxe.ui.behaviours.Behaviour;
 import haxe.ui.util.Variant;
 import haxe.ui.data.DataSource;
 import haxe.ui.core.CompositeBuilder;
-import haxe.ui.util.Color;
 import hxchart.basics.colors.ColorPalettes;
-import haxe.ui.Toolkit;
-import haxe.ui.styles.elements.Directive;
-import haxe.ui.styles.elements.RuleElement;
 import haxe.ui.styles.StyleSheet;
-import hxchart.basics.legend.LegendTools.LegendPosition;
 import hxchart.basics.legend.Legend;
 import hxchart.basics.axis.AxisInfo;
 import hxchart.basics.axis.Axis;
@@ -32,7 +23,7 @@ import haxe.ui.components.Canvas;
 import hxchart.basics.points.Point;
 import hxchart.basics.axis.AxisTools;
 import haxe.ui.behaviours.DataBehaviour;
-import haxe.ui.behaviours.ValueBehaviour;
+import haxe.ui.behaviours.DefaultBehaviour;
 
 typedef ChartInfo = {
 	axis_info:AxisInfo,
@@ -52,6 +43,12 @@ typedef TickInfos = {
  */
 @:composite(Builder, ChartLayout)
 class Chart extends Absolute {
+	@:clonable @:behaviour(DefaultBehaviour, 10) public var fontSize:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 8) public var subFontSize:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 7) public var tickLength:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 4) public var subTickLength:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 10) public var tickMargin:Null<Float>;
+
 	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
 	@:behaviour(CanvasBehaviour) public var canvas:Canvas;
 
@@ -145,47 +142,6 @@ class Chart extends Absolute {
 
 	private var margin_bottom:Float = 60;
 	private var margin_left:Float = 60;
-
-	/**
-	 * [Set options for a chart]
-	 * @param options An array of `Option`. Each option need to have a name and value.
-	 */
-	public function setOptions(options:Array<Option>) {
-		for (option in options) {
-			switch option.name {
-				case margin:
-					this.options.margin = option.value;
-				case tick_length:
-					this.options.tick_length = option.value;
-				case tick_color:
-					this.options.tick_color = option.value;
-				case tick_margin:
-					this.options.tick_margin = option.value;
-				case tick_fontsize:
-					this.options.tick_fontsize = option.value;
-
-				case color:
-					var old_color = this.options.color;
-					this.options.color = option.value;
-					if (old_color.toInt() == this.options.point_color[0].toInt()) {
-						this.options.point_color[0] = option.value;
-					}
-					if (old_color.toInt() == this.options.tick_color.toInt()) {
-						this.options.tick_color = option.value;
-					}
-				case point_size:
-					this.options.point_size = option.value;
-				case point_color:
-					this.options.point_color = option.value;
-				case legend_options:
-					legend.setOptions(option.value);
-				case use_legend:
-					if (!this.options.used_set_legend) {
-						this.options.use_legend = option.value;
-					}
-			}
-		}
-	}
 }
 
 @:dox(hide) @:noCompletion
@@ -303,7 +259,9 @@ private class SetPoints extends Behaviour {
 typedef LegendAdd = {
 	legends:Array<String>,
 	title:String,
-	options:LegendOptions
+	align:Int,
+	fontSizeTitle:Int,
+	fontSizeEntry:Int,
 }
 
 @:dox(hide) @:noCompletion
@@ -312,17 +270,18 @@ private class SetLegend extends Behaviour {
 		var chart = cast(_component, Chart);
 		var params:LegendAdd = param;
 		var options = chart.optionsDS.get(0);
-		chart.legend.setOptions(params.options);
 		if (params.title == null) {
 			params.title = "Groups";
 		}
+		chart.legend.legendAlign = params.align;
 		chart.legend.legendTitle = params.title;
+		chart.legend.fontSizeTitle = params.fontSizeTitle;
 		options.use_legend = true;
 		options.used_set_legend = true;
 		var groups = new Map();
 		for (i => text in params.legends) {
 			groups.set(text, i);
-			chart.legend.addNode({text: text, color: options.point_color[i]});
+			chart.legend.addNode({text: text, color: options.point_color[i], fontSize: params.fontSizeEntry});
 		}
 		return null;
 	}
