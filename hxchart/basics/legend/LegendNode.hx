@@ -1,5 +1,6 @@
 package hxchart.basics.legend;
 
+import haxe.ui.core.TextDisplay;
 import haxe.ui.layouts.DefaultLayout;
 import haxe.ui.styles.Style;
 import haxe.ui.util.Variant;
@@ -82,13 +83,9 @@ private class TextBehaviour extends DataBehaviour {
 		var label = _component.findComponent("legend-text", Label, null, "css");
 		if (label != null) {
 			label.text = _value;
+			label.htmlText = _value;
 			var legend = cast(_component, LegendNode);
-			label.getTextDisplay().textStyle.fontSize = legend.fontSize;
-			trace("Label change", label.text, label.width, label.getTextDisplay().width, label.getTextDisplay().textWidth, label.hasTextDisplay(),
-				label.hasTextInput());
-			label.createTextDisplay(_value);
-			trace("Label change2", label.text, label.width, label.getTextDisplay().width, label.getTextDisplay().textWidth, label.hasTextDisplay(),
-				label.hasTextInput(), legend.fontSize, label.style.fontSize);
+			label.customStyle.fontSize = legend.fontSize;
 		}
 	}
 }
@@ -128,8 +125,7 @@ private class Builder extends CompositeBuilder {
 
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
-		_legendNode.canvas.height = _legendNode.fontSize * 1.25 + 4;
-		trace(_legendNode.width, _legendNode.childComponents[1].width);
-		_legendNode.width = 100;
+		_legendNode.canvas.height = _legendNode.childComponents[1].height;
+		_legendNode.validateComponentStyle();
 	}
 }

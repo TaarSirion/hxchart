@@ -259,9 +259,10 @@ private class SetPoints extends Behaviour {
 typedef LegendAdd = {
 	legends:Array<String>,
 	title:String,
-	align:Int,
-	fontSizeTitle:Int,
-	fontSizeEntry:Int,
+	?align:Int,
+	?fontSizeTitle:Int,
+	?fontSizeEntry:Int,
+	?margin:Float,
 }
 
 @:dox(hide) @:noCompletion
@@ -273,9 +274,19 @@ private class SetLegend extends Behaviour {
 		if (params.title == null) {
 			params.title = "Groups";
 		}
-		chart.legend.legendAlign = params.align;
+		if (params.align != null) {
+			chart.legend.legendAlign = params.align;
+		}
 		chart.legend.legendTitle = params.title;
-		chart.legend.fontSizeTitle = params.fontSizeTitle;
+		if (params.fontSizeEntry != null) {
+			chart.legend.fontSizeTitle = params.fontSizeTitle;
+		}
+		if (params.margin != null) {
+			chart.legend.marginTop = params.margin;
+			chart.legend.marginLeft = params.margin;
+			chart.legend.marginBottom = params.margin;
+			chart.legend.marginRight = params.margin;
+		}
 		options.use_legend = true;
 		options.used_set_legend = true;
 		var groups = new Map();

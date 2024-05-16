@@ -128,9 +128,8 @@ class Builder extends CompositeBuilder {
 			.legend-class{ 
 				border: 1px solid #000000;
 				background-color: rgb(245, 245, 245);
-				margin-right: 10px;
-				margin-top: 10px;
 				padding: 10px;
+				margin-top:10px;
 				font-family: Arial;
 			}
 			.legend-title {
@@ -144,13 +143,7 @@ class Builder extends CompositeBuilder {
 
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
-		// var childWidth = Lambda.fold(_text_container.childComponents, function(item, res) {
-		// 	return Math.max(item.width, res);
-		// }, 0);
-
-		trace(_text_container.childComponents.map(function(x) return x.width));
-		// _legend.width = childWidth;
-		_legend.invalidateComponent();
-		trace("Applying this style");
+		trace(_legend.marginRight);
+		trace(_legend.customStyle.marginRight);
 	}
 }
