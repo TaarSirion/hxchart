@@ -274,18 +274,15 @@ private class SetLegend extends Behaviour {
 		if (params.title == null) {
 			params.title = "Groups";
 		}
-		if (params.align != null) {
-			chart.legend.legendAlign = params.align;
-		}
 		chart.legend.legendTitle = params.title;
 		if (params.fontSizeEntry != null) {
 			chart.legend.fontSizeTitle = params.fontSizeTitle;
 		}
 		if (params.margin != null) {
-			chart.legend.marginTop = params.margin;
-			chart.legend.marginLeft = params.margin;
-			chart.legend.marginBottom = params.margin;
-			chart.legend.marginRight = params.margin;
+			chart.legend.customStyle.marginTop = params.margin;
+			chart.legend.customStyle.marginLeft = params.margin;
+			chart.legend.customStyle.marginBottom = params.margin;
+			chart.legend.customStyle.marginRight = params.margin;
 		}
 		options.use_legend = true;
 		options.used_set_legend = true;
@@ -293,6 +290,9 @@ private class SetLegend extends Behaviour {
 		for (i => text in params.legends) {
 			groups.set(text, i);
 			chart.legend.addNode({text: text, color: options.point_color[i], fontSize: params.fontSizeEntry});
+		}
+		if (params.align != null) {
+			chart.legend.align = params.align;
 		}
 		return null;
 	}
@@ -376,7 +376,7 @@ class Builder extends CompositeBuilder {
 		_chart.legendLayer.percentWidth = 100;
 		_chart.legendLayer.addClass("legend-layer");
 		_chart.addComponent(_chart.legendLayer);
-		_chart.legend = new Legend(_chart.optionsDS.get(0));
+		_chart.legend = new Legend();
 		_chart.legendLayer.addComponent(_chart.legend);
 		_chart.addComponent(_chart.pointlayer);
 	}

@@ -29,14 +29,14 @@ enum LegendSymbols {
 
 @:composite(Builder, LegendLayout)
 class Legend extends VBox {
-	@:clonable @:behaviour(DefaultBehaviour, 1) public var legendAlign:Null<Int>;
+	@:clonable @:behaviour(DefaultBehaviour, 1) public var align:Null<Int>;
 	@:clonable @:behaviour(DefaultBehaviour, 20) public var fontSizeTitle:Null<Int>;
 
-	@:behaviour(TitleBehaviour) public var legendTitle:String;
+	@:clonable @:behaviour(TitleBehaviour) public var legendTitle:String;
 
 	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
 
-	public function new(options:Options) {
+	public function new() {
 		super();
 	}
 }
@@ -48,7 +48,7 @@ private class LegendLayout extends DefaultLayout {
 		var width = _legend.width;
 		var height = _legend.height;
 		var layer = _legend.parentComponent;
-		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.legendAlign]);
+		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.align]);
 		_legend.left = coords.x;
 		_legend.top = coords.y;
 		trace("Repositin legend");
@@ -60,9 +60,19 @@ private class LegendLayout extends DefaultLayout {
 		var width = _legend.width;
 		var height = _legend.height;
 		var layer = _legend.parentComponent;
-		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.legendAlign]);
+		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.align]);
 		_legend.left = coords.x;
 		_legend.top = coords.y;
+	}
+
+	override function marginLeft(child:Component):Float {
+		return super.marginLeft(child);
+		trace("SETTING MARGIN LEFT");
+	}
+
+	override function set_component(value:Component):Component {
+		return super.set_component(value);
+		trace("Set component");
 	}
 }
 
@@ -106,15 +116,6 @@ class Builder extends CompositeBuilder {
 		setStyleSheet();
 	}
 
-	public override function onReady() {
-		var width = _legend.width;
-		var height = _legend.height;
-		var layer = _legend.parentComponent;
-		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.legendAlign]);
-		_legend.left = coords.x;
-		_legend.top = coords.y;
-	}
-
 	public override function addComponent(child:Component):Component {
 		if (child is LegendNode) {
 			return _text_container.addComponent(child);
@@ -129,7 +130,6 @@ class Builder extends CompositeBuilder {
 				border: 1px solid #000000;
 				background-color: rgb(245, 245, 245);
 				padding: 10px;
-				margin-top:10px;
 				font-family: Arial;
 			}
 			.legend-title {
@@ -143,7 +143,21 @@ class Builder extends CompositeBuilder {
 
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
-		trace(_legend.marginRight);
-		trace(_legend.customStyle.marginRight);
+	}
+
+	override function validateComponentLayout():Bool {
+		return super.validateComponentLayout();
+		trace("AA", _legend.left);
+	}
+
+	override function validateComponentData() {
+		super.validateComponentData();
+		var width = _legend.width;
+		var height = _legend.height;
+		var layer = _legend.parentComponent;
+		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.align], _legend.marginTop,
+			_legend.marginLeft, _legend.marginRight);
+		_legend.left = coords.x;
+		_legend.top = coords.y;
 	}
 }

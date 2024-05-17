@@ -8,15 +8,16 @@ enum LegendPosition {
 }
 
 class LegendTools {
-	public static function calcPosition(width:Float, height:Float, chart_width:Float, chart_height:Float, align:LegendPosition) {
+	public static function calcPosition(width:Float, height:Float, chart_width:Float, chart_height:Float, align:LegendPosition, marginTop:Float = 0,
+			marginLeft:Float = 0, marginRight:Float = 0) {
 		switch align {
 			case topright:
-				var y = 0;
-				var x = chart_width - width;
+				var y = marginTop;
+				var x = chart_width - width - marginLeft;
 				return new Point(x, y);
 			case topleft:
-				var y = 0;
-				var x = 0;
+				var y = marginTop;
+				var x = marginRight;
 				return new Point(x, y);
 		}
 	}
