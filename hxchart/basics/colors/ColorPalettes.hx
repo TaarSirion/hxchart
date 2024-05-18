@@ -3,6 +3,19 @@ package hxchart.basics.colors;
 import haxe.ui.util.ColorUtil;
 import haxe.ui.util.Color;
 
+enum ColorPaletteEnum {
+	blue;
+	green;
+	red;
+	grey;
+	blueGreen;
+	pastellBlueGreen;
+	blueRed;
+	pastellBlueRed;
+	greenRed;
+	pastellGreenRed;
+}
+
 class ColorPalettes {
 	public static function blue(n:Int) {
 		return ColorUtil.buildColorArray(Color.fromString("#B9DDF1"), Color.fromString("blue"), n);
@@ -50,7 +63,7 @@ class ColorPalettes {
 			Color.fromString("#99991E"), Color.fromString("grey"), Color.fromString("pink"), Color.fromString("brown"), Color.fromString("white"),
 			Color.fromString("yellow"), Color.fromString("blue"), Color.fromString("#CCFFFF"), Color.fromString("#79CC3D"), Color.fromString("#3F2327"),
 			Color.fromString("black")];
-		var res = [];
+		var res:Array<Int> = [];
 		var x = Math.ceil(n / def.length);
 		var ddef = [];
 		trace(x, "def", def);

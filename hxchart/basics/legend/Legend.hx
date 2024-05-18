@@ -36,6 +36,8 @@ class Legend extends VBox {
 
 	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
 
+	public var childNodes:Array<LegendNode>;
+
 	public function new() {
 		super();
 	}
@@ -96,6 +98,7 @@ private class AddNode extends Behaviour {
 		var node = new LegendNode(legend);
 		node.data = param;
 		legend.addComponent(node);
+		legend.childNodes.push(node);
 		return node;
 	}
 }
@@ -109,6 +112,7 @@ class Builder extends CompositeBuilder {
 	public function new(legend:Legend) {
 		super(legend);
 		_legend = legend;
+		_legend.childNodes = [];
 		_legend.addClass("legend-class");
 		_text_container = new VBox();
 		_text_container.id = "legend-container";
@@ -147,7 +151,6 @@ class Builder extends CompositeBuilder {
 
 	override function validateComponentLayout():Bool {
 		return super.validateComponentLayout();
-		trace("AA", _legend.left);
 	}
 
 	override function validateComponentData() {

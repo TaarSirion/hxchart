@@ -48,6 +48,14 @@ class AxisTools {
 		var dist = Math.abs(nmin) + nmax;
 		var tick_num = calcTickNum(dist, prec, tick_step, nmax);
 		var pos_ratio = calcPosRatio(nmin, nmax, dist);
+		trace("Tick Info", {
+			num: tick_num,
+			step: tick_step,
+			min: nmin,
+			prec: prec,
+			pos_ratio: pos_ratio,
+			zero: calcZeroIndex(pos_ratio, tick_num),
+		});
 		return ({
 			num: tick_num,
 			step: tick_step,

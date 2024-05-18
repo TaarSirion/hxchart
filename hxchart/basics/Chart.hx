@@ -1,5 +1,8 @@
 package hxchart.basics;
 
+import hxchart.basics.legend.LegendNode;
+import haxe.ui.backend.html5.filters.ColorMatrixFilter;
+import haxe.ui.util.Color;
 import hxchart.basics.points.PointLayer;
 import haxe.ui.geom.Size;
 import haxe.ui.core.Component;
@@ -49,6 +52,10 @@ class Chart extends Absolute {
 	@:clonable @:behaviour(DefaultBehaviour, 4) public var subTickLength:Null<Float>;
 	@:clonable @:behaviour(DefaultBehaviour, 10) public var tickMargin:Null<Float>;
 
+	@:clonable @:behaviour(ColorPaletteBehaviour) public var colorPalatte:Int;
+
+	public var colors:Array<Int>;
+
 	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
 	@:behaviour(CanvasBehaviour) public var canvas:Canvas;
 
@@ -65,8 +72,13 @@ class Chart extends Absolute {
 	public var pointlayer:PointLayer;
 
 	public var point_groups(default, set):Map<String, Int>;
+	public var countGroups:Int;
 
 	function set_point_groups(point_groups:Map<String, Int>) {
+		countGroups = 0;
+		for (key in point_groups.keys()) {
+			countGroups++;
+		}
 		return this.point_groups = point_groups;
 	}
 
@@ -192,8 +204,54 @@ private class OptionsBehaviour extends DataBehaviour {
 private class CanvasBehaviour extends DataBehaviour {
 	private override function validateData() {
 		if (_component.findComponent(null, Canvas) == null) {
-			trace("Canvas");
 			_component.addComponent(_value);
+		}
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class ColorPaletteBehaviour extends DataBehaviour {
+	override function set(value:Variant) {
+		super.set(value);
+		var chart = cast(_component, Chart);
+		var bvalue:ColorPaletteEnum = ColorPaletteEnum.createByIndex(value);
+		switch (bvalue) {
+			case blue:
+				chart.colors = ColorPalettes.blue(chart.countGroups);
+			case green:
+				chart.colors = ColorPalettes.green(chart.countGroups);
+			case red:
+				chart.colors = ColorPalettes.red(chart.countGroups);
+			case grey:
+				chart.colors = ColorPalettes.grey(chart.countGroups);
+			case blueGreen:
+				chart.colors = ColorPalettes.blueGreen(chart.countGroups);
+			case pastellBlueGreen:
+				chart.colors = ColorPalettes.pastellBlueGreen(chart.countGroups);
+			case blueRed:
+				chart.colors = ColorPalettes.blueRed(chart.countGroups);
+			case pastellBlueRed:
+				chart.colors = ColorPalettes.pastellBlueRed(chart.countGroups);
+			case greenRed:
+				chart.colors = ColorPalettes.greenRed(chart.countGroups);
+			case pastellGreenRed:
+				chart.colors = ColorPalettes.pastellGreenRed(chart.countGroups);
+			default:
+				chart.colors = ColorPalettes.defaultColors(chart.countGroups);
+		}
+	}
+
+	private override function validateData() {
+		super.validateData();
+		var chart = cast(_component, Chart);
+		for (point in chart.pointlayer.points) {
+			point.color = chart.colors[point.group];
+		}
+		for (i => node in chart.legend.childNodes) {
+			if (i == 0) {
+				continue;
+			}
+			node.color = chart.colors[i - 1];
 		}
 	}
 }
@@ -207,6 +265,8 @@ private class SetTickInfo extends Behaviour {
 			y: AxisTools.calcTickInfo(pointInfo.min_y, pointInfo.max_y)
 		}
 		var chart = cast(_component, Chart);
+		trace(chart.x_axis.ticks[infos.x.zero].num);
+		trace(chart.y_axis.ticks[infos.y.zero].num);
 		chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left;
 		chart.y_axis.width = 30;
 		chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top;
@@ -243,12 +303,13 @@ private class SetPoints extends Behaviour {
 				j++;
 			}
 		}
-		if (j > 0 && options.point_color.length == 1) {
-			options.point_color = ColorPalettes.defaultColors(j + 1);
+		chart.countGroups = j;
+		if (chart.colorPalatte == null) {
+			chart.colors = ColorPalettes.defaultColors(chart.countGroups);
 		}
 		for (i in 0...params.x_points.length) {
 			var point = new Point(params.x_points[i], params.y_points[i], chart.point_groups.get(params.groups[i]));
-			point.color = options.point_color[point.group];
+			point.color = chart.colors[point.group];
 			chart.pointlayer.addPoint(point);
 		}
 
@@ -289,7 +350,7 @@ private class SetLegend extends Behaviour {
 		var groups = new Map();
 		for (i => text in params.legends) {
 			groups.set(text, i);
-			chart.legend.addNode({text: text, color: options.point_color[i], fontSize: params.fontSizeEntry});
+			chart.legend.addNode({text: text, color: chart.colors[i], fontSize: params.fontSizeEntry});
 		}
 		if (params.align != null) {
 			chart.legend.align = params.align;

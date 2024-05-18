@@ -1,5 +1,6 @@
 package hxchart.basics.legend;
 
+import haxe.ui.components.Button;
 import haxe.ui.core.TextDisplay;
 import haxe.ui.layouts.DefaultLayout;
 import haxe.ui.styles.Style;
@@ -26,7 +27,6 @@ class LegendNode extends HBox {
 	@:clonable @:behaviour(DefaultBehaviour, "point") public var symbol:String;
 
 	@:clonable @:behaviour(TextBehaviour) public var text:String;
-	@:clonable @:behaviour(ColorBehaviour) public var symbolColor:String;
 
 	public var canvas:Canvas;
 
@@ -47,7 +47,7 @@ class LegendNode extends HBox {
 
 	private function set_data(value:LegendNodeData):LegendNodeData {
 		text = value.text;
-		symbolColor = value.color.toHex();
+		color = value.color;
 		fontSize = value.fontSize;
 		_data = value;
 		return value;
@@ -91,18 +91,6 @@ private class TextBehaviour extends DataBehaviour {
 }
 
 @:dox(hide) @:noCompletion
-private class ColorBehaviour extends DataBehaviour {
-	private override function validateData() {
-		var canvas = _component.findComponent("legend-text-symbol", Canvas, null, "css");
-		if (canvas != null) {
-			var node = cast(_component, LegendNode);
-			canvas.componentGraphics.fillStyle(Color.fromString(_value));
-			node.drawSymbol();
-		}
-	}
-}
-
-@:dox(hide) @:noCompletion
 @:access(haxe.ui.core.Component)
 private class Builder extends CompositeBuilder {
 	private var _legendNode:LegendNode;
@@ -126,6 +114,11 @@ private class Builder extends CompositeBuilder {
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
 		_legendNode.canvas.height = _legendNode.childComponents[1].height;
-		_legendNode.validateComponentStyle();
+		var canvas = _component.findComponent("legend-text-symbol", Canvas, null, "css");
+		if (canvas != null) {
+			var node = cast(_component, LegendNode);
+			canvas.componentGraphics.fillStyle(_legendNode.color);
+			node.drawSymbol();
+		}
 	}
 }
