@@ -30,7 +30,7 @@ class TestAxis extends Test {
 
 		var tick_info = AxisTools.calcTickInfo(-0.5, 0.5);
 		Assert.same({
-			num: 12,
+			num: 13,
 			min: -0.6,
 			pos_ratio: 0.5,
 			prec: 1,

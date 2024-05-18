@@ -14,7 +14,7 @@ class TestChart extends utest.Test {
 	}
 
 	function testCalcAxisLength() {
-		var length = ChartTools.calcAxisLength(100, 10);
+		var length = ChartTools.calcAxisLength(100, 10, 10);
 		Assert.equals(80, length);
 	}
 
@@ -26,24 +26,29 @@ class TestChart extends utest.Test {
 	}
 
 	function testSetStartPoint() {
-		var point = ChartTools.setAxisStartPoint(0, 0, false);
+		var point = ChartTools.setAxisStartPoint(0, 0, false, 0);
 
 		Assert.equals(0, point.x);
 		Assert.equals(0, point.y);
 
-		var point = ChartTools.setAxisStartPoint(1, 0, false);
+		var point = ChartTools.setAxisStartPoint(0, 0, false);
+
+		Assert.equals(0, point.x);
+		Assert.equals(15, point.y);
+
+		var point = ChartTools.setAxisStartPoint(1, 0, false, 0);
 
 		Assert.equals(1, point.x);
 		Assert.equals(0, point.y);
 
-		var point = ChartTools.setAxisStartPoint(0, 1, true);
+		var point = ChartTools.setAxisStartPoint(0, 1, true, 0);
 
 		Assert.equals(1, point.x);
 		Assert.equals(0, point.y);
 	}
 
 	function testSetEndPoint() {
-		var spoint = ChartTools.setAxisStartPoint(0, 0, false);
+		var spoint = ChartTools.setAxisStartPoint(0, 0, false, 0);
 		var point = ChartTools.setAxisEndPoint(spoint, 100, false);
 		Assert.equals(100, point.x);
 		Assert.equals(0, point.y);
