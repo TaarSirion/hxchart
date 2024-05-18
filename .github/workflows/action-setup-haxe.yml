@@ -69,7 +69,7 @@ jobs:
       shell: bash
       id: prerequisites
       run: |
-        haxelib install haxeui-core@1.6.0
+        haxelib install haxeui-core 1.6.0
         haxelib install utest
     
     - name: Test hxchart
