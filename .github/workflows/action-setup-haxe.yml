@@ -37,4 +37,29 @@ jobs:
       with:
         haxe-version: ${{ matrix.haxe }}
         haxe-libs: | # haxe libraries to be installed:
+  haxe-test:
+    
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - ubuntu-latest
+        - macos-latest
+        - windows-latest
+        haxe:
+        - nightly # latest development build
+        - latest  # latest stable release
+        - 4.2.5
+        - 3.4.7
+    steps:
+    - name: Git Checkout
+      uses: actions/checkout@v4
+
+    - name: Test with Haxe
+      uses: vegardit/haxe-reusable-workflows/.github/actions/test-with-haxe@v1
+      with:
+        haxe-version: ${{ matrix.haxe }}
+        haxe-args: tests.hxml
           haxeui-core@1.6.0
