@@ -37,8 +37,8 @@ jobs:
       with:
         haxe-version: ${{ matrix.haxe }}
         haxe-libs: | # haxe libraries to be installed:
+          haxeui-core@1.6.0
   haxe-test:
-    
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
     strategy:
@@ -61,5 +61,4 @@ jobs:
       uses: vegardit/haxe-reusable-workflows/.github/actions/test-with-haxe@v1
       with:
         haxe-version: ${{ matrix.haxe }}
-        haxe-args: tests.hxml
-          haxeui-core@1.6.0
+        text-hxchart: tests.hxml
