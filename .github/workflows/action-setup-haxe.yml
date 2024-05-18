@@ -74,5 +74,3 @@ jobs:
     
     - name: Test hxchart
       run: haxe tests.hxml
-        haxelib install travix
-        haxelib run travix install
