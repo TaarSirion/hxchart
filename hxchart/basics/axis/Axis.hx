@@ -42,12 +42,12 @@ class Axis extends Absolute {
 		color = Color.fromString("black");
 	}
 
-	public function setStartToEnd(axisLength:Float) {
+	public function setStartToEnd(axisLength:Float, marginStart:Float) {
 		if (is_y) {
-			endPoint = ChartTools.setAxisStartPoint(0, 0, is_y, 0);
+			endPoint = ChartTools.setAxisStartPoint(marginStart, 0, is_y, 0);
 			startPoint = ChartTools.setAxisEndPoint(endPoint, axisLength, is_y);
 		} else {
-			startPoint = ChartTools.setAxisStartPoint(0, 0, is_y, 0);
+			startPoint = ChartTools.setAxisStartPoint(marginStart, 0, is_y, 0);
 			endPoint = ChartTools.setAxisEndPoint(startPoint, axisLength, is_y);
 		}
 		draw();

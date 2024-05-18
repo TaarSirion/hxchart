@@ -30,15 +30,15 @@ class ChartTools {
 		};
 	}
 
-	public static function calcAxisLength(length:Float, margin:Float) {
-		return length;
+	public static function calcAxisLength(length:Float, marginStart:Float, marginEnd:Float) {
+		return length - marginStart - marginEnd;
 	}
 
-	public static function setAxisStartPoint(margin:Float, axis_margin:Float, is_y:Bool, offset:Int = 15) {
+	public static function setAxisStartPoint(marginStart:Float, axis_margin:Float, is_y:Bool, offset:Int = 15) {
 		if (is_y) {
-			return new haxe.ui.geom.Point(axis_margin + offset, 0);
+			return new haxe.ui.geom.Point(axis_margin + offset, marginStart);
 		}
-		return new haxe.ui.geom.Point(0, axis_margin + offset);
+		return new haxe.ui.geom.Point(marginStart, axis_margin + offset);
 	}
 
 	public static function setAxisEndPoint(start_point:haxe.ui.geom.Point, axis_length:Float, is_y:Bool) {

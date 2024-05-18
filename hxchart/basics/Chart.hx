@@ -19,7 +19,6 @@ import hxchart.basics.axis.AxisInfo;
 import hxchart.basics.axis.Axis;
 import haxe.ui.events.UIEvent;
 import haxe.ui.containers.Absolute;
-import hxchart.basics.Options.Option;
 import hxchart.basics.ChartTools.AxisDist;
 import haxe.ui.core.Screen;
 import haxe.ui.components.Canvas;
@@ -56,7 +55,6 @@ class Chart extends Absolute {
 
 	public var colors:Array<Int>;
 
-	@:behaviour(OptionsBehaviour) public var optionsDS:DataSource<Options>;
 	@:behaviour(CanvasBehaviour) public var canvas:Canvas;
 
 	@:call(SetTickInfo) public function setTickInfo(data:hxchart.basics.ChartTools.ChartMinMax):Void;
@@ -84,8 +82,6 @@ class Chart extends Absolute {
 
 	public var x_tick_info:TickInfo;
 	public var y_tick_info:TickInfo;
-
-	private var options:Options;
 
 	public var x_axis:Axis;
 	public var y_axis:Axis;
@@ -182,25 +178,6 @@ private class ChartLayout extends DefaultLayout {
 }
 
 @:dox(hide) @:noCompletion
-private class OptionsBehaviour extends DataBehaviour {
-	override function set(value:Variant) {
-		super.set(value);
-	}
-
-	private override function validateData() {
-		var optionDS:DataSource<Options> = _value;
-		if (optionDS.get(0) != null) {
-			setStyleSheet(optionDS.get(0));
-		}
-	}
-
-	private function setStyleSheet(options:Options) {
-		_component.styleSheet = new StyleSheet();
-		_component.styleSheet.parse("");
-	}
-}
-
-@:dox(hide) @:noCompletion
 private class CanvasBehaviour extends DataBehaviour {
 	private override function validateData() {
 		if (_component.findComponent(null, Canvas) == null) {
@@ -287,7 +264,6 @@ typedef PointAdd = {
 private class SetPoints extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
-		var options = chart.optionsDS.get(0);
 		var params:PointAdd = param;
 		if (params.groups == null) {
 			params.groups = [];
@@ -331,7 +307,6 @@ private class SetLegend extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
 		var params:LegendAdd = param;
-		var options = chart.optionsDS.get(0);
 		if (params.title == null) {
 			params.title = "Groups";
 		}
@@ -345,8 +320,6 @@ private class SetLegend extends Behaviour {
 			chart.legend.customStyle.marginBottom = params.margin;
 			chart.legend.customStyle.marginRight = params.margin;
 		}
-		options.use_legend = true;
-		options.used_set_legend = true;
 		var groups = new Map();
 		for (i => text in params.legends) {
 			groups.set(text, i);
@@ -363,28 +336,27 @@ private class SetLegend extends Behaviour {
 private class SetAxis extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
-		var options = chart.optionsDS.get(0);
-		var y_axis_length = ChartTools.calcAxisLength(chart.height, options.margin);
-		var x_axis_length = ChartTools.calcAxisLength(chart.width, options.margin);
-		setXAxis(x_axis_length, options, chart);
-		setYAxis(y_axis_length, options, chart);
+		var y_axis_length = ChartTools.calcAxisLength(chart.height, chart.marginTop, chart.marginBottom);
+		var x_axis_length = ChartTools.calcAxisLength(chart.width, chart.marginLeft, chart.marginRight);
+		setXAxis(x_axis_length, chart);
+		setYAxis(y_axis_length, chart);
 		return null;
 	}
 
-	private function setXAxis(x_axis_length:Float, options:Options, chart:Chart) {
+	private function setXAxis(x_axis_length:Float, chart:Chart) {
 		chart.x_axis = new Axis();
 		chart.x_axis.is_y = false;
-		chart.x_axis.setStartToEnd(x_axis_length);
+		chart.x_axis.setStartToEnd(x_axis_length, chart.marginLeft);
 		var minmax = new haxe.ui.geom.Point(chart.min_x, chart.max_x);
 		chart.x_axis.setTicks(minmax);
 		chart.x_axis.width = chart.width;
 		chart.addComponent(chart.x_axis);
 	}
 
-	private function setYAxis(y_axis_length:Float, options:Options, chart:Chart) {
+	private function setYAxis(y_axis_length:Float, chart:Chart) {
 		chart.y_axis = new Axis();
 		chart.y_axis.is_y = true;
-		chart.y_axis.setStartToEnd(y_axis_length);
+		chart.y_axis.setStartToEnd(y_axis_length, chart.marginTop);
 		var minmax = new haxe.ui.geom.Point(chart.min_y, chart.max_y);
 		chart.y_axis.setTicks(minmax);
 		chart.y_axis.height = chart.height;
@@ -422,8 +394,6 @@ class Builder extends CompositeBuilder {
 		_chart = chart;
 		_chart.width = 500;
 		_chart.height = 500;
-		_chart.optionsDS = new ListDataSource();
-		_chart.optionsDS.add(new Options());
 		_chart.canvas = new Canvas();
 		_chart.canvas.width = _chart.width;
 		_chart.canvas.height = _chart.height;
