@@ -61,4 +61,4 @@ jobs:
       uses: vegardit/haxe-reusable-workflows/.github/actions/test-with-haxe@v1
       with:
         haxe-version: ${{ matrix.haxe }}
-        text-hxchart: tests.hxml
+        haxe-args: tests.hxml
