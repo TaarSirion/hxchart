@@ -1,0 +1,7 @@
+-cp local
+-main TestAll
+
+-lib utest
+-lib haxeui-core
+
+--interp
