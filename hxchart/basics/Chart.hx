@@ -398,8 +398,8 @@ class Builder extends CompositeBuilder {
 		_chart.canvas.width = _chart.width;
 		_chart.canvas.height = _chart.height;
 		_chart.pointlayer = new PointLayer();
-		_chart.pointlayer.width = _chart.width;
-		_chart.pointlayer.height = _chart.height;
+		_chart.pointlayer.percentHeight = 100;
+		_chart.pointlayer.percentWidth = 100;
 		_chart.legendLayer = new Absolute();
 		_chart.legendLayer.top = _chart.top;
 		_chart.legendLayer.left = _chart.left;
@@ -422,5 +422,9 @@ class Builder extends CompositeBuilder {
 	override function addComponent(child:Component):Component {
 		trace("adding component");
 		return super.addComponent(child);
+	}
+
+	override function validateComponentData() {
+		super.validateComponentData();
 	}
 }

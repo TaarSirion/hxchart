@@ -110,7 +110,7 @@ private class SetTicks extends Behaviour {
 		for (i in 0...tick_calc.num) {
 			var tick = new Ticks(false, is_y);
 			tick.text = tick_calc.labels[i];
-			tick.num = tick_calc.min + tick_calc.step * i;
+			tick.num = Std.parseFloat(tick_calc.labels[i]);
 			if (is_y) {
 				tick.top = pos[i];
 				tick.left = 0;
