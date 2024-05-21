@@ -10,6 +10,7 @@ typedef TickInfo = {
 	prec:Int,
 	pos_ratio:Float,
 	zero:Int,
+	labels:Array<String>
 }
 
 class AxisTools {
@@ -20,6 +21,9 @@ class AxisTools {
 		if (pos_ratio == 0) {
 			return tick_num - 1;
 		}
+		// if (pos_ratio == 0.5) {
+		// 	return Math.round((tick_num + 1) / 2) - 1; // basically the median value
+		// }
 		return Math.floor(tick_num * (1 - pos_ratio));
 	}
 
@@ -34,27 +38,56 @@ class AxisTools {
 		return tick_num;
 	}
 
-	public static function calcTickInfo(min:Float, max:Float):TickInfo {
-		var ten_pow = 1;
-		if (max > 0) {
-			ten_pow = Math.floor(Math.log(max) / Math.log(10));
-		} else if (max < 0) {
-			ten_pow = Math.floor(Math.log(Math.abs(min)) / Math.log(10));
+	public static function setTickValues(min:Float, max:Float, zeroIndex:Int, tickNum:Int, prec:Int) {
+		var labels:Array<String> = new Vector(tickNum).toArray();
+		var negStep = 0.0;
+		if (zeroIndex > 0) {
+			negStep = Math.abs(min / zeroIndex);
 		}
-		var tick_step = Math.pow(10, ten_pow);
-		var prec = tick_step < 1 ? -1 * ten_pow : ten_pow;
-		var nmax = max < 0 ? 0 : Utils.roundToPrec(max + tick_step, prec);
-		var nmin = min < 0 ? Utils.roundToPrec(min - tick_step, prec) : 0;
+		var posStep = 0.0;
+		if (zeroIndex < (tickNum - 1)) {
+			posStep = max / (tickNum - zeroIndex - 1);
+		}
+		trace(min, max, negStep, posStep);
+		for (i in 0...tickNum) {
+			if (i < zeroIndex) {
+				labels[i] = Utils.floatToStringPrecision(min + negStep * i, prec);
+			} else if (i == zeroIndex) {
+				labels[i] = "0";
+			} else {
+				labels[i] = Utils.floatToStringPrecision(posStep * (i - zeroIndex), prec);
+			}
+		}
+		return labels;
+	}
+
+	public static function calcTickInfo(min:Float, max:Float):TickInfo {
+		var tenPow = 1;
+		if (max > 0) {
+			tenPow = Math.floor(Math.log(max) / Math.log(10));
+		} else if (max < 0) {
+			tenPow = Math.floor(Math.log(Math.abs(min)) / Math.log(10));
+		}
+		var tickStep = Math.pow(10, tenPow);
+		var prec = tickStep < 1 ? -1 * tenPow : tenPow;
+		var nmax = max < 0 ? 0 : Utils.roundToPrec(max, prec);
+		var nmin = min < 0 ? Utils.roundToPrec(min, prec) : 0;
 		var dist = Math.abs(nmin) + nmax;
-		var tick_num = calcTickNum(dist, prec, tick_step, nmax);
+		var tickNum = calcTickNum(dist, prec, tickStep, nmax);
+		if (tickNum == 20) {
+			tickStep = dist / 20;
+			tickNum++;
+		}
 		var pos_ratio = calcPosRatio(nmin, nmax, dist);
+		var zeroIndex = calcZeroIndex(pos_ratio, tickNum);
 		return ({
-			num: tick_num,
-			step: tick_step,
+			num: tickNum,
+			step: tickStep,
 			min: nmin,
-			prec: prec,
+			prec: tickStep < 1 ? -prec : 0,
 			pos_ratio: pos_ratio,
-			zero: calcZeroIndex(pos_ratio, tick_num),
+			zero: zeroIndex,
+			labels: setTickValues(nmin, nmax, zeroIndex, tickNum, prec),
 		});
 	}
 

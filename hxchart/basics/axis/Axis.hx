@@ -108,9 +108,8 @@ private class SetTicks extends Behaviour {
 		var dist_between_ticks = dist / (tick_calc.num - 1);
 		var pos = AxisTools.calcTickPos(tick_calc.num, dist_between_ticks, start_p, is_y);
 		for (i in 0...tick_calc.num) {
-			var label = Utils.floatToStringPrecision(tick_calc.min + tick_calc.step * i, tick_calc.prec);
 			var tick = new Ticks(false, is_y);
-			tick.text = label;
+			tick.text = tick_calc.labels[i];
 			tick.num = tick_calc.min + tick_calc.step * i;
 			if (is_y) {
 				tick.top = pos[i];

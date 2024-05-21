@@ -46,13 +46,23 @@ class Utils {
 		return str;
 	}
 
-	public static function roundToPrec(n:Float, prec:Int = 1) {
+	public static function roundToPrec(n:Float, prec:Float = 1) {
 		if (n == 0) {
 			return 0.0;
 		}
-		if (n > 0) {
-			return (Math.floor(n * Math.pow(10, prec)) / Math.pow(10, prec));
+		if (n % Math.pow(10, prec) == 0) {
+			return n;
 		}
-		return (Math.ceil(n * Math.pow(10, prec)) / Math.pow(10, prec));
+
+		if (n > -1 && n < 1) {
+			if (n > 0) {
+				return (Math.floor(n * Math.pow(10, prec)) / Math.pow(10, prec));
+			}
+			return (Math.ceil(n * Math.pow(10, prec)) / Math.pow(10, prec));
+		}
+		if (n > 0) {
+			return Math.round((n + Math.pow(10, prec) / 2) / Math.pow(10, prec)) * Math.pow(10, prec);
+		}
+		return Math.round((n - Math.pow(10, prec) / 2) / Math.pow(10, prec)) * Math.pow(10, prec);
 	}
 }
