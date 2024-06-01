@@ -55,8 +55,6 @@ class Chart extends Absolute {
 
 	public var colors:Array<Int>;
 
-	@:behaviour(CanvasBehaviour) public var canvas:Canvas;
-
 	@:call(SetTickInfo) public function setTickInfo(data:hxchart.basics.ChartTools.ChartMinMax):Void;
 
 	@:call(SetPoints) public function setPoints(data:PointAdd):Void;
@@ -108,13 +106,6 @@ class Chart extends Absolute {
 	 */
 	public function new() {
 		super();
-	}
-
-	private function createCanvas(top:Float, left:Float) {
-		canvas.percentWidth = 100;
-		canvas.percentHeight = 100;
-		canvas.top = top;
-		canvas.left = left;
 	}
 
 	private var init_width:Float = 0;
@@ -176,15 +167,6 @@ private class ChartLayout extends DefaultLayout {
 }
 
 @:dox(hide) @:noCompletion
-private class CanvasBehaviour extends DataBehaviour {
-	private override function validateData() {
-		if (_component.findComponent(null, Canvas) == null) {
-			_component.addComponent(_value);
-		}
-	}
-}
-
-@:dox(hide) @:noCompletion
 private class ColorPaletteBehaviour extends DataBehaviour {
 	override function set(value:Variant) {
 		super.set(value);
@@ -240,8 +222,7 @@ private class SetTickInfo extends Behaviour {
 			y: AxisTools.calcTickInfo(pointInfo.min_y, pointInfo.max_y)
 		}
 		var chart = cast(_component, Chart);
-		trace(chart.x_axis.ticks[infos.x.zero].num);
-		trace(chart.y_axis.ticks[infos.y.zero].num);
+
 		chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left;
 		chart.y_axis.width = 30;
 		chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top;
@@ -327,7 +308,6 @@ private class SetAxis extends Behaviour {
 private class DrawPoints extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
-		trace(chart.x_tick_info);
 		var x_coord_min = chart.x_axis.ticks[0].left;
 		var x_coord_max = chart.x_axis.ticks[chart.x_axis.ticks.length - 1].left;
 		var x_dist = ChartTools.calcAxisDists(x_coord_min, x_coord_max, chart.x_tick_info.pos_ratio);
@@ -353,9 +333,6 @@ class Builder extends CompositeBuilder {
 		_chart = chart;
 		_chart.width = 500;
 		_chart.height = 500;
-		_chart.canvas = new Canvas();
-		_chart.canvas.width = _chart.width;
-		_chart.canvas.height = _chart.height;
 		_chart.pointlayer = new PointLayer();
 		_chart.pointlayer.percentHeight = 100;
 		_chart.pointlayer.percentWidth = 100;
@@ -389,6 +366,7 @@ class Builder extends CompositeBuilder {
 
 	override function validateComponentData() {
 		super.validateComponentData();
+		setLayerPosition();
 	}
 
 	function setLegend(legend:Legend) {
@@ -396,6 +374,33 @@ class Builder extends CompositeBuilder {
 		for (i => text in legend.legendTexts) {
 			groups.set(text, i);
 			legend.colors.push(_chart.colors[i]);
+		}
+	}
+
+	function setLayerPosition() {
+		var legend = cast(_chart.legend, Legend);
+		if (legend.align <= 1) {
+			_chart.legendLayer.percentWidth = 20;
+			_chart.legendLayer.percentHeight = 100;
+			_chart.pointlayer.percentWidth = 80;
+			_chart.pointlayer.percentHeight = 100;
+			_chart.legendLayer.left = 0;
+			_chart.pointlayer.left = _chart.legendLayer.width;
+			if (legend.align == 1) {
+				_chart.pointlayer.left = 0;
+				_chart.legendLayer.left = _chart.pointlayer.width;
+			}
+		} else if (legend.align >= 2) {
+			_chart.legendLayer.percentWidth = 100;
+			_chart.legendLayer.percentHeight = 20;
+			_chart.pointlayer.percentHeight = 80;
+			_chart.pointlayer.percentWidth = 100;
+			_chart.legendLayer.top = 0;
+			_chart.pointlayer.top = _chart.legendLayer.height;
+			if (legend.align == 3) {
+				_chart.pointlayer.left = 0;
+				_chart.legendLayer.left = _chart.pointlayer.height;
+			}
 		}
 	}
 }
