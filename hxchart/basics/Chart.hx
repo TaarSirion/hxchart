@@ -61,8 +61,6 @@ class Chart extends Absolute {
 
 	@:call(SetPoints) public function setPoints(data:PointAdd):Void;
 
-	@:call(SetLegend) public function setLegend(data:LegendAdd):Void;
-
 	@:call(SetAxis) public function setAxis():Void;
 
 	@:call(DrawPoints) public function drawPoints():Void;
@@ -293,45 +291,6 @@ private class SetPoints extends Behaviour {
 	}
 }
 
-typedef LegendAdd = {
-	legends:Array<String>,
-	title:String,
-	?align:Int,
-	?fontSizeTitle:Int,
-	?fontSizeEntry:Int,
-	?margin:Float,
-}
-
-@:dox(hide) @:noCompletion
-private class SetLegend extends Behaviour {
-	public override function call(param:Any = null):Variant {
-		var chart = cast(_component, Chart);
-		var params:LegendAdd = param;
-		if (params.title == null) {
-			params.title = "Groups";
-		}
-		chart.legend.legendTitle = params.title;
-		if (params.fontSizeEntry != null) {
-			chart.legend.fontSizeTitle = params.fontSizeTitle;
-		}
-		if (params.margin != null) {
-			chart.legend.customStyle.marginTop = params.margin;
-			chart.legend.customStyle.marginLeft = params.margin;
-			chart.legend.customStyle.marginBottom = params.margin;
-			chart.legend.customStyle.marginRight = params.margin;
-		}
-		var groups = new Map();
-		for (i => text in params.legends) {
-			groups.set(text, i);
-			chart.legend.addNode({text: text, color: chart.colors[i], fontSize: params.fontSizeEntry});
-		}
-		if (params.align != null) {
-			chart.legend.align = params.align;
-		}
-		return null;
-	}
-}
-
 @:dox(hide) @:noCompletion
 private class SetAxis extends Behaviour {
 	public override function call(param:Any = null):Variant {
@@ -407,8 +366,6 @@ class Builder extends CompositeBuilder {
 		_chart.legendLayer.percentWidth = 100;
 		_chart.legendLayer.addClass("legend-layer");
 		_chart.addComponent(_chart.legendLayer);
-		_chart.legend = new Legend();
-		_chart.legendLayer.addComponent(_chart.legend);
 		_chart.addComponent(_chart.pointlayer);
 	}
 
@@ -420,11 +377,25 @@ class Builder extends CompositeBuilder {
 	}
 
 	override function addComponent(child:Component):Component {
-		trace("adding component");
-		return super.addComponent(child);
+		if (child is Legend) {
+			var legend = cast(child, Legend);
+			setLegend(legend);
+			_chart.legend = legend;
+			return _chart.legendLayer.addComponent(legend);
+		} else {
+			return super.addComponent(child);
+		}
 	}
 
 	override function validateComponentData() {
 		super.validateComponentData();
+	}
+
+	function setLegend(legend:Legend) {
+		var groups = new Map();
+		for (i => text in legend.legendTexts) {
+			groups.set(text, i);
+			legend.colors.push(_chart.colors[i]);
+		}
 	}
 }

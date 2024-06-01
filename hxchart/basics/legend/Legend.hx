@@ -1,25 +1,18 @@
 package hxchart.basics.legend;
 
+import haxe.ui.util.Color;
 import haxe.ui.styles.Style;
-import haxe.ui.components.Button;
 import haxe.ui.layouts.DefaultLayout;
-import haxe.ui.data.ListDataSource;
-import haxe.ui.data.DataSource;
 import hxchart.basics.legend.LegendNode.LegendNodeData;
 import haxe.ui.core.Component;
 import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
 import haxe.ui.behaviours.DataBehaviour;
 import haxe.ui.core.CompositeBuilder;
-import haxe.ui.util.Color;
 import hxchart.basics.legend.LegendTools.LegendPosition;
-import haxe.ui.containers.HBox;
-import haxe.ui.components.Canvas;
 import haxe.ui.containers.VBox;
 import haxe.ui.styles.StyleSheet;
-import haxe.ui.core.TextDisplay;
 import haxe.ui.components.Label;
-import hxchart.basics.Options;
 import haxe.ui.behaviours.DefaultBehaviour;
 
 enum LegendSymbols {
@@ -31,12 +24,15 @@ enum LegendSymbols {
 class Legend extends VBox {
 	@:clonable @:behaviour(DefaultBehaviour, 1) public var align:Null<Int>;
 	@:clonable @:behaviour(DefaultBehaviour, 20) public var fontSizeTitle:Null<Int>;
+	@:clonable @:behaviour(DefaultBehaviour, 16) public var fontSizeEntry:Null<Int>;
 
 	@:clonable @:behaviour(TitleBehaviour) public var legendTitle:String;
+	@:clonable @:behaviour(TextsBehaviour) public var legendTexts:Array<String>;
 
 	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
 
 	public var childNodes:Array<LegendNode>;
+	public var colors:Array<Color>;
 
 	public function new() {
 		super();
@@ -92,6 +88,22 @@ private class TitleBehaviour extends DataBehaviour {
 }
 
 @:dox(hide) @:noCompletion
+private class TextsBehaviour extends DataBehaviour {
+	private override function validateData() {
+		var legend = cast(_component, Legend);
+		if (legend != null) {
+			for (i => value in _value.toArray()) {
+				if (legend.colors[i] != null) {
+					legend.addNode({text: value, color: legend.colors[i], fontSize: legend.fontSizeEntry});
+				} else {
+					legend.addNode({text: value, color: Color.fromString("black"), fontSize: legend.fontSizeEntry});
+				}
+			}
+		}
+	}
+}
+
+@:dox(hide) @:noCompletion
 private class AddNode extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var legend = cast(_component, Legend);
@@ -112,6 +124,7 @@ class Builder extends CompositeBuilder {
 	public function new(legend:Legend) {
 		super(legend);
 		_legend = legend;
+		_legend.colors = [];
 		_legend.childNodes = [];
 		_legend.addClass("legend-class");
 		_text_container = new VBox();
