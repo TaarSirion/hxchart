@@ -103,10 +103,8 @@ private class Builder extends CompositeBuilder {
 		label.addClass("legend-text");
 		label.text = "Legend Text";
 		label.customStyle.textAlign = "left";
-		label.percentWidth = 80;
 		_legendNode.canvas = new Canvas();
 		_legendNode.canvas.addClass("legend-text-symbol");
-		_legendNode.canvas.percentWidth = 20;
 		_legendNode.canvas.height = _legendNode.fontSize * 1.25 + 4;
 		_legendNode.addComponent(_legendNode.canvas);
 		_legendNode.addComponent(label);

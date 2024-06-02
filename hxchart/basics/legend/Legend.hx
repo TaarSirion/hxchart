@@ -1,5 +1,6 @@
 package hxchart.basics.legend;
 
+import haxe.ui.containers.HBox;
 import haxe.ui.util.Color;
 import haxe.ui.styles.Style;
 import haxe.ui.layouts.DefaultLayout;
@@ -78,11 +79,20 @@ private class TitleBehaviour extends DataBehaviour {
 	private override function validateData() {
 		var label = new Label();
 		label.text = _value;
-		label.percentWidth = 100;
 		label.addClass("legend-title");
-		var textContainer = _component.findComponent("legend-container", VBox);
-		if (textContainer != null) {
-			textContainer.addComponentAt(label, 0);
+		var legend = cast(_component, Legend);
+		if (legend.align < 2) {
+			label.percentWidth = 100;
+			var textContainer = cast(legend.childComponents[0], VBox);
+			if (textContainer != null) {
+				textContainer.addComponentAt(label, 0);
+			}
+		} else {
+			label.percentHeight = 100;
+			var textHBox = cast(legend.childComponents[1], HBox);
+			if (textHBox != null) {
+				textHBox.addComponentAt(label, 0);
+			}
 		}
 	}
 }
@@ -104,9 +114,15 @@ private class AddNode extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var legend = cast(_component, Legend);
 		var node = new LegendNode(legend);
-		node.percentWidth = 100;
-		node.marginLeft = 10;
-		node.marginRight = 10;
+		if (legend.align < 2) {
+			node.percentWidth = 100;
+			node.marginLeft = 10;
+			node.marginRight = 10;
+			node.childComponents[0].percentWidth = 20;
+			node.childComponents[1].percentWidth = 80;
+		} else {
+			node.percentHeight = 100;
+		}
 		node.data = param;
 		legend.addComponent(node);
 		legend.childNodes.push(node);
@@ -118,7 +134,8 @@ private class AddNode extends Behaviour {
 @:access(haxe.ui.core.Component)
 class Builder extends CompositeBuilder {
 	private var _legend:Legend;
-	private var _text_container:VBox;
+	private var _textVBox:VBox;
+	private var _textHBox:HBox;
 
 	public function new(legend:Legend) {
 		super(legend);
@@ -127,17 +144,26 @@ class Builder extends CompositeBuilder {
 		_legend.percentWidth = 100;
 		_legend.childNodes = [];
 		_legend.addClass("legend-class");
-		_text_container = new VBox();
-		_text_container.id = "legend-container";
-		_text_container.percentHeight = 100;
-		_text_container.percentWidth = 100;
-		_legend.addComponent(_text_container);
+		_textVBox = new VBox();
+		_textVBox.id = "legend-container";
+		_textVBox.percentHeight = 100;
+		_textVBox.percentWidth = 100;
+		_legend.addComponent(_textVBox);
+		_textHBox = new HBox();
+		_textHBox.id = "legend-container";
+		_textHBox.percentHeight = 100;
+		_textHBox.percentWidth = 100;
+		_legend.addComponent(_textHBox);
 		setStyleSheet();
 	}
 
 	public override function addComponent(child:Component):Component {
 		if (child is LegendNode) {
-			return _text_container.addComponent(child);
+			if (_legend.align < 2) {
+				return _textVBox.addComponent(child);
+			} else {
+				return _textHBox.addComponent(child);
+			}
 		}
 		return null;
 	}
@@ -170,5 +196,15 @@ class Builder extends CompositeBuilder {
 
 	override function validateComponentData() {
 		super.validateComponentData();
+		if (_legend.align >= 2) {
+			_legend.childComponents[0].hide();
+			for (child in _legend.childComponents[1].childComponents) {
+				if (child.childComponents.length > 0) {
+					trace("Child width", child.width, child.childComponents[1].width);
+				}
+			}
+		} else {
+			_legend.childComponents[1].hide();
+		}
 	}
 }
