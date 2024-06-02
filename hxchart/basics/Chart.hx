@@ -227,6 +227,10 @@ private class SetTickInfo extends Behaviour {
 		chart.y_axis.width = 30;
 		chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top;
 		chart.x_axis.height = 30;
+		if (chart.legend.align == 0) {
+			chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left * 0.8;
+			chart.x_axis.width = chart.pointlayer.width;
+		}
 		chart.x_tick_info = infos.x;
 		chart.y_tick_info = infos.y;
 		return chart;
@@ -379,22 +383,31 @@ class Builder extends CompositeBuilder {
 
 	function setLayerPosition() {
 		var legend = cast(_chart.legend, Legend);
+		var minWidth:Int = 50;
+		var minPercent:Int = 10;
+		var maxPercent:Int = 100 - minPercent;
+		_chart.legendLayer.percentHeight = 100;
+		_chart.legendLayer.percentWidth = 100;
+		_chart.pointlayer.percentHeight = 100;
+		_chart.pointlayer.percentWidth = 100;
 		if (legend.align <= 1) {
-			_chart.legendLayer.percentWidth = 20;
-			_chart.legendLayer.percentHeight = 100;
-			_chart.pointlayer.percentWidth = 80;
-			_chart.pointlayer.percentHeight = 100;
+			_chart.legendLayer.percentWidth = minPercent;
+			_chart.pointlayer.percentWidth = maxPercent;
+			var percent = (minWidth / _chart.width) * 100;
+			if (percent > minPercent) {
+				_chart.legendLayer.percentWidth = percent;
+				_chart.pointlayer.percentWidth = 100 - percent;
+			}
 			_chart.legendLayer.left = 0;
 			_chart.pointlayer.left = _chart.legendLayer.width;
 			if (legend.align == 1) {
 				_chart.pointlayer.left = 0;
 				_chart.legendLayer.left = _chart.pointlayer.width;
 			}
-		} else if (legend.align >= 2) {
-			_chart.legendLayer.percentWidth = 100;
-			_chart.legendLayer.percentHeight = 20;
-			_chart.pointlayer.percentHeight = 80;
-			_chart.pointlayer.percentWidth = 100;
+			trace(_chart.legendLayer.left);
+		} else {
+			_chart.legendLayer.percentHeight = minPercent;
+			_chart.pointlayer.percentHeight = maxPercent;
 			_chart.legendLayer.top = 0;
 			_chart.pointlayer.top = _chart.legendLayer.height;
 			if (legend.align == 3) {
