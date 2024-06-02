@@ -78,6 +78,7 @@ private class TitleBehaviour extends DataBehaviour {
 	private override function validateData() {
 		var label = new Label();
 		label.text = _value;
+		label.percentWidth = 100;
 		label.addClass("legend-title");
 		var textContainer = _component.findComponent("legend-container", VBox);
 		if (textContainer != null) {
@@ -103,6 +104,9 @@ private class AddNode extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var legend = cast(_component, Legend);
 		var node = new LegendNode(legend);
+		node.percentWidth = 100;
+		node.marginLeft = 10;
+		node.marginRight = 10;
 		node.data = param;
 		legend.addComponent(node);
 		legend.childNodes.push(node);
@@ -119,10 +123,14 @@ class Builder extends CompositeBuilder {
 	public function new(legend:Legend) {
 		super(legend);
 		_legend = legend;
+		_legend.percentHeight = 100;
+		_legend.percentWidth = 100;
 		_legend.childNodes = [];
 		_legend.addClass("legend-class");
 		_text_container = new VBox();
 		_text_container.id = "legend-container";
+		_text_container.percentHeight = 100;
+		_text_container.percentWidth = 100;
 		_legend.addComponent(_text_container);
 		setStyleSheet();
 	}
@@ -162,12 +170,5 @@ class Builder extends CompositeBuilder {
 
 	override function validateComponentData() {
 		super.validateComponentData();
-		var width = _legend.width;
-		var height = _legend.height;
-		var layer = _legend.parentComponent;
-		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.align], _legend.marginTop,
-			_legend.marginLeft, _legend.marginRight);
-		_legend.left = coords.x;
-		_legend.top = coords.y;
 	}
 }
