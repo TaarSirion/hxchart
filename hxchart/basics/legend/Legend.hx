@@ -32,7 +32,6 @@ class Legend extends VBox {
 	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
 
 	public var childNodes:Array<LegendNode>;
-	public var colors:Array<Color>;
 
 	public function new() {
 		super();
@@ -93,11 +92,7 @@ private class TextsBehaviour extends DataBehaviour {
 		var legend = cast(_component, Legend);
 		if (legend != null) {
 			for (i => value in _value.toArray()) {
-				if (legend.colors[i] != null) {
-					legend.addNode({text: value, color: legend.colors[i], fontSize: legend.fontSizeEntry});
-				} else {
-					legend.addNode({text: value, color: Color.fromString("black"), fontSize: legend.fontSizeEntry});
-				}
+				legend.addNode({text: value, color: Color.fromString("black"), fontSize: legend.fontSizeEntry});
 			}
 		}
 	}
@@ -124,7 +119,6 @@ class Builder extends CompositeBuilder {
 	public function new(legend:Legend) {
 		super(legend);
 		_legend = legend;
-		_legend.colors = [];
 		_legend.childNodes = [];
 		_legend.addClass("legend-class");
 		_text_container = new VBox();

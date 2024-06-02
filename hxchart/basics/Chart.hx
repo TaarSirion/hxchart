@@ -208,10 +208,7 @@ private class ColorPaletteBehaviour extends DataBehaviour {
 			point.color = chart.colors[point.group];
 		}
 		for (i => node in chart.legend.childNodes) {
-			if (i == 0) {
-				continue;
-			}
-			node.color = chart.colors[i - 1];
+			node.color = chart.colors[i];
 		}
 	}
 }
@@ -381,7 +378,6 @@ class Builder extends CompositeBuilder {
 		var groups = new Map();
 		for (i => text in legend.legendTexts) {
 			groups.set(text, i);
-			legend.colors.push(_chart.colors[i]);
 		}
 	}
 
