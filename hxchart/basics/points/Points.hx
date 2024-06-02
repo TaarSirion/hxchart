@@ -1,16 +1,13 @@
 package hxchart.basics.points;
 
-import haxe.ui.styles.Style;
 import hxchart.basics.Chart.ChartInfo;
-import hxchart.basics.axis.AxisTools.TickInfo;
-import hxchart.basics.axis.AxisInfo;
 import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
 import haxe.ui.components.Canvas;
 import haxe.ui.core.CompositeBuilder;
 
 @:composite(Builder)
-class PointLayer extends Canvas {
+class Points extends Canvas {
 	@:call(AddPoint) public function addPoint(data:Point):Void;
 
 	public var points:Array<Point>;
@@ -40,7 +37,7 @@ class PointLayer extends Canvas {
 
 class AddPoint extends Behaviour {
 	public override function call(param:Any = null):Variant {
-		var pointlayer:PointLayer = cast(_component, PointLayer);
+		var pointlayer:Points = cast(_component, Points);
 		var point:Point = param;
 		pointlayer.points.push(point);
 		return null;
@@ -48,9 +45,9 @@ class AddPoint extends Behaviour {
 }
 
 class Builder extends CompositeBuilder {
-	private var pointlayer:PointLayer;
+	private var pointlayer:Points;
 
-	public function new(_pointlayer:PointLayer) {
+	public function new(_pointlayer:Points) {
 		super(_pointlayer);
 		pointlayer = _pointlayer;
 	}

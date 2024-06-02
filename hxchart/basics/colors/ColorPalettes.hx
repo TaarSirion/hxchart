@@ -4,6 +4,7 @@ import haxe.ui.util.ColorUtil;
 import haxe.ui.util.Color;
 
 enum ColorPaletteEnum {
+	normal;
 	blue;
 	green;
 	red;

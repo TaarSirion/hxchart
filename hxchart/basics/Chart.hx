@@ -3,7 +3,7 @@ package hxchart.basics;
 import hxchart.basics.legend.LegendNode;
 import haxe.ui.backend.html5.filters.ColorMatrixFilter;
 import haxe.ui.util.Color;
-import hxchart.basics.points.PointLayer;
+import hxchart.basics.points.Points;
 import haxe.ui.geom.Size;
 import haxe.ui.core.Component;
 import haxe.ui.data.ListDataSource;
@@ -63,7 +63,8 @@ class Chart extends Absolute {
 
 	@:call(DrawPoints) public function drawPoints():Void;
 
-	public var pointlayer:PointLayer;
+	public var pointlayer:Absolute;
+	public var points:Points;
 
 	public var point_groups(default, set):Map<String, Int>;
 	public var countGroups:Int;
@@ -129,7 +130,7 @@ class Chart extends Absolute {
 	public var max_y:Float;
 
 	public function sortPoints() {
-		var minmax = pointlayer.sortPoints();
+		var minmax = points.sortPoints();
 		min_x = minmax.min_x;
 		max_x = minmax.max_x;
 		min_y = minmax.min_y;
@@ -173,6 +174,8 @@ private class ColorPaletteBehaviour extends DataBehaviour {
 		var chart = cast(_component, Chart);
 		var bvalue:ColorPaletteEnum = ColorPaletteEnum.createByIndex(value);
 		switch (bvalue) {
+			case normal:
+				chart.colors = ColorPalettes.defaultColors(chart.countGroups);
 			case blue:
 				chart.colors = ColorPalettes.blue(chart.countGroups);
 			case green:
@@ -201,7 +204,7 @@ private class ColorPaletteBehaviour extends DataBehaviour {
 	private override function validateData() {
 		super.validateData();
 		var chart = cast(_component, Chart);
-		for (point in chart.pointlayer.points) {
+		for (point in chart.points.points) {
 			point.color = chart.colors[point.group];
 		}
 		for (i => node in chart.legend.childNodes) {
@@ -227,10 +230,6 @@ private class SetTickInfo extends Behaviour {
 		chart.y_axis.width = 30;
 		chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top;
 		chart.x_axis.height = 30;
-		if (chart.legend.align == 0) {
-			chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left * 0.8;
-			chart.x_axis.width = chart.pointlayer.width;
-		}
 		chart.x_tick_info = infos.x;
 		chart.y_tick_info = infos.y;
 		return chart;
@@ -269,7 +268,7 @@ private class SetPoints extends Behaviour {
 		for (i in 0...params.x_points.length) {
 			var point = new Point(params.x_points[i], params.y_points[i], chart.point_groups.get(params.groups[i]));
 			point.color = chart.colors[point.group];
-			chart.pointlayer.addPoint(point);
+			chart.points.addPoint(point);
 		}
 
 		return chart;
@@ -280,8 +279,8 @@ private class SetPoints extends Behaviour {
 private class SetAxis extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
-		var y_axis_length = ChartTools.calcAxisLength(chart.height, chart.marginTop, chart.marginBottom);
-		var x_axis_length = ChartTools.calcAxisLength(chart.width, chart.marginLeft, chart.marginRight);
+		var y_axis_length = ChartTools.calcAxisLength(chart.pointlayer.height, chart.marginTop, chart.marginBottom);
+		var x_axis_length = ChartTools.calcAxisLength(chart.pointlayer.width, chart.marginLeft, chart.marginRight);
 		setXAxis(x_axis_length, chart);
 		setYAxis(y_axis_length, chart);
 		return null;
@@ -293,8 +292,8 @@ private class SetAxis extends Behaviour {
 		chart.x_axis.setStartToEnd(x_axis_length, chart.marginLeft);
 		var minmax = new haxe.ui.geom.Point(chart.min_x, chart.max_x);
 		chart.x_axis.setTicks(minmax);
-		chart.x_axis.width = chart.width;
-		chart.addComponent(chart.x_axis);
+		chart.x_axis.width = chart.pointlayer.width;
+		chart.pointlayer.addComponent(chart.x_axis);
 	}
 
 	private function setYAxis(y_axis_length:Float, chart:Chart) {
@@ -303,8 +302,8 @@ private class SetAxis extends Behaviour {
 		chart.y_axis.setStartToEnd(y_axis_length, chart.marginTop);
 		var minmax = new haxe.ui.geom.Point(chart.min_y, chart.max_y);
 		chart.y_axis.setTicks(minmax);
-		chart.y_axis.height = chart.height;
-		chart.addComponent(chart.y_axis);
+		chart.y_axis.height = chart.pointlayer.height;
+		chart.pointlayer.addComponent(chart.y_axis);
 	}
 }
 
@@ -318,13 +317,14 @@ private class DrawPoints extends Behaviour {
 		var y_coord_min = chart.y_axis.ticks[0].top;
 		var y_coord_max = chart.y_axis.ticks[chart.y_axis.ticks.length - 1].top;
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, chart.y_tick_info.pos_ratio);
-		chart.pointlayer.setInfo({
+		chart.points.setInfo({
 			axis_info: {x_ticks: chart.x_axis.ticks, y_ticks: chart.y_axis.ticks},
 			x_dist: x_dist,
 			y_dist: y_dist,
 			y_tick_info: chart.y_tick_info,
 			x_tick_info: chart.x_tick_info
 		});
+		trace(chart.points.points.length);
 		return null;
 	}
 }
@@ -337,7 +337,7 @@ class Builder extends CompositeBuilder {
 		_chart = chart;
 		_chart.width = 500;
 		_chart.height = 500;
-		_chart.pointlayer = new PointLayer();
+		_chart.pointlayer = new Absolute();
 		_chart.pointlayer.percentHeight = 100;
 		_chart.pointlayer.percentWidth = 100;
 		_chart.legendLayer = new Absolute();
@@ -348,6 +348,10 @@ class Builder extends CompositeBuilder {
 		_chart.legendLayer.addClass("legend-layer");
 		_chart.addComponent(_chart.legendLayer);
 		_chart.addComponent(_chart.pointlayer);
+		_chart.points = new Points();
+		_chart.points.percentHeight = 100;
+		_chart.points.percentWidth = 100;
+		_chart.pointlayer.addComponent(_chart.points);
 	}
 
 	override function onReady() {
