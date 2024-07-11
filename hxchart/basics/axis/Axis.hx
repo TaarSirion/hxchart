@@ -6,7 +6,6 @@ import haxe.ui.layouts.DefaultLayout;
 import haxe.ui.util.Variant;
 import haxe.ui.core.CompositeBuilder;
 import haxe.ui.containers.Absolute;
-import hxchart.basics.axis.AxisTools.TickInfo;
 import haxe.ui.components.Canvas;
 import hxchart.basics.ticks.Ticks;
 import haxe.ui.geom.Point;

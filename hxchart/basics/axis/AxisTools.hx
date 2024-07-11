@@ -3,16 +3,15 @@ package hxchart.basics.axis;
 import haxe.ds.Vector;
 import hxchart.Utils;
 
-typedef TickInfo = {
-	num:Int,
-	step:Float,
-	min:Float,
-	prec:Int,
-	pos_ratio:Float,
-	zero:Int,
-	labels:Array<String>
-}
-
+// typedef TickInfo = {
+// 	num:Int,
+// 	step:Float,
+// 	min:Float,
+// 	prec:Int,
+// 	pos_ratio:Float,
+// 	zero:Int,
+// 	labels:Array<String>
+// }
 class AxisTools {
 	private static function calcZeroIndex(pos_ratio:Float, tick_num:Int):Int {
 		if (pos_ratio == 1) {
@@ -38,25 +37,16 @@ class AxisTools {
 		return tick_num;
 	}
 
-	public static function setTickValues(min:Float, max:Float, zeroIndex:Int, tickNum:Int, prec:Int) {
+	public static function setTickValues(tickStep:Float, zeroIndex:Int, tickNum:Int, prec:Int) {
 		var labels:Array<String> = new Vector(tickNum).toArray();
-		var negStep = 0.0;
-		if (zeroIndex > 0) {
-			negStep = Math.abs(min / zeroIndex);
+		trace(tickStep, tickNum, zeroIndex);
+		var negDist = zeroIndex - 1;
+		for (i in 0...negDist) {
+			labels[i] = "" + Utils.floatToStringPrecision(-1 * tickStep * (negDist - i), prec);
 		}
-		var posStep = 0.0;
-		if (zeroIndex < (tickNum - 1)) {
-			posStep = max / (tickNum - zeroIndex - 1);
-		}
-		trace(min, max, negStep, posStep);
-		for (i in 0...tickNum) {
-			if (i < zeroIndex) {
-				labels[i] = Utils.floatToStringPrecision(min + negStep * i, prec);
-			} else if (i == zeroIndex) {
-				labels[i] = "0";
-			} else {
-				labels[i] = Utils.floatToStringPrecision(posStep * (i - zeroIndex), prec);
-			}
+		labels[zeroIndex] = "0";
+		for (i in (zeroIndex + 1)...tickNum) {
+			labels[i] = "" + Utils.floatToStringPrecision(tickStep * (i - zeroIndex), prec);
 		}
 		return labels;
 	}
@@ -75,7 +65,14 @@ class AxisTools {
 		var dist = Math.abs(nmin) + nmax;
 		var tickNum = calcTickNum(dist, prec, tickStep, nmax);
 		if (tickNum == 20) {
-			tickStep = dist / 20;
+			// var realDist = dist / 20;
+			// var tickDiff = realDist - tickStep;
+			// if (tickDiff >= 0 && tickDiff < 10) {
+			// 	tickNum += 2;
+			// } else if (tickDiff >= 0 && tickDiff < 50) {
+			// 	tickStep = tickStep + tickStep / 2;
+			// 	tickNum = calcTickNum(dist, prec, tickStep, nmax);
+			// }
 			tickNum++;
 		}
 		var pos_ratio = calcPosRatio(nmin, nmax, dist);
@@ -87,7 +84,7 @@ class AxisTools {
 			prec: tickStep < 1 ? -prec : 0,
 			pos_ratio: pos_ratio,
 			zero: zeroIndex,
-			labels: setTickValues(nmin, nmax, zeroIndex, tickNum, prec),
+			labels: setTickValues(tickStep, zeroIndex, tickNum, prec),
 		});
 	}
 
