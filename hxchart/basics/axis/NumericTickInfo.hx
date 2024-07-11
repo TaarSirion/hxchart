@@ -67,11 +67,11 @@ class NumericTickInfo extends TickInfo {
 			tickNum = 20;
 		}
 		var ratio = calcRatio(dist);
+		calcZeroIndex(ratio);
 		if (ratio > 0 && ratio < 1) {
 			tickNum++;
 		}
-		// calcZeroIndex(ratio)
-		// calcNegNum(dist);
+		calcNegNum();
 		// var pos_ratio = calcPosRatio(nmin, nmax, dist);
 		// var zeroIndex = calcZeroIndex(pos_ratio, tickNum);
 	}
@@ -86,18 +86,18 @@ class NumericTickInfo extends TickInfo {
 	}
 
 	private function calcZeroIndex(ratio:Float) {
-		zeroIndex = Math.round(tickNum * ratio);
+		switch ratio {
+			case 1:
+				zeroIndex = 0;
+			case 0:
+				zeroIndex = tickNum - 1;
+			default:
+				zeroIndex = Math.round(tickNum * (1 - ratio));
+		}
 	}
 
-	private function calcNegNum(dist:Float) {
-		var posRatio = 1.0;
-		negNum = 0;
-		if (max == 0) {
-			posRatio = 0;
-			negNum = tickNum;
-		} else if (min > 0) {
-			posRatio = max / dist;
-			negNum = Math.round(tickNum * posRatio);
-		}
+	private function calcNegNum() {
+		var invertedIndex = tickNum - zeroIndex;
+		negNum = tickNum - invertedIndex;
 	}
 }
