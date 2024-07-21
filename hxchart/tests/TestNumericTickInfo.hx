@@ -41,6 +41,7 @@ class TestNumericTickInfo extends utest.Test {
 		Assert.equals(0.1, tickInfo.power);
 	}
 
+	@:depends(testPrecision, testPower)
 	function testTickNum() {
 		var tickInfo = new NumericTickInfo(0, 10);
 		tickInfo.calcTickNum();
@@ -66,7 +67,8 @@ class TestNumericTickInfo extends utest.Test {
 		Assert.equals(14, tickInfo.tickNum);
 	}
 
-	function testzeroIndex() {
+	@:depends(testTickNum)
+	function testZeroIndex() {
 		var tickInfo = new NumericTickInfo(0, 10);
 		tickInfo.calcTickNum();
 		Assert.equals(0, tickInfo.zeroIndex);
@@ -91,6 +93,7 @@ class TestNumericTickInfo extends utest.Test {
 		Assert.equals(6, tickInfo.zeroIndex);
 	}
 
+	@:depends(testTickNum)
 	function testNegNum() {
 		var tickInfo = new NumericTickInfo(0, 10);
 		tickInfo.calcTickNum();
@@ -114,5 +117,32 @@ class TestNumericTickInfo extends utest.Test {
 		var tickInfo = new NumericTickInfo(-0.6, 0.7);
 		tickInfo.calcTickNum();
 		Assert.equals(6, tickInfo.negNum);
+	}
+
+	@:depends(testTickNum, testZeroIndex, testNegNum)
+	function testCalcLabels() {
+		var tickInfo = new NumericTickInfo(0, 10);
+		tickInfo.calcTickNum();
+		var labels = tickInfo.calcTickLabels();
+		Assert.contains("7", labels);
+		Assert.notContains("11", labels);
+
+		var tickInfo = new NumericTickInfo(-9, 80);
+		tickInfo.calcTickNum();
+		var labels = tickInfo.calcTickLabels();
+		Assert.contains("-10", labels);
+		Assert.contains("0", labels);
+		Assert.contains("40", labels);
+		Assert.notContains("-11", labels);
+		Assert.notContains("90", labels);
+
+		var tickInfo = new NumericTickInfo(-0.6, 0.7);
+		tickInfo.calcTickNum();
+		var labels = tickInfo.calcTickLabels();
+		Assert.contains("-0.2", labels);
+		Assert.contains("0", labels);
+		Assert.contains("0.3", labels);
+		Assert.notContains("-0.7", labels);
+		Assert.notContains("0.8", labels);
 	}
 }

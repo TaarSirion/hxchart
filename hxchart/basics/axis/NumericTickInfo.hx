@@ -1,5 +1,7 @@
 package hxchart.basics.axis;
 
+import haxe.ds.Vector;
+
 class NumericTickInfo extends TickInfo {
 	public var precision(default, set):Int;
 
@@ -35,6 +37,22 @@ class NumericTickInfo extends TickInfo {
 
 	function set_max(max:Float) {
 		return this.max = max;
+	}
+
+	/**
+	 * Displayed distance between the ticks. This differs from tickDist in the sense
+	 * that this is only for calculating the labels.
+	 */
+	public var valueDist(default, set):Float;
+
+	function set_valueDist(dist:Float) {
+		return valueDist = dist;
+	}
+
+	public var labels(default, set):Array<String>;
+
+	function set_labels(labels:Array<String>) {
+		return this.labels = labels;
 	}
 
 	/**
@@ -123,5 +141,18 @@ class NumericTickInfo extends TickInfo {
 	private function calcNegNum() {
 		var invertedIndex = tickNum - zeroIndex;
 		negNum = tickNum - invertedIndex;
+	}
+
+	public function calcTickLabels() {
+		labels = new Vector(tickNum).toArray();
+		for (i in 0...negNum) {
+			var negTick = negNum - i;
+			labels[i] = "" + Utils.floatToStringPrecision(-1 * power * negTick, precision);
+		}
+		labels[zeroIndex] = "0";
+		for (i in (zeroIndex + 1)...tickNum) {
+			labels[i] = "" + Utils.floatToStringPrecision(power * (i - zeroIndex), precision);
+		}
+		return labels;
 	}
 }

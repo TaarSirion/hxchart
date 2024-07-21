@@ -1,10 +1,6 @@
 package hxchart;
 
-import haxe.ui.geom.Point;
-
 class Utils {
-	public static function centerPoints(coords:Point, width:Float, height:Float) {}
-
 	public static function floatToStringPrecision(n:Float, prec:Int) {
 		n = Math.round(n * Math.pow(10, prec));
 		var str = '' + n;
