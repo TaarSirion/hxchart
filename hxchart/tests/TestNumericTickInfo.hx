@@ -45,7 +45,7 @@ class TestNumericTickInfo extends utest.Test {
 	function testTickNum() {
 		var tickInfo = new NumericTickInfo(0, 10);
 		tickInfo.calcTickNum();
-		Assert.equals(10, tickInfo.tickNum);
+		Assert.equals(11, tickInfo.tickNum);
 
 		var tickInfo = new NumericTickInfo(-9, 80);
 		tickInfo.calcTickNum();
@@ -53,15 +53,15 @@ class TestNumericTickInfo extends utest.Test {
 
 		var tickInfo = new NumericTickInfo(-99, 0);
 		tickInfo.calcTickNum();
-		Assert.equals(10, tickInfo.tickNum);
+		Assert.equals(11, tickInfo.tickNum);
 
 		var tickInfo = new NumericTickInfo(0, 0.6);
 		tickInfo.calcTickNum();
-		Assert.equals(6, tickInfo.tickNum);
+		Assert.equals(7, tickInfo.tickNum);
 
 		var tickInfo = new NumericTickInfo(-0.6, 0);
 		tickInfo.calcTickNum();
-		Assert.equals(6, tickInfo.tickNum);
+		Assert.equals(7, tickInfo.tickNum);
 		var tickInfo = new NumericTickInfo(-0.6, 0.7);
 		tickInfo.calcTickNum();
 		Assert.equals(14, tickInfo.tickNum);
@@ -79,7 +79,7 @@ class TestNumericTickInfo extends utest.Test {
 
 		var tickInfo = new NumericTickInfo(-99, 0);
 		tickInfo.calcTickNum();
-		Assert.equals(9, tickInfo.zeroIndex);
+		Assert.equals(10, tickInfo.zeroIndex);
 
 		var tickInfo = new NumericTickInfo(0, 0.6);
 		tickInfo.calcTickNum();
@@ -87,7 +87,7 @@ class TestNumericTickInfo extends utest.Test {
 
 		var tickInfo = new NumericTickInfo(-0.6, 0);
 		tickInfo.calcTickNum();
-		Assert.equals(5, tickInfo.zeroIndex);
+		Assert.equals(6, tickInfo.zeroIndex);
 		var tickInfo = new NumericTickInfo(-0.6, 0.7);
 		tickInfo.calcTickNum();
 		Assert.equals(6, tickInfo.zeroIndex);
@@ -105,7 +105,7 @@ class TestNumericTickInfo extends utest.Test {
 
 		var tickInfo = new NumericTickInfo(-99, 0);
 		tickInfo.calcTickNum();
-		Assert.equals(9, tickInfo.negNum);
+		Assert.equals(10, tickInfo.negNum);
 
 		var tickInfo = new NumericTickInfo(0, 0.6);
 		tickInfo.calcTickNum();
@@ -113,7 +113,7 @@ class TestNumericTickInfo extends utest.Test {
 
 		var tickInfo = new NumericTickInfo(-0.6, 0);
 		tickInfo.calcTickNum();
-		Assert.equals(5, tickInfo.negNum);
+		Assert.equals(6, tickInfo.negNum);
 		var tickInfo = new NumericTickInfo(-0.6, 0.7);
 		tickInfo.calcTickNum();
 		Assert.equals(6, tickInfo.negNum);
@@ -123,22 +123,130 @@ class TestNumericTickInfo extends utest.Test {
 	function testCalcLabels() {
 		var tickInfo = new NumericTickInfo(0, 10);
 		tickInfo.calcTickNum();
-		var labels = tickInfo.calcTickLabels();
+		tickInfo.calcTickLabels();
+		var labels = tickInfo.labels;
 		Assert.contains("7", labels);
+		Assert.contains("10", labels);
+		Assert.contains("0", labels);
 		Assert.notContains("11", labels);
 
 		var tickInfo = new NumericTickInfo(-9, 80);
 		tickInfo.calcTickNum();
-		var labels = tickInfo.calcTickLabels();
+		tickInfo.calcTickLabels();
+		var labels = tickInfo.labels;
 		Assert.contains("-10", labels);
 		Assert.contains("0", labels);
 		Assert.contains("40", labels);
+		Assert.contains("80", labels);
 		Assert.notContains("-11", labels);
 		Assert.notContains("90", labels);
 
 		var tickInfo = new NumericTickInfo(-0.6, 0.7);
 		tickInfo.calcTickNum();
-		var labels = tickInfo.calcTickLabels();
+		tickInfo.calcTickLabels();
+		var labels = tickInfo.labels;
+		Assert.contains("-0.2", labels);
+		Assert.contains("0", labels);
+		Assert.contains("0.3", labels);
+		Assert.notContains("-0.7", labels);
+		Assert.notContains("0.8", labels);
+	}
+
+	function testSubTickNum() {
+		var tickInfo = new NumericTickInfo(0, 10);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(30, tickInfo.subTickNum);
+
+		var tickInfo = new NumericTickInfo(-9, 80);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(27, tickInfo.subTickNum);
+
+		var tickInfo = new NumericTickInfo(-99, 0);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(30, tickInfo.subTickNum);
+
+		var tickInfo = new NumericTickInfo(0, 0.6);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(18, tickInfo.subTickNum);
+
+		var tickInfo = new NumericTickInfo(-0.6, 0);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(18, tickInfo.subTickNum);
+
+		var tickInfo = new NumericTickInfo(-0.6, 0.7);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(39, tickInfo.subTickNum);
+	}
+
+	@:depends(testNegNum)
+	function testSubNegNum() {
+		var tickInfo = new NumericTickInfo(0, 10);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(0, tickInfo.subNegNum);
+
+		var tickInfo = new NumericTickInfo(-9, 80);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(3, tickInfo.subNegNum);
+
+		var tickInfo = new NumericTickInfo(-99, 0);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(30, tickInfo.subNegNum);
+
+		var tickInfo = new NumericTickInfo(0, 0.6);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(0, tickInfo.subNegNum);
+
+		var tickInfo = new NumericTickInfo(-0.6, 0);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(18, tickInfo.subNegNum);
+
+		var tickInfo = new NumericTickInfo(-0.6, 0.7);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		Assert.equals(18, tickInfo.subNegNum);
+	}
+
+	@:depends(testSubTickNum, testSubNegNum)
+	function testSubLabels() {
+		var tickInfo = new NumericTickInfo(0, 10);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		tickInfo.calcTickLabels();
+		var labels = tickInfo.subLabels;
+		trace(labels);
+		Assert.contains("0.25", labels);
+		Assert.contains("9.75", labels);
+		Assert.notContains("0", labels);
+		Assert.notContains("10.25", labels);
+
+		var tickInfo = new NumericTickInfo(-9, 80);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		tickInfo.calcTickLabels();
+		var labels = tickInfo.subLabels;
+		Assert.contains("-9.5", labels);
+		Assert.contains("0", labels);
+		Assert.contains("40", labels);
+		Assert.contains("80", labels);
+		Assert.notContains("-11", labels);
+		Assert.notContains("90", labels);
+
+		var tickInfo = new NumericTickInfo(-0.6, 0.7);
+		tickInfo.useSubTicks = true;
+		tickInfo.calcTickNum();
+		tickInfo.calcTickLabels();
+		var labels = tickInfo.subLabels;
 		Assert.contains("-0.2", labels);
 		Assert.contains("0", labels);
 		Assert.contains("0.3", labels);

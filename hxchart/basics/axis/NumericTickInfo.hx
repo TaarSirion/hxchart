@@ -39,20 +39,34 @@ class NumericTickInfo extends TickInfo {
 		return this.max = max;
 	}
 
-	/**
-	 * Displayed distance between the ticks. This differs from tickDist in the sense
-	 * that this is only for calculating the labels.
-	 */
-	public var valueDist(default, set):Float;
-
-	function set_valueDist(dist:Float) {
-		return valueDist = dist;
-	}
-
 	public var labels(default, set):Array<String>;
 
 	function set_labels(labels:Array<String>) {
 		return this.labels = labels;
+	}
+
+	public var useSubTicks(default, set):Bool;
+
+	function set_useSubTicks(useSubTicks:Bool) {
+		return this.useSubTicks = useSubTicks;
+	}
+
+	public var subTickNum(default, set):Int;
+
+	function set_subTickNum(num:Int) {
+		return subTickNum = num;
+	}
+
+	public var subNegNum(default, set):Int;
+
+	function set_subNegNum(num:Int) {
+		return subNegNum = num;
+	}
+
+	public var subLabels(default, set):Array<String>;
+
+	function set_subLabels(labels:Array<String>) {
+		return subLabels = labels;
 	}
 
 	/**
@@ -92,11 +106,16 @@ class NumericTickInfo extends TickInfo {
 		if (tickNum > 20) {
 			tickNum = 20;
 		}
+		// Add extra tickNum for 0
+		tickNum++;
+		if (useSubTicks) {
+			var tickSpaces = tickNum - 1;
+			subTickNum = tickSpaces * 3;
+		}
+
 		var ratio = calcRatio(dist);
 		calcZeroIndex(ratio);
-		if (ratio > 0 && ratio < 1) {
-			tickNum++;
-		}
+
 		calcNegNum();
 	}
 
@@ -141,18 +160,48 @@ class NumericTickInfo extends TickInfo {
 	private function calcNegNum() {
 		var invertedIndex = tickNum - zeroIndex;
 		negNum = tickNum - invertedIndex;
+		if (useSubTicks) {
+			subNegNum = negNum * 3;
+		}
 	}
 
 	public function calcTickLabels() {
 		labels = new Vector(tickNum).toArray();
+		var betweenTickStep = 0.0;
+		var subTickPrec = 0;
+		if (useSubTicks) {
+			subLabels = new Vector(subTickNum).toArray();
+			var vv = power / 4;
+			subTickPrec = vv < 1 ? precision + 2 : -1 * (precision + 1);
+			betweenTickStep = Utils.roundToPrec(vv, subTickPrec);
+		}
+		var subIndex = 0;
 		for (i in 0...negNum) {
 			var negTick = negNum - i;
-			labels[i] = "" + Utils.floatToStringPrecision(-1 * power * negTick, precision);
+			var negValue = -1 * power * negTick;
+			labels[i] = "" + Utils.floatToStringPrecision(negValue, precision);
+			if (useSubTicks) {
+				var loopValue = negValue;
+				for (j in 0...3) {
+					trace(loopValue, Utils.floatToStringPrecision(loopValue, subTickPrec));
+					loopValue += betweenTickStep;
+					subLabels[subIndex] = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
+					subIndex++;
+				}
+			}
 		}
 		labels[zeroIndex] = "0";
 		for (i in (zeroIndex + 1)...tickNum) {
-			labels[i] = "" + Utils.floatToStringPrecision(power * (i - zeroIndex), precision);
+			var value = power * (i - zeroIndex);
+			labels[i] = "" + Utils.floatToStringPrecision(value, precision);
+			if (useSubTicks) {
+				var loopValue = power * (i - zeroIndex - 1);
+				for (j in 0...3) {
+					loopValue += betweenTickStep;
+					subLabels[subIndex] = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
+					subIndex++;
+				}
+			}
 		}
-		return labels;
 	}
 }
