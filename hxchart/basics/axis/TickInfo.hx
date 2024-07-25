@@ -13,5 +13,11 @@ class TickInfo {
 		return tickDist = dist;
 	}
 
+	public var zeroIndex(default, set):Int;
+
+	function set_zeroIndex(index:Int) {
+		return zeroIndex = index;
+	}
+
 	public function new() {}
 }

@@ -15,12 +15,6 @@ class NumericTickInfo extends TickInfo {
 		return this.power = power;
 	}
 
-	public var zeroIndex(default, set):Int;
-
-	function set_zeroIndex(index:Int) {
-		return zeroIndex = index;
-	}
-
 	public var negNum(default, set):Int;
 
 	function set_negNum(num:Int) {

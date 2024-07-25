@@ -1,3 +1,4 @@
+import hxchart.tests.TestAxisTools;
 import hxchart.tests.TestPoint;
 import utest.ui.Report;
 import utest.Runner;
@@ -10,7 +11,7 @@ class TestAll {
 		var runner = new Runner();
 
 		runner.addCase(new TestChart());
-		// runner.addCase(new TestAxis());
+		runner.addCase(new TestAxisTools());
 		runner.addCase(new TestPoint());
 		runner.addCase(new TestNumericTickInfo());
 		Report.create(runner);

@@ -3,5 +3,6 @@
 
 -lib utest
 -lib haxeui-core
+-lib haxeui-html5
 
---interp
+-js Export/test-html/main.js
