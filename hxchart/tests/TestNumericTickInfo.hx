@@ -224,7 +224,6 @@ class TestNumericTickInfo extends utest.Test {
 		tickInfo.calcTickNum();
 		tickInfo.calcTickLabels();
 		var labels = tickInfo.subLabels;
-		trace(labels);
 		Assert.contains("0.25", labels);
 		Assert.contains("9.75", labels);
 		Assert.notContains("0", labels);
@@ -235,22 +234,22 @@ class TestNumericTickInfo extends utest.Test {
 		tickInfo.calcTickNum();
 		tickInfo.calcTickLabels();
 		var labels = tickInfo.subLabels;
-		Assert.contains("-9.5", labels);
-		Assert.contains("0", labels);
-		Assert.contains("40", labels);
-		Assert.contains("80", labels);
-		Assert.notContains("-11", labels);
-		Assert.notContains("90", labels);
+		Assert.contains("-7.5", labels);
+		Assert.contains("-5", labels);
+		Assert.contains("45", labels);
+		Assert.contains("77.5", labels);
+		Assert.notContains("-12.5", labels);
+		Assert.notContains("82.5", labels);
 
 		var tickInfo = new NumericTickInfo(-0.6, 0.7);
 		tickInfo.useSubTicks = true;
 		tickInfo.calcTickNum();
 		tickInfo.calcTickLabels();
 		var labels = tickInfo.subLabels;
-		Assert.contains("-0.2", labels);
-		Assert.contains("0", labels);
-		Assert.contains("0.3", labels);
-		Assert.notContains("-0.7", labels);
-		Assert.notContains("0.8", labels);
+		Assert.contains("-0.575", labels);
+		Assert.contains("0.025", labels);
+		Assert.contains("0.675", labels);
+		Assert.notContains("-0.625", labels);
+		Assert.notContains("0.725", labels);
 	}
 }

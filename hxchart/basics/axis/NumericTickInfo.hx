@@ -169,11 +169,13 @@ class NumericTickInfo extends TickInfo {
 		labels = new Vector(tickNum).toArray();
 		var betweenTickStep = 0.0;
 		var subTickPrec = 0;
+		var roundPrec = 0;
 		if (useSubTicks) {
 			subLabels = new Vector(subTickNum).toArray();
 			var vv = power / 4;
-			subTickPrec = vv < 1 ? precision + 2 : -1 * (precision + 1);
-			betweenTickStep = Utils.roundToPrec(vv, subTickPrec);
+			subTickPrec = precision + 2;
+			roundPrec = vv < 1 && vv > -1 ? precision + 2 : -1 * precision;
+			betweenTickStep = Utils.roundToPrec(vv, roundPrec);
 		}
 		var subIndex = 0;
 		for (i in 0...negNum) {
@@ -183,7 +185,6 @@ class NumericTickInfo extends TickInfo {
 			if (useSubTicks) {
 				var loopValue = negValue;
 				for (j in 0...3) {
-					trace(loopValue, Utils.floatToStringPrecision(loopValue, subTickPrec));
 					loopValue += betweenTickStep;
 					subLabels[subIndex] = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
 					subIndex++;
