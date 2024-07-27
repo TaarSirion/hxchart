@@ -155,18 +155,25 @@ private class SetTicks extends Behaviour {
 		if (tickInfo.useSubTicks) {
 			subTicksPerTick = Math.round(tickInfo.subTickNum / (tickInfo.tickNum - 1));
 		}
+		var subIndex = 0;
 		for (i in 0...tickInfo.tickNum) {
 			var tick = new Ticks();
 			var tickPoint = AxisTools.positionEndpoint(start, axis.rotation, axis.tickMargin + i * tickPos);
 			tick.left = tickPoint.x;
 			tick.top = tickPoint.y;
+			tick.text = tickInfo.labels[i];
 			axis.ticks.push(tick);
 			layer.addComponent(tick);
 			for (j in 0...subTicksPerTick) {
+				if (subIndex > tickInfo.subTickNum) {
+					break;
+				}
 				var tick = new Ticks(true);
 				var tickPoint = AxisTools.positionEndpoint(tickPoint, axis.rotation, (j + 1) * tickPos / (subTicksPerTick + 1));
 				tick.left = tickPoint.x;
 				tick.top = tickPoint.y;
+				tick.text = tickInfo.subLabels[subIndex];
+				subIndex++;
 				axis.sub_ticks.push(tick);
 				layer.addComponent(tick);
 			}

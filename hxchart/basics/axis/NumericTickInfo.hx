@@ -79,16 +79,15 @@ class NumericTickInfo extends TickInfo {
 		if (tickNum > 20) {
 			tickNum = 20;
 		}
+
 		// Add extra tickNum for 0
 		tickNum++;
 		if (useSubTicks) {
 			var tickSpaces = tickNum - 1;
 			subTickNum = tickSpaces * 3;
 		}
-
 		var ratio = calcRatio(dist);
 		calcZeroIndex(ratio);
-
 		calcNegNum();
 	}
 
@@ -122,7 +121,7 @@ class NumericTickInfo extends TickInfo {
 			case 0:
 				zeroIndex = tickNum - 1;
 			default:
-				zeroIndex = Math.round(tickNum * (1 - ratio));
+				zeroIndex = Math.round((tickNum - 1) * (1 - ratio));
 		}
 	}
 
@@ -131,8 +130,7 @@ class NumericTickInfo extends TickInfo {
 	 * Inverts the zeroIndex and subtracts it from tickNum.
 	 */
 	private function calcNegNum() {
-		var invertedIndex = tickNum - zeroIndex;
-		negNum = tickNum - invertedIndex;
+		negNum = zeroIndex > 0 ? zeroIndex : 0;
 		if (useSubTicks) {
 			subNegNum = negNum * 3;
 		}

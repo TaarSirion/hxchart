@@ -81,6 +81,9 @@ class TestNumericTickInfo extends utest.Test {
 		tickInfo.calcTickNum();
 		Assert.equals(10, tickInfo.zeroIndex);
 
+		var tickInfo = new NumericTickInfo(-10, 10);
+		Assert.equals(10, tickInfo.zeroIndex);
+
 		var tickInfo = new NumericTickInfo(0, 0.6);
 		tickInfo.calcTickNum();
 		Assert.equals(0, tickInfo.zeroIndex);
@@ -105,6 +108,9 @@ class TestNumericTickInfo extends utest.Test {
 
 		var tickInfo = new NumericTickInfo(-99, 0);
 		tickInfo.calcTickNum();
+		Assert.equals(10, tickInfo.negNum);
+
+		var tickInfo = new NumericTickInfo(-10, 10);
 		Assert.equals(10, tickInfo.negNum);
 
 		var tickInfo = new NumericTickInfo(0, 0.6);
@@ -140,6 +146,15 @@ class TestNumericTickInfo extends utest.Test {
 		Assert.contains("80", labels);
 		Assert.notContains("-11", labels);
 		Assert.notContains("90", labels);
+
+		var tickInfo = new NumericTickInfo(-10, 10);
+		var labels = tickInfo.labels;
+		Assert.contains("-10", labels);
+		Assert.contains("0", labels);
+		Assert.contains("3", labels);
+		Assert.contains("10", labels);
+		Assert.notContains("-11", labels);
+		Assert.notContains("11", labels);
 
 		var tickInfo = new NumericTickInfo(-0.6, 0.7);
 		tickInfo.calcTickNum();
