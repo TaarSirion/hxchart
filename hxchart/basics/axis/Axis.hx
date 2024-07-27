@@ -81,7 +81,7 @@ class Axis extends Absolute {
 		endPoint = AxisTools.positionEndpoint(start, rotation, length);
 		this.color = Color.fromString(color);
 		this.tickInfo = tickInfo;
-		width = length;
+		width = length + 20;
 		setTicks(tickInfo);
 	}
 
@@ -150,7 +150,7 @@ private class SetTicks extends Behaviour {
 
 	private function setTickPosition(tickInfo:TickInfo) {
 		var start = axis.startPoint;
-		var tickPos = (axis.axisLength - 2 * axis.tickMargin) / tickInfo.tickNum;
+		var tickPos = (axis.axisLength - 2 * axis.tickMargin) / (tickInfo.tickNum - 1);
 		var subTicksPerTick = 0;
 		if (tickInfo.useSubTicks) {
 			subTicksPerTick = Math.round(tickInfo.subTickNum / (tickInfo.tickNum - 1));
