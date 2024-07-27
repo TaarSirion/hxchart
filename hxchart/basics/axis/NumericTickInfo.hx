@@ -33,34 +33,10 @@ class NumericTickInfo extends TickInfo {
 		return this.max = max;
 	}
 
-	public var labels(default, set):Array<String>;
-
-	function set_labels(labels:Array<String>) {
-		return this.labels = labels;
-	}
-
-	public var useSubTicks(default, set):Bool;
-
-	function set_useSubTicks(useSubTicks:Bool) {
-		return this.useSubTicks = useSubTicks;
-	}
-
-	public var subTickNum(default, set):Int;
-
-	function set_subTickNum(num:Int) {
-		return subTickNum = num;
-	}
-
 	public var subNegNum(default, set):Int;
 
 	function set_subNegNum(num:Int) {
 		return subNegNum = num;
-	}
-
-	public var subLabels(default, set):Array<String>;
-
-	function set_subLabels(labels:Array<String>) {
-		return subLabels = labels;
 	}
 
 	/**
@@ -68,10 +44,11 @@ class NumericTickInfo extends TickInfo {
 	 * @param min Min value of the axis.
 	 * @param max Max value of the axis.
 	 */
-	public function new(min:Float, max:Float) {
+	public function new(min:Float, max:Float, useSubTicks:Bool = false) {
 		super();
 		this.min = min;
 		this.max = max;
+		this.useSubTicks = useSubTicks;
 		var pow = 1;
 		if (max > 1) {
 			pow = Math.floor(Math.log(max - 1) / Math.log(10));

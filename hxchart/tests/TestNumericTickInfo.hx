@@ -153,74 +153,61 @@ class TestNumericTickInfo extends utest.Test {
 	}
 
 	function testSubTickNum() {
-		var tickInfo = new NumericTickInfo(0, 10);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(0, 10, true);
 		tickInfo.calcTickNum();
 		Assert.equals(30, tickInfo.subTickNum);
 
-		var tickInfo = new NumericTickInfo(-9, 80);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(-9, 80, true);
 		tickInfo.calcTickNum();
 		Assert.equals(27, tickInfo.subTickNum);
 
-		var tickInfo = new NumericTickInfo(-99, 0);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(-99, 0, true);
 		tickInfo.calcTickNum();
 		Assert.equals(30, tickInfo.subTickNum);
 
-		var tickInfo = new NumericTickInfo(0, 0.6);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(0, 0.6, true);
 		tickInfo.calcTickNum();
 		Assert.equals(18, tickInfo.subTickNum);
 
-		var tickInfo = new NumericTickInfo(-0.6, 0);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(-0.6, 0, true);
 		tickInfo.calcTickNum();
 		Assert.equals(18, tickInfo.subTickNum);
 
-		var tickInfo = new NumericTickInfo(-0.6, 0.7);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(-0.6, 0.7, true);
 		tickInfo.calcTickNum();
 		Assert.equals(39, tickInfo.subTickNum);
 	}
 
 	@:depends(testNegNum)
 	function testSubNegNum() {
-		var tickInfo = new NumericTickInfo(0, 10);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(0, 10, true);
 		tickInfo.calcTickNum();
 		Assert.equals(0, tickInfo.subNegNum);
 
-		var tickInfo = new NumericTickInfo(-9, 80);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(-9, 80, true);
 		tickInfo.calcTickNum();
 		Assert.equals(3, tickInfo.subNegNum);
 
-		var tickInfo = new NumericTickInfo(-99, 0);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(-99, 0, true);
 		tickInfo.calcTickNum();
 		Assert.equals(30, tickInfo.subNegNum);
 
-		var tickInfo = new NumericTickInfo(0, 0.6);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(0, 0.6, true);
 		tickInfo.calcTickNum();
 		Assert.equals(0, tickInfo.subNegNum);
 
-		var tickInfo = new NumericTickInfo(-0.6, 0);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(-0.6, 0, true);
 		tickInfo.calcTickNum();
 		Assert.equals(18, tickInfo.subNegNum);
 
-		var tickInfo = new NumericTickInfo(-0.6, 0.7);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(-0.6, 0.7, true);
 		tickInfo.calcTickNum();
 		Assert.equals(18, tickInfo.subNegNum);
 	}
 
 	@:depends(testSubTickNum, testSubNegNum)
 	function testSubLabels() {
-		var tickInfo = new NumericTickInfo(0, 10);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(0, 10, true);
 		tickInfo.calcTickNum();
 		tickInfo.calcTickLabels();
 		var labels = tickInfo.subLabels;
@@ -229,8 +216,7 @@ class TestNumericTickInfo extends utest.Test {
 		Assert.notContains("0", labels);
 		Assert.notContains("10.25", labels);
 
-		var tickInfo = new NumericTickInfo(-9, 80);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(-9, 80, true);
 		tickInfo.calcTickNum();
 		tickInfo.calcTickLabels();
 		var labels = tickInfo.subLabels;
@@ -241,8 +227,7 @@ class TestNumericTickInfo extends utest.Test {
 		Assert.notContains("-12.5", labels);
 		Assert.notContains("82.5", labels);
 
-		var tickInfo = new NumericTickInfo(-0.6, 0.7);
-		tickInfo.useSubTicks = true;
+		var tickInfo = new NumericTickInfo(-0.6, 0.7, true);
 		tickInfo.calcTickNum();
 		tickInfo.calcTickLabels();
 		var labels = tickInfo.subLabels;
