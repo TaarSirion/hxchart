@@ -19,7 +19,7 @@ import haxe.ui.geom.Point;
 @:composite(TickBuilder, TickLayout)
 class Ticks extends Box {
 	@:clonable @:behaviour(DefaultBehaviour, 10) public var fontSize:Null<Float>;
-	@:clonable @:behaviour(DefaultBehaviour, 8) public var subFontSize:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 6) public var subFontSize:Null<Float>;
 	@:clonable @:behaviour(DefaultBehaviour, 7) public var tickLength:Null<Float>;
 	@:clonable @:behaviour(DefaultBehaviour, 4) public var subTickLength:Null<Float>;
 

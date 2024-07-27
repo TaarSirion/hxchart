@@ -157,7 +157,8 @@ class NumericTickInfo extends TickInfo {
 				var loopValue = negValue;
 				for (j in 0...3) {
 					loopValue += betweenTickStep;
-					subLabels[subIndex] = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
+					var subLabel = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
+					subLabels[subIndex] = "." + Utils.removeLeadingNumbers(subLabel);
 					subIndex++;
 				}
 			}
@@ -170,7 +171,8 @@ class NumericTickInfo extends TickInfo {
 				var loopValue = power * (i - zeroIndex - 1);
 				for (j in 0...3) {
 					loopValue += betweenTickStep;
-					subLabels[subIndex] = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
+					var subLabel = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
+					subLabels[subIndex] = "." + Utils.removeLeadingNumbers(subLabel);
 					subIndex++;
 				}
 			}
