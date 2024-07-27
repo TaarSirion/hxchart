@@ -2,7 +2,6 @@ package hxchart.basics.points;
 
 import haxe.ui.styles.Style;
 import hxchart.basics.Chart.ChartInfo;
-import hxchart.basics.axis.AxisTools.TickInfo;
 import hxchart.basics.axis.AxisInfo;
 import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;

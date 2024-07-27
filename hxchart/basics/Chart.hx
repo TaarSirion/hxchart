@@ -1,5 +1,6 @@
 package hxchart.basics;
 
+import hxchart.basics.axis.NumericTickInfo;
 import hxchart.basics.legend.LegendNode;
 import haxe.ui.backend.html5.filters.ColorMatrixFilter;
 import haxe.ui.util.Color;
@@ -29,15 +30,15 @@ import haxe.ui.behaviours.DefaultBehaviour;
 
 typedef ChartInfo = {
 	axis_info:AxisInfo,
-	x_tick_info:TickInfo,
-	y_tick_info:TickInfo,
+	x_tick_info:NumericTickInfo,
+	y_tick_info:NumericTickInfo,
 	x_dist:AxisDist,
 	y_dist:AxisDist,
 }
 
 typedef TickInfos = {
-	x:TickInfo,
-	y:TickInfo,
+	x:NumericTickInfo,
+	y:NumericTickInfo,
 }
 
 /**
@@ -80,8 +81,8 @@ class Chart extends Absolute {
 		return this.point_groups = point_groups;
 	}
 
-	public var x_tick_info:TickInfo;
-	public var y_tick_info:TickInfo;
+	public var x_tick_info:NumericTickInfo;
+	public var y_tick_info:NumericTickInfo;
 
 	public var x_axis:Axis;
 	public var y_axis:Axis;
@@ -237,19 +238,14 @@ private class ColorPaletteBehaviour extends DataBehaviour {
 private class SetTickInfo extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var pointInfo:hxchart.basics.ChartTools.ChartMinMax = param;
-		var infos:TickInfos = {
-			x: AxisTools.calcTickInfo(pointInfo.min_x, pointInfo.max_x),
-			y: AxisTools.calcTickInfo(pointInfo.min_y, pointInfo.max_y)
-		}
 		var chart = cast(_component, Chart);
-		trace(chart.x_axis.ticks[infos.x.zero].num);
-		trace(chart.y_axis.ticks[infos.y.zero].num);
-		chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left;
-		chart.y_axis.width = 30;
-		chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top;
-		chart.x_axis.height = 30;
-		chart.x_tick_info = infos.x;
-		chart.y_tick_info = infos.y;
+		chart.x_tick_info = new NumericTickInfo(pointInfo.min_x, pointInfo.max_x);
+		chart.y_tick_info = new NumericTickInfo(pointInfo.min_y, pointInfo.max_y);
+
+		// chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left;
+		// chart.y_axis.width = 30;
+		// chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top;
+		// chart.x_axis.height = 30;
 		return chart;
 	}
 }
@@ -343,23 +339,18 @@ private class SetAxis extends Behaviour {
 		return null;
 	}
 
-	private function setXAxis(x_axis_length:Float, chart:Chart) {
-		chart.x_axis = new Axis();
-		chart.x_axis.is_y = false;
-		chart.x_axis.setStartToEnd(x_axis_length, chart.marginLeft);
-		var minmax = new haxe.ui.geom.Point(chart.min_x, chart.max_x);
-		chart.x_axis.setTicks(minmax);
-		chart.x_axis.width = chart.width;
+	private function setXAxis(xAxisLength:Float, chart:Chart) {
+		var xAxisStart = new haxe.ui.geom.Point(chart.marginLeft, 0);
+		chart.x_axis = new Axis(xAxisStart, 0, xAxisLength, chart.x_tick_info);
+		chart.x_axis.setStartToEnd(xAxisLength, chart.marginLeft);
+
 		chart.addComponent(chart.x_axis);
 	}
 
-	private function setYAxis(y_axis_length:Float, chart:Chart) {
-		chart.y_axis = new Axis();
-		chart.y_axis.is_y = true;
-		chart.y_axis.setStartToEnd(y_axis_length, chart.marginTop);
-		var minmax = new haxe.ui.geom.Point(chart.min_y, chart.max_y);
-		chart.y_axis.setTicks(minmax);
-		chart.y_axis.height = chart.height;
+	private function setYAxis(yAxisLength:Float, chart:Chart) {
+		var yAxisStart = new haxe.ui.geom.Point(0, chart.marginTop);
+		chart.y_axis = new Axis(yAxisStart, 90, yAxisLength, chart.y_tick_info);
+		chart.y_axis.setStartToEnd(yAxisLength, chart.marginTop);
 		chart.addComponent(chart.y_axis);
 	}
 }
@@ -371,10 +362,12 @@ private class DrawPoints extends Behaviour {
 		trace(chart.x_tick_info);
 		var x_coord_min = chart.x_axis.ticks[0].left;
 		var x_coord_max = chart.x_axis.ticks[chart.x_axis.ticks.length - 1].left;
-		var x_dist = ChartTools.calcAxisDists(x_coord_min, x_coord_max, chart.x_tick_info.pos_ratio);
+		var ratio = 1 - chart.x_tick_info.negNum / chart.x_tick_info.tickNum;
+		var x_dist = ChartTools.calcAxisDists(x_coord_min, x_coord_max, ratio);
 		var y_coord_min = chart.y_axis.ticks[0].top;
 		var y_coord_max = chart.y_axis.ticks[chart.y_axis.ticks.length - 1].top;
-		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, chart.y_tick_info.pos_ratio);
+		var ratio = 1 - chart.y_tick_info.negNum / chart.y_tick_info.tickNum;
+		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, ratio);
 		chart.pointlayer.setInfo({
 			axis_info: {x_ticks: chart.x_axis.ticks, y_ticks: chart.y_axis.ticks},
 			x_dist: x_dist,

@@ -15,7 +15,7 @@ import haxe.ui.behaviours.DefaultBehaviour;
 class Axis extends Absolute {
 	@:clonable @:behaviour(DefaultBehaviour, 10) public var tickMargin:Null<Float>;
 
-	@:call(SetTicks) public function setTicks(data:Point):Void;
+	@:call(SetTicks) public function setTicks(data:TickInfo):Void;
 
 	@:call(Draw) private function draw():Void;
 
@@ -81,6 +81,8 @@ class Axis extends Absolute {
 		endPoint = AxisTools.positionEndpoint(start, rotation, length);
 		this.color = Color.fromString(color);
 		this.tickInfo = tickInfo;
+		width = length;
+		setTicks(tickInfo);
 	}
 
 	public function setStartToEnd(axisLength:Float, marginStart:Float) {
@@ -135,20 +137,29 @@ private class SetTicks extends Behaviour {
 	var layer:Absolute;
 
 	public override function call(param:Any = null):Variant {
-		var minmax:Point = param;
+		var tickInfo:TickInfo = param;
 		axis = cast(_component, Axis);
 		start = axis.startPoint;
 		end = axis.endPoint;
-		// is_y = axis.is_y;
 		ticks = axis.ticks;
 		sub_ticks = axis.sub_ticks;
 		layer = _component.findComponent(null, Absolute);
-		setTickPosition(minmax.x, minmax.y);
+		setTickPosition(tickInfo);
 		return null;
 	}
 
-	private function setTickPosition(min:Float, max:Float) {
-		// var tick_calc = AxisTools.calcTickInfo(min, max);
+	private function setTickPosition(tickInfo:TickInfo) {
+		var start = axis.startPoint;
+		var tickPos = (axis.axisLength - 2 * axis.tickMargin) / tickInfo.tickNum;
+		for (i in 0...tickInfo.tickNum) {
+			var tick = new Ticks();
+			var tickPoint = AxisTools.positionEndpoint(start, axis.rotation, axis.tickMargin + i * tickPos);
+			trace(tickPoint.x, axis.endPoint.x);
+			tick.left = tickPoint.x;
+			tick.top = tickPoint.y;
+			axis.ticks.push(tick);
+			layer.addComponent(tick);
+		}
 		// var start_p = is_y ? start.y - axis.tickMargin : start.x + axis.tickMargin;
 		// var end_p = is_y ? end.y + axis.tickMargin : end.x - axis.tickMargin;
 		// var dist = is_y ? start_p - end_p : end_p - start_p;

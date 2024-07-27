@@ -84,6 +84,8 @@ class NumericTickInfo extends TickInfo {
 		}
 		power = Math.pow(10, pow);
 		precision = power < 1 ? -1 * pow : pow;
+		calcTickNum();
+		calcTickLabels();
 	}
 
 	/**

@@ -101,6 +101,7 @@ class TickBuilder extends CompositeBuilder {
 	}
 
 	public override function onReady() {
+		trace("tick ready");
 		super.onReady();
 		TickUtils.drawTicks(_tick, _label);
 	}
@@ -108,6 +109,7 @@ class TickBuilder extends CompositeBuilder {
 
 class TickUtils {
 	public static function drawTicks(_tick:Ticks, _label:Label) {
+		trace("is ready");
 		var is_sub = _tick.is_sub;
 		var tickLength = is_sub ? _tick.subTickLength : _tick.tickLength;
 		var tickFontsize = is_sub ? _tick.subFontSize : _tick.fontSize;
