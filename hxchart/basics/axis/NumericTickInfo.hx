@@ -15,12 +15,18 @@ class NumericTickInfo extends TickInfo {
 		return this.power = power;
 	}
 
+	/**
+	 * Negative Number of Ticks
+	 */
 	public var negNum(default, set):Int;
 
 	function set_negNum(num:Int) {
 		return negNum = num;
 	}
 
+	/**
+	 * Min value
+	 */
 	public var min(default, set):Float;
 
 	function set_min(min:Float) {
@@ -33,6 +39,9 @@ class NumericTickInfo extends TickInfo {
 		return this.max = max;
 	}
 
+	/**
+	 * Negative Number of Sub Ticks.
+	 */
 	public var subNegNum(default, set):Int;
 
 	function set_subNegNum(num:Int) {
@@ -44,11 +53,18 @@ class NumericTickInfo extends TickInfo {
 	 * @param min Min value of the axis.
 	 * @param max Max value of the axis.
 	 */
-	public function new(min:Float, max:Float, useSubTicks:Bool = false) {
+	public function new(min:Float, max:Float, useSubTicks:Bool = false, subTicksPerPart:Int = 3) {
 		super();
 		this.min = min;
 		this.max = max;
 		this.useSubTicks = useSubTicks;
+		this.subTicksPerPart = subTicksPerPart;
+		calcPower();
+		calcTickNum();
+		calcTickLabels();
+	}
+
+	function calcPower() {
 		var pow = 1;
 		if (max > 1) {
 			pow = Math.floor(Math.log(max - 1) / Math.log(10));
@@ -61,8 +77,6 @@ class NumericTickInfo extends TickInfo {
 		}
 		power = Math.pow(10, pow);
 		precision = power < 1 ? -1 * pow : pow;
-		calcTickNum();
-		calcTickLabels();
 	}
 
 	/**
@@ -84,7 +98,7 @@ class NumericTickInfo extends TickInfo {
 		tickNum++;
 		if (useSubTicks) {
 			var tickSpaces = tickNum - 1;
-			subTickNum = tickSpaces * 3;
+			subTickNum = tickSpaces * subTicksPerPart;
 		}
 		var ratio = calcRatio(dist);
 		calcZeroIndex(ratio);
@@ -132,7 +146,7 @@ class NumericTickInfo extends TickInfo {
 	private function calcNegNum() {
 		negNum = zeroIndex > 0 ? zeroIndex : 0;
 		if (useSubTicks) {
-			subNegNum = negNum * 3;
+			subNegNum = negNum * subTicksPerPart;
 		}
 	}
 
@@ -143,7 +157,7 @@ class NumericTickInfo extends TickInfo {
 		var roundPrec = 0;
 		if (useSubTicks) {
 			subLabels = new Vector(subTickNum).toArray();
-			var vv = power / 4;
+			var vv = power / (subTicksPerPart + 1);
 			subTickPrec = precision + 2;
 			roundPrec = vv < 1 && vv > -1 ? precision + 2 : -1 * precision;
 			betweenTickStep = Utils.roundToPrec(vv, roundPrec);
@@ -155,7 +169,7 @@ class NumericTickInfo extends TickInfo {
 			labels[i] = "" + Utils.floatToStringPrecision(negValue, precision);
 			if (useSubTicks) {
 				var loopValue = negValue;
-				for (j in 0...3) {
+				for (j in 0...subTicksPerPart) {
 					loopValue += betweenTickStep;
 					var subLabel = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
 					subLabels[subIndex] = "." + Utils.removeLeadingNumbers(subLabel);
@@ -169,7 +183,7 @@ class NumericTickInfo extends TickInfo {
 			labels[i] = "" + Utils.floatToStringPrecision(value, precision);
 			if (useSubTicks) {
 				var loopValue = power * (i - zeroIndex - 1);
-				for (j in 0...3) {
+				for (j in 0...subTicksPerPart) {
 					loopValue += betweenTickStep;
 					var subLabel = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
 					subLabels[subIndex] = "." + Utils.removeLeadingNumbers(subLabel);

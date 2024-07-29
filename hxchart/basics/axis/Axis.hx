@@ -153,7 +153,7 @@ private class SetTicks extends Behaviour {
 		var tickPos = (axis.axisLength - 2 * axis.tickMargin) / (tickInfo.tickNum - 1);
 		var subTicksPerTick = 0;
 		if (tickInfo.useSubTicks) {
-			subTicksPerTick = Math.round(tickInfo.subTickNum / (tickInfo.tickNum - 1));
+			subTicksPerTick = tickInfo.subTicksPerPart;
 		}
 		var subIndex = 0;
 		for (i in 0...tickInfo.tickNum) {
@@ -165,7 +165,7 @@ private class SetTicks extends Behaviour {
 			axis.ticks.push(tick);
 			layer.addComponent(tick);
 			for (j in 0...subTicksPerTick) {
-				if (subIndex > tickInfo.subTickNum) {
+				if (i == (tickInfo.tickNum - 1)) {
 					break;
 				}
 				var tick = new Ticks(true);

@@ -49,5 +49,11 @@ class TickInfo {
 		return subLabels = labels;
 	}
 
+	public var subTicksPerPart(default, set):Int;
+
+	function set_subTicksPerPart(ticks:Int) {
+		return subTicksPerPart = ticks;
+	}
+
 	public function new() {}
 }
