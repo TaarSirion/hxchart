@@ -119,6 +119,23 @@ private class Draw extends Behaviour {
 				axis.endPoint = AxisTools.positionEndpoint(axis.startPoint, axis.rotation, axis.axisLength);
 			}
 			canvas.componentGraphics.lineTo(axis.endPoint.x, axis.endPoint.y);
+			for (tick in axis.ticks) {
+				var tickLength = tick.tickLength;
+				var middlePoint = new Point(tick.left, tick.top);
+				var start = AxisTools.positionEndpoint(middlePoint, tick.rotation, tickLength / 2);
+				var end = AxisTools.positionEndpoint(middlePoint, tick.rotation + 180, tickLength / 2);
+				canvas.componentGraphics.moveTo(start.x, start.y);
+				canvas.componentGraphics.lineTo(end.x, end.y);
+			}
+			for (tick in axis.sub_ticks) {
+				tick.showLabel = false;
+				var tickLength = tick.subTickLength;
+				var middlePoint = new Point(tick.left, tick.top);
+				var start = AxisTools.positionEndpoint(middlePoint, tick.rotation, tickLength / 2);
+				var end = AxisTools.positionEndpoint(middlePoint, tick.rotation + 180, tickLength / 2);
+				canvas.componentGraphics.moveTo(start.x, start.y);
+				canvas.componentGraphics.lineTo(end.x, end.y);
+			}
 		}
 		return null;
 	}
@@ -157,7 +174,7 @@ private class SetTicks extends Behaviour {
 		}
 		var subIndex = 0;
 		for (i in 0...tickInfo.tickNum) {
-			var tick = new Ticks();
+			var tick = new Ticks(false, axis.rotation);
 			var tickPoint = AxisTools.positionEndpoint(start, axis.rotation, axis.tickMargin + i * tickPos);
 			tick.left = tickPoint.x;
 			tick.top = tickPoint.y;
@@ -168,7 +185,7 @@ private class SetTicks extends Behaviour {
 				if (i == (tickInfo.tickNum - 1)) {
 					break;
 				}
-				var tick = new Ticks(true);
+				var tick = new Ticks(true, axis.rotation);
 				var tickPoint = AxisTools.positionEndpoint(tickPoint, axis.rotation, (j + 1) * tickPos / (subTicksPerTick + 1));
 				tick.left = tickPoint.x;
 				tick.top = tickPoint.y;
