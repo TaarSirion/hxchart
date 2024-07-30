@@ -34,7 +34,9 @@ class Axis extends Absolute {
 	public var startPoint(default, set):Point;
 
 	function set_startPoint(point:Point) {
-		return startPoint = point;
+		startPoint = point;
+		setTicks(tickInfo);
+		return startPoint;
 	}
 
 	/**
@@ -75,28 +77,12 @@ class Axis extends Absolute {
 
 	public function new(start:Point, rotation:Int, length:Float, tickInfo:TickInfo, color:String = "black") {
 		super();
-		startPoint = start;
+		top = start.y;
+		left = start.x;
 		this.rotation = rotation;
 		axisLength = length;
-		endPoint = AxisTools.positionEndpoint(start, rotation, length);
 		this.color = Color.fromString(color);
 		this.tickInfo = tickInfo;
-		width = length + 20;
-		setTicks(tickInfo);
-	}
-
-	public function setStartToEnd(axisLength:Float, marginStart:Float) {
-		if (endPoint == null) {
-			endPoint = AxisTools.positionEndpoint(startPoint, rotation, axisLength);
-		}
-		// if (is_y) {
-		// 	endPoint = ChartTools.setAxisStartPoint(marginStart, 0, is_y, 0);
-		// 	startPoint = ChartTools.setAxisEndPoint(endPoint, axisLength, is_y);
-		// } else {
-		// 	startPoint = ChartTools.setAxisStartPoint(marginStart, 0, is_y, 0);
-		// 	endPoint = ChartTools.setAxisEndPoint(startPoint, axisLength, is_y);
-		// }
-		draw();
 	}
 }
 
@@ -166,6 +152,8 @@ private class SetTicks extends Behaviour {
 	}
 
 	private function setTickPosition(tickInfo:TickInfo) {
+		axis.ticks = [];
+		axis.sub_ticks = [];
 		var start = axis.startPoint;
 		var tickPos = (axis.axisLength - 2 * axis.tickMargin) / (tickInfo.tickNum - 1);
 		var subTicksPerTick = 0;
@@ -195,55 +183,6 @@ private class SetTicks extends Behaviour {
 				layer.addComponent(tick);
 			}
 		}
-
-		// var start_p = is_y ? start.y - axis.tickMargin : start.x + axis.tickMargin;
-		// var end_p = is_y ? end.y + axis.tickMargin : end.x - axis.tickMargin;
-		// var dist = is_y ? start_p - end_p : end_p - start_p;
-		// var dist_between_ticks = dist / (tick_calc.num - 1);
-		// var pos = AxisTools.calcTickPos(tick_calc.num, dist_between_ticks, start_p, is_y);
-		// for (i in 0...tick_calc.num) {
-		// 	var tick = new Ticks(false, is_y);
-		// 	tick.text = tick_calc.labels[i];
-		// 	tick.num = Std.parseFloat(tick_calc.labels[i]);
-		// 	if (is_y) {
-		// 		tick.top = pos[i];
-		// 		tick.left = 0;
-		// 	} else {
-		// 		tick.left = pos[i];
-		// 		tick.top = 0;
-		// 	}
-		// 	ticks.push(tick);
-		// 	layer.addComponent(tick);
-		// }
-		// var axis = cast(_component, Axis);
-		// axis.ticks = ticks;
-		// setSubTicks(tick_calc, dist_between_ticks);
-	}
-
-	private function setSubTicks(tick_calc:TickInfo, dist_between_ticks:Float) {
-		// var sub_num = AxisTools.setSubTickNum(tick_calc.num);
-		// var sub_tick = AxisTools.calcSubTickInfo(dist_between_ticks, sub_num, tick_calc.step);
-		// for (i in 0...(tick_calc.num - 1)) {
-		// 	var start = is_y ? ticks[i].top : ticks[i].left;
-		// 	for (j in 0...(sub_num - 1)) {
-		// 		var l = ticks[i].num + sub_tick.step * (j + 1);
-		// 		var d = start + (is_y ? -sub_tick.dists : sub_tick.dists) * (j + 1);
-		// 		var tick = new Ticks(true, is_y);
-		// 		tick.text = Utils.floatToStringPrecision(l, sub_tick.prec + 1);
-		// 		tick.num = l;
-		// 		if (is_y) {
-		// 			tick.top = d;
-		// 			tick.left = 0;
-		// 		} else {
-		// 			tick.left = d;
-		// 			tick.top = 0;
-		// 		}
-		// 		sub_ticks.push(tick);
-		// 		layer.addComponent(tick);
-		// 	}
-		// }
-		// var axis = cast(_component, Axis);
-		// axis.sub_ticks = sub_ticks;
 	}
 }
 
@@ -264,11 +203,49 @@ private class AxisBuilder extends CompositeBuilder {
 	}
 
 	public override function onReady() {
+		_tickCanvasLayer.componentGraphics.clear();
+		_tickLabelLayer.removeAllComponents();
 		var sub_width = _axis.width;
 		var sub_height = _axis.height;
+
+		if (_axis.startPoint == null) {
+			_axis.startPoint = new Point(40, 40);
+		}
+
+		_axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.rotation, _axis.axisLength);
+		_axis.setTicks(_axis.tickInfo);
+
 		_tickCanvasLayer.width = sub_width;
 		_tickLabelLayer.width = sub_width;
 		_tickCanvasLayer.height = sub_height;
 		_tickLabelLayer.height = sub_height;
+
+		var axis = _axis;
+		var canvas = _tickCanvasLayer;
+		if (canvas != null) {
+			canvas.componentGraphics.strokeStyle(axis.color);
+			canvas.componentGraphics.moveTo(axis.startPoint.x, axis.startPoint.y);
+			if (axis.endPoint == null) {
+				axis.endPoint = AxisTools.positionEndpoint(axis.startPoint, axis.rotation, axis.axisLength);
+			}
+			canvas.componentGraphics.lineTo(axis.endPoint.x, axis.endPoint.y);
+			for (tick in axis.ticks) {
+				var tickLength = tick.tickLength;
+				var middlePoint = new Point(tick.left, tick.top);
+				var start = AxisTools.positionEndpoint(middlePoint, tick.rotation, tickLength / 2);
+				var end = AxisTools.positionEndpoint(middlePoint, tick.rotation + 180, tickLength / 2);
+				canvas.componentGraphics.moveTo(start.x, start.y);
+				canvas.componentGraphics.lineTo(end.x, end.y);
+			}
+			for (tick in axis.sub_ticks) {
+				tick.showLabel = false;
+				var tickLength = tick.subTickLength;
+				var middlePoint = new Point(tick.left, tick.top);
+				var start = AxisTools.positionEndpoint(middlePoint, tick.rotation, tickLength / 2);
+				var end = AxisTools.positionEndpoint(middlePoint, tick.rotation + 180, tickLength / 2);
+				canvas.componentGraphics.moveTo(start.x, start.y);
+				canvas.componentGraphics.lineTo(end.x, end.y);
+			}
+		}
 	}
 }

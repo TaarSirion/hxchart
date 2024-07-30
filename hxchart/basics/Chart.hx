@@ -241,11 +241,6 @@ private class SetTickInfo extends Behaviour {
 		var chart = cast(_component, Chart);
 		chart.x_tick_info = new NumericTickInfo(pointInfo.min_x, pointInfo.max_x);
 		chart.y_tick_info = new NumericTickInfo(pointInfo.min_y, pointInfo.max_y);
-
-		// chart.y_axis.left = chart.x_axis.ticks[infos.x.zero].left;
-		// chart.y_axis.width = 30;
-		// chart.x_axis.top = chart.y_axis.ticks[infos.y.zero].top;
-		// chart.x_axis.height = 30;
 		return chart;
 	}
 }
@@ -334,24 +329,22 @@ private class SetAxis extends Behaviour {
 		var chart = cast(_component, Chart);
 		var y_axis_length = ChartTools.calcAxisLength(chart.height, chart.marginTop, chart.marginBottom);
 		var x_axis_length = ChartTools.calcAxisLength(chart.width, chart.marginLeft, chart.marginRight);
-		setXAxis(x_axis_length, chart);
-		setYAxis(y_axis_length, chart);
-		return null;
-	}
-
-	private function setXAxis(xAxisLength:Float, chart:Chart) {
-		var xAxisStart = new haxe.ui.geom.Point(chart.marginLeft, 0);
-		chart.x_axis = new Axis(xAxisStart, 0, xAxisLength, chart.x_tick_info);
-		chart.x_axis.setStartToEnd(xAxisLength, chart.marginLeft);
-
+		var chartPoint = new haxe.ui.geom.Point(chart.marginLeft, chart.marginTop);
+		chart.x_axis = new Axis(chartPoint, 0, x_axis_length, chart.x_tick_info);
+		chart.x_axis.width = x_axis_length;
+		chart.x_axis.height = y_axis_length;
+		chart.y_axis = new Axis(chartPoint, 90, y_axis_length, chart.y_tick_info);
+		chart.y_axis.width = x_axis_length;
+		chart.y_axis.height = y_axis_length;
+		// This is necessary to allow the ticks to be calculated
+		chart.x_axis.startPoint = new haxe.ui.geom.Point(0, 40);
+		chart.y_axis.startPoint = new haxe.ui.geom.Point(40, 0);
+		// Real positioning
+		chart.x_axis.startPoint = new haxe.ui.geom.Point(0, chart.y_axis.ticks[chart.y_tick_info.zeroIndex].top);
+		chart.y_axis.startPoint = new haxe.ui.geom.Point(chart.x_axis.ticks[chart.x_tick_info.zeroIndex].left, 0);
 		chart.addComponent(chart.x_axis);
-	}
-
-	private function setYAxis(yAxisLength:Float, chart:Chart) {
-		var yAxisStart = new haxe.ui.geom.Point(0, chart.marginTop);
-		chart.y_axis = new Axis(yAxisStart, 90, yAxisLength, chart.y_tick_info);
-		chart.y_axis.setStartToEnd(yAxisLength, chart.marginTop);
 		chart.addComponent(chart.y_axis);
+		return null;
 	}
 }
 
@@ -407,9 +400,9 @@ class Builder extends CompositeBuilder {
 
 	override function onReady() {
 		var minmax = _chart.sortPoints();
-		_chart.setAxis();
 		_chart.setTickInfo(minmax);
-		_chart.drawPoints();
+		_chart.setAxis();
+		// _chart.drawPoints();
 	}
 
 	override function addComponent(child:Component):Component {
