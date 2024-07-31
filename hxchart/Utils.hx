@@ -1,10 +1,6 @@
 package hxchart;
 
-import haxe.ui.geom.Point;
-
 class Utils {
-	public static function centerPoints(coords:Point, width:Float, height:Float) {}
-
 	public static function floatToStringPrecision(n:Float, prec:Int) {
 		n = Math.round(n * Math.pow(10, prec));
 		var str = '' + n;
@@ -64,5 +60,14 @@ class Utils {
 			return Math.round((n + Math.pow(10, prec) / 2) / Math.pow(10, prec)) * Math.pow(10, prec);
 		}
 		return Math.round((n - Math.pow(10, prec) / 2) / Math.pow(10, prec)) * Math.pow(10, prec);
+	}
+
+	/**
+	 * Will remove all leading numbers before a dot.
+	 * @param str Numeric String
+	 */
+	public static function removeLeadingNumbers(str:String) {
+		var x = str.split(".");
+		return x[1];
 	}
 }

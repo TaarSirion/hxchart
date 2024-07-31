@@ -1,25 +1,31 @@
 package hxchart.basics.ticks;
 
-import haxe.ui.macros.ComponentMacros;
-import haxe.ui.util.ComponentUtil;
+import hxchart.basics.axis.AxisTools;
 import haxe.ui.behaviours.DefaultBehaviour;
 import haxe.ui.layouts.DefaultLayout;
 import haxe.ui.behaviours.DataBehaviour;
 import haxe.ui.containers.Box;
 import haxe.ui.core.CompositeBuilder;
-import haxe.ui.containers.Absolute;
 import haxe.ui.util.Color;
-import haxe.ui.core.Screen;
-import haxe.ui.core.Component;
 import haxe.ui.components.Canvas;
 import haxe.ui.components.Label;
-import haxe.ui.graphics.ComponentGraphics;
 import haxe.ui.geom.Point;
+
+enum CompassOrientation {
+	N;
+	NE;
+	E;
+	SE;
+	S;
+	SW;
+	W;
+	NW;
+}
 
 @:composite(TickBuilder, TickLayout)
 class Ticks extends Box {
 	@:clonable @:behaviour(DefaultBehaviour, 10) public var fontSize:Null<Float>;
-	@:clonable @:behaviour(DefaultBehaviour, 8) public var subFontSize:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 6) public var subFontSize:Null<Float>;
 	@:clonable @:behaviour(DefaultBehaviour, 7) public var tickLength:Null<Float>;
 	@:clonable @:behaviour(DefaultBehaviour, 4) public var subTickLength:Null<Float>;
 
@@ -43,22 +49,32 @@ class Ticks extends Box {
 		return is_sub;
 	}
 
-	public var is_y(default, set):Bool;
+	public var rotation(default, set):Int;
 
-	function get_is_y() {
-		return is_y;
+	function set_rotation(rotation:Int) {
+		return this.rotation = rotation;
 	}
 
-	function set_is_y(is_y:Bool) {
-		return this.is_y = is_y;
+	public var showLabel(default, set):Bool;
+
+	function set_showLabel(show:Bool) {
+		return showLabel = show;
+	}
+
+	public var labelPosition(default, set):CompassOrientation;
+
+	function set_labelPosition(pos:CompassOrientation) {
+		return labelPosition = pos;
 	}
 
 	public var options:Options;
 
-	public function new(is_sub:Bool = false, is_y:Bool = false) {
+	public function new(is_sub:Bool = false, rotation:Int = 0) {
 		super();
 		this.is_sub = is_sub;
-		this.is_y = is_y;
+		this.rotation = rotation + 90;
+		showLabel = true;
+		labelPosition = S;
 		color = Color.fromString("black");
 	}
 }
@@ -111,20 +127,35 @@ class TickUtils {
 		var is_sub = _tick.is_sub;
 		var tickLength = is_sub ? _tick.subTickLength : _tick.tickLength;
 		var tickFontsize = is_sub ? _tick.subFontSize : _tick.fontSize;
-		var tickTop = is_sub ? ((_tick.tickLength - _tick.subTickLength) / 2) : 0;
-		_tick.canvas.componentGraphics.strokeStyle(_tick.color);
+		var zeroPoint = new Point(0, 0);
+		var labelPoint = AxisTools.positionEndpoint(zeroPoint, _tick.rotation, tickLength / 2 + 11);
 		_label.customStyle.fontSize = tickFontsize;
-		_label.left = _tick.is_y ? 5 : 0;
-		_label.top = _tick.is_y ? 0 : 5;
-		_tick.canvas.componentGraphics.clear();
-		if (_tick.is_y) {
-			_tick.canvas.left = -tickLength / 2;
-			_tick.canvas.componentGraphics.moveTo(tickTop, 0);
-			_tick.canvas.componentGraphics.lineTo(tickLength, 0);
-		} else {
-			_tick.canvas.top = -tickLength / 2;
-			_tick.canvas.componentGraphics.moveTo(0, tickTop);
-			_tick.canvas.componentGraphics.lineTo(0, tickLength);
+		switch (_tick.labelPosition) {
+			case S:
+				_label.left = labelPoint.x - _label.width / 2;
+				_label.top = labelPoint.y - _label.height / 2;
+			case N:
+				_label.left = labelPoint.x - _label.width / 2;
+				_label.top = labelPoint.y + _label.height;
+			case E:
+				_label.left = labelPoint.x + _label.width / 2;
+				_label.top = labelPoint.y + _label.height / 2;
+			case W:
+				_label.left = labelPoint.x - _label.width;
+				_label.top = labelPoint.y + _label.height / 2;
+			case NE:
+				_label.left = labelPoint.x + _label.width / 2;
+				_label.top = labelPoint.y + _label.height;
+			case NW:
+				_label.left = labelPoint.x - _label.width;
+				_label.top = labelPoint.y + _label.height;
+			case SE:
+				_label.left = labelPoint.x + _label.width / 2;
+				_label.top = labelPoint.y - _label.height / 2;
+			case SW:
+				_label.left = labelPoint.x - _label.width;
+				_label.top = labelPoint.y - _label.height / 2;
 		}
+		_label.hidden = !_tick.showLabel;
 	}
 }

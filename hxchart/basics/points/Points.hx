@@ -1,6 +1,7 @@
 package hxchart.basics.points;
 
 import hxchart.basics.Chart.ChartInfo;
+import hxchart.basics.axis.AxisInfo;
 import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
 import haxe.ui.components.Canvas;
