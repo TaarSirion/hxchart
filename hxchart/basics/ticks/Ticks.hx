@@ -11,6 +11,17 @@ import haxe.ui.components.Canvas;
 import haxe.ui.components.Label;
 import haxe.ui.geom.Point;
 
+enum CompassOrientation {
+	N;
+	NE;
+	E;
+	SE;
+	S;
+	SW;
+	W;
+	NW;
+}
+
 @:composite(TickBuilder, TickLayout)
 class Ticks extends Box {
 	@:clonable @:behaviour(DefaultBehaviour, 10) public var fontSize:Null<Float>;
@@ -50,6 +61,12 @@ class Ticks extends Box {
 		return showLabel = show;
 	}
 
+	public var labelPosition(default, set):CompassOrientation;
+
+	function set_labelPosition(pos:CompassOrientation) {
+		return labelPosition = pos;
+	}
+
 	public var options:Options;
 
 	public function new(is_sub:Bool = false, rotation:Int = 0) {
@@ -57,6 +74,7 @@ class Ticks extends Box {
 		this.is_sub = is_sub;
 		this.rotation = rotation + 90;
 		showLabel = true;
+		labelPosition = S;
 		color = Color.fromString("black");
 	}
 }
@@ -112,8 +130,32 @@ class TickUtils {
 		var zeroPoint = new Point(0, 0);
 		var labelPoint = AxisTools.positionEndpoint(zeroPoint, _tick.rotation, tickLength / 2 + 11);
 		_label.customStyle.fontSize = tickFontsize;
-		_label.left = labelPoint.x - _label.width / 2;
-		_label.top = labelPoint.y - _label.height / 2;
+		switch (_tick.labelPosition) {
+			case S:
+				_label.left = labelPoint.x - _label.width / 2;
+				_label.top = labelPoint.y - _label.height / 2;
+			case N:
+				_label.left = labelPoint.x - _label.width / 2;
+				_label.top = labelPoint.y + _label.height;
+			case E:
+				_label.left = labelPoint.x + _label.width / 2;
+				_label.top = labelPoint.y + _label.height / 2;
+			case W:
+				_label.left = labelPoint.x - _label.width;
+				_label.top = labelPoint.y + _label.height / 2;
+			case NE:
+				_label.left = labelPoint.x + _label.width / 2;
+				_label.top = labelPoint.y + _label.height;
+			case NW:
+				_label.left = labelPoint.x - _label.width;
+				_label.top = labelPoint.y + _label.height;
+			case SE:
+				_label.left = labelPoint.x + _label.width / 2;
+				_label.top = labelPoint.y - _label.height / 2;
+			case SW:
+				_label.left = labelPoint.x - _label.width;
+				_label.top = labelPoint.y - _label.height / 2;
+		}
 		_label.hidden = !_tick.showLabel;
 	}
 }

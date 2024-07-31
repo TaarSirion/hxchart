@@ -1,5 +1,6 @@
 package hxchart.basics;
 
+import hxchart.basics.ticks.Ticks.CompassOrientation;
 import hxchart.basics.axis.NumericTickInfo;
 import hxchart.basics.legend.LegendNode;
 import haxe.ui.backend.html5.filters.ColorMatrixFilter;
@@ -342,6 +343,9 @@ private class SetAxis extends Behaviour {
 		// Real positioning
 		chart.x_axis.startPoint = new haxe.ui.geom.Point(0, chart.y_axis.ticks[chart.y_tick_info.zeroIndex].top);
 		chart.y_axis.startPoint = new haxe.ui.geom.Point(chart.x_axis.ticks[chart.x_tick_info.zeroIndex].left, 0);
+
+		chart.y_axis.showZeroTick = false;
+		chart.x_axis.zeroTickPosition = CompassOrientation.SE;
 		chart.addComponent(chart.x_axis);
 		chart.addComponent(chart.y_axis);
 		return null;

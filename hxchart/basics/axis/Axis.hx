@@ -75,12 +75,25 @@ class Axis extends Absolute {
 		return this.sub_ticks = ticks;
 	}
 
+	public var showZeroTick(default, set):Bool;
+
+	private function set_showZeroTick(show:Bool) {
+		return showZeroTick = show;
+	}
+
+	public var zeroTickPosition(default, set):CompassOrientation;
+
+	private function set_zeroTickPosition(pos:CompassOrientation) {
+		return zeroTickPosition = pos;
+	}
+
 	public function new(start:Point, rotation:Int, length:Float, tickInfo:TickInfo, color:String = "black") {
 		super();
 		top = start.y;
 		left = start.x;
 		this.rotation = rotation;
 		axisLength = length;
+		showZeroTick = true;
 		this.color = Color.fromString(color);
 		this.tickInfo = tickInfo;
 	}
@@ -166,6 +179,12 @@ private class SetTicks extends Behaviour {
 			var tickPoint = AxisTools.positionEndpoint(start, axis.rotation, axis.tickMargin + i * tickPos);
 			tick.left = tickPoint.x;
 			tick.top = tickPoint.y;
+			if (tickInfo.zeroIndex == i && !axis.showZeroTick) {
+				tick.hidden = true;
+			}
+			if (tickInfo.zeroIndex == i && axis.zeroTickPosition != null) {
+				tick.labelPosition = axis.zeroTickPosition;
+			}
 			tick.text = tickInfo.labels[i];
 			axis.ticks.push(tick);
 			layer.addComponent(tick);
