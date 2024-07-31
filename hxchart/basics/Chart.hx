@@ -84,6 +84,11 @@ class Chart extends Absolute {
 
 	public var x_axis:Axis;
 	public var y_axis:Axis;
+	public var axisLayer(default, set):Absolute;
+
+	function set_axisLayer(layer:Absolute) {
+		return axisLayer = layer;
+	}
 
 	public var legendLayer(default, set):Absolute;
 
@@ -269,13 +274,13 @@ private class SetPoints extends Behaviour {
 private class SetAxis extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
-		var y_axis_length = ChartTools.calcAxisLength(chart.height, chart.marginTop, chart.marginBottom);
-		var x_axis_length = ChartTools.calcAxisLength(chart.width, chart.marginLeft, chart.marginRight);
+		var y_axis_length = ChartTools.calcAxisLength(chart.axisLayer.height, chart.marginTop, chart.marginBottom);
+		var x_axis_length = ChartTools.calcAxisLength(chart.axisLayer.width, chart.marginLeft, chart.marginRight);
 		var chartPoint = new haxe.ui.geom.Point(chart.marginLeft, chart.marginTop);
-		chart.x_axis = new Axis(chartPoint, 0, x_axis_length, chart.x_tick_info);
+		chart.x_axis = new Axis(chartPoint, 0, x_axis_length, chart.x_tick_info, "xaxis");
 		chart.x_axis.width = x_axis_length;
 		chart.x_axis.height = y_axis_length;
-		chart.y_axis = new Axis(chartPoint, 90, y_axis_length, chart.y_tick_info);
+		chart.y_axis = new Axis(chartPoint, 90, y_axis_length, chart.y_tick_info, "yaxis");
 		chart.y_axis.width = x_axis_length;
 		chart.y_axis.height = y_axis_length;
 		// This is necessary to allow the ticks to be calculated
@@ -287,8 +292,21 @@ private class SetAxis extends Behaviour {
 
 		chart.y_axis.showZeroTick = false;
 		chart.x_axis.zeroTickPosition = CompassOrientation.SE;
-		chart.addComponent(chart.x_axis);
-		chart.addComponent(chart.y_axis);
+
+		var xComponent:Absolute = chart.axisLayer.findComponent("xaxis");
+		if (xComponent == null) {
+			chart.axisLayer.addComponent(chart.x_axis);
+		} else {
+			chart.axisLayer.removeComponent(xComponent);
+			chart.axisLayer.addComponent(chart.x_axis);
+		}
+		var yComponent:Absolute = chart.axisLayer.findComponent("yaxis");
+		if (yComponent == null) {
+			chart.axisLayer.addComponent(chart.y_axis);
+		} else {
+			chart.axisLayer.removeComponent(yComponent);
+			chart.axisLayer.addComponent(chart.y_axis);
+		}
 		return null;
 	}
 }
@@ -305,14 +323,13 @@ private class DrawPoints extends Behaviour {
 		var y_coord_max = chart.y_axis.ticks[chart.y_axis.ticks.length - 1].top;
 		var ratio = 1 - chart.y_tick_info.negNum / chart.y_tick_info.tickNum;
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, ratio);
-		chart.pointlayer.setInfo({
+		chart.points.setInfo({
 			axis_info: {x_ticks: chart.x_axis.ticks, y_ticks: chart.y_axis.ticks},
 			x_dist: x_dist,
 			y_dist: y_dist,
 			y_tick_info: chart.y_tick_info,
 			x_tick_info: chart.x_tick_info
 		});
-		trace(chart.points.points.length);
 		return null;
 	}
 }
@@ -334,8 +351,12 @@ class Builder extends CompositeBuilder {
 		_chart.legendLayer.percentHeight = 100;
 		_chart.legendLayer.percentWidth = 100;
 		_chart.legendLayer.addClass("legend-layer");
+		_chart.axisLayer = new Absolute();
+		_chart.axisLayer.percentHeight = 100;
+		_chart.axisLayer.percentWidth = 100;
 		_chart.addComponent(_chart.legendLayer);
 		_chart.addComponent(_chart.pointlayer);
+		_chart.addComponent(_chart.axisLayer);
 		_chart.points = new Points();
 		_chart.points.percentHeight = 100;
 		_chart.points.percentWidth = 100;
@@ -343,9 +364,9 @@ class Builder extends CompositeBuilder {
 	}
 
 	override function onReady() {
-		var minmax = _chart.sortPoints();
-		_chart.setTickInfo(minmax);
-		_chart.setAxis();
+		// var minmax = _chart.sortPoints();
+		// _chart.setTickInfo(minmax);
+		// _chart.setAxis();
 		// _chart.drawPoints();
 	}
 
@@ -363,6 +384,9 @@ class Builder extends CompositeBuilder {
 	override function validateComponentData() {
 		super.validateComponentData();
 		setLayerPosition();
+		var minmax = _chart.sortPoints();
+		_chart.setTickInfo(minmax);
+		_chart.setAxis();
 	}
 
 	function setLegend(legend:Legend) {
@@ -381,18 +405,32 @@ class Builder extends CompositeBuilder {
 		_chart.legendLayer.percentWidth = 100;
 		_chart.pointlayer.percentHeight = 100;
 		_chart.pointlayer.percentWidth = 100;
+		_chart.axisLayer.percentHeight = 100;
+		_chart.axisLayer.percentWidth = 100;
+		if (legend == null) {
+			_chart.pointlayer.percentHeight = 100;
+			_chart.pointlayer.top = 0;
+			_chart.axisLayer.percentHeight = 100;
+			_chart.axisLayer.top = 0;
+			return;
+		}
+
 		if (legend.align <= 1) {
 			_chart.legendLayer.percentWidth = minPercent;
 			_chart.pointlayer.percentWidth = maxPercent;
+			_chart.axisLayer.percentWidth = maxPercent;
 			var percent = (minWidth / _chart.width) * 100;
 			if (percent > minPercent) {
 				_chart.legendLayer.percentWidth = percent;
 				_chart.pointlayer.percentWidth = 100 - percent;
+				_chart.axisLayer.percentWidth = 100 - percent;
 			}
 			_chart.legendLayer.left = 0;
 			_chart.pointlayer.left = _chart.legendLayer.width;
+			_chart.axisLayer.left = _chart.legendLayer.width;
 			if (legend.align == 1) {
 				_chart.pointlayer.left = 0;
+				_chart.axisLayer.left = 0;
 				_chart.legendLayer.left = _chart.pointlayer.width;
 			}
 			trace(_chart.legendLayer.left);
@@ -401,8 +439,11 @@ class Builder extends CompositeBuilder {
 			_chart.pointlayer.percentHeight = maxPercent;
 			_chart.legendLayer.top = 0;
 			_chart.pointlayer.top = _chart.legendLayer.height;
+			_chart.axisLayer.top = _chart.legendLayer.height;
+			_chart.axisLayer.percentHeight = maxPercent;
 			if (legend.align == 3) {
 				_chart.pointlayer.left = 0;
+				_chart.axisLayer.left = 0;
 				_chart.legendLayer.left = _chart.pointlayer.height;
 			}
 		}

@@ -87,7 +87,7 @@ class Axis extends Absolute {
 		return zeroTickPosition = pos;
 	}
 
-	public function new(start:Point, rotation:Int, length:Float, tickInfo:TickInfo, color:String = "black") {
+	public function new(start:Point, rotation:Int, length:Float, tickInfo:TickInfo, idName:String, color:String = "black") {
 		super();
 		top = start.y;
 		left = start.x;
@@ -96,6 +96,7 @@ class Axis extends Absolute {
 		showZeroTick = true;
 		this.color = Color.fromString(color);
 		this.tickInfo = tickInfo;
+		id = idName;
 	}
 }
 
@@ -221,7 +222,7 @@ private class AxisBuilder extends CompositeBuilder {
 		_axis.addComponent(_tickLabelLayer);
 	}
 
-	public override function onReady() {
+	override function validateComponentData() {
 		_tickCanvasLayer.componentGraphics.clear();
 		_tickLabelLayer.removeAllComponents();
 		var sub_width = _axis.width;
@@ -238,7 +239,6 @@ private class AxisBuilder extends CompositeBuilder {
 		_tickLabelLayer.width = sub_width;
 		_tickCanvasLayer.height = sub_height;
 		_tickLabelLayer.height = sub_height;
-
 		var axis = _axis;
 		var canvas = _tickCanvasLayer;
 		if (canvas != null) {
