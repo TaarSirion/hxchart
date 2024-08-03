@@ -55,13 +55,6 @@ class LegendNode extends HBox {
 
 	public function drawSymbol() {
 		canvas.componentGraphics.clear();
-		// if (legend.optionsDS.get(0).legend_symbol_filled) {
-		// 	canvas.componentGraphics.rectangle(2, 2, 6, 6);
-		// 	return;
-		// }
-		// switch legend.optionsDS.get(0).legend_symbol_type {
-		// 	case point:
-
 		canvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
 		// 	case line:
 		// 		canvas.componentGraphics.moveTo(2, 5);
@@ -94,30 +87,31 @@ private class TextBehaviour extends DataBehaviour {
 @:access(haxe.ui.core.Component)
 private class Builder extends CompositeBuilder {
 	private var _legendNode:LegendNode;
+	private var _label:Label;
 
 	private function new(legendNode:LegendNode) {
 		super(legendNode);
 		_legendNode = legendNode;
 		_legendNode.fontSize = 16;
-		var label = new Label();
-		label.addClass("legend-text");
-		label.text = "Legend Text";
-		label.customStyle.textAlign = "left";
+		_label = new Label();
+		_label.addClass("legend-text");
+		_label.text = "Legend Text";
+		_label.customStyle.textAlign = "left";
 		_legendNode.canvas = new Canvas();
 		_legendNode.canvas.addClass("legend-text-symbol");
 		_legendNode.canvas.height = _legendNode.fontSize * 1.25 + 4;
 		_legendNode.addComponent(_legendNode.canvas);
-		_legendNode.addComponent(label);
+		_legendNode.addComponent(_label);
 	}
 
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
 		_legendNode.canvas.height = _legendNode.childComponents[1].height;
-		var canvas = _component.findComponent("legend-text-symbol", Canvas, null, "css");
-		if (canvas != null) {
-			var node = cast(_component, LegendNode);
-			canvas.componentGraphics.fillStyle(_legendNode.color);
-			node.drawSymbol();
-		}
+		_legendNode.canvas.componentGraphics.fillStyle(_legendNode.color);
+		_legendNode.drawSymbol();
+	}
+
+	override function validateComponentData() {
+		super.validateComponentData();
 	}
 }

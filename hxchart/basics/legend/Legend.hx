@@ -23,7 +23,11 @@ enum LegendSymbols {
 
 @:composite(Builder, LegendLayout)
 class Legend extends VBox {
+	/**
+	 * Alginment of the legend. 0 means left. 1 means right. 2 means top. 3 means bottom. 
+	 */
 	@:clonable @:behaviour(DefaultBehaviour, 1) public var align:Null<Int>;
+
 	@:clonable @:behaviour(DefaultBehaviour, 20) public var fontSizeTitle:Null<Int>;
 	@:clonable @:behaviour(DefaultBehaviour, 16) public var fontSizeEntry:Null<Int>;
 
@@ -122,6 +126,9 @@ private class AddNode extends Behaviour {
 			node.childComponents[1].percentWidth = 80;
 		} else {
 			node.percentHeight = 100;
+			node.childComponents[0].percentWidth = 20;
+			node.childComponents[1].percentWidth = 80;
+			node.marginLeft = 40;
 		}
 		node.data = param;
 		legend.addComponent(node);
@@ -198,10 +205,13 @@ class Builder extends CompositeBuilder {
 		super.validateComponentData();
 		if (_legend.align >= 2) {
 			_legend.childComponents[0].hide();
+			var fullLength = _legend.childComponents[1].width;
 			for (child in _legend.childComponents[1].childComponents) {
-				if (child.childComponents.length > 0) {
-					trace("Child width", child.width, child.childComponents[1].width);
+				if (child.numComponents == 0) {
+					fullLength -= child.width;
+					continue;
 				}
+				child.width = fullLength / _legend.childNodes.length;
 			}
 		} else {
 			_legend.childComponents[1].hide();
