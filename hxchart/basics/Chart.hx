@@ -280,19 +280,18 @@ private class SetAxis extends Behaviour {
 		chart.x_axis = new Axis(chartPoint, 0, x_axis_length, chart.x_tick_info, "xaxis");
 		chart.x_axis.width = x_axis_length;
 		chart.x_axis.height = y_axis_length;
-		chart.y_axis = new Axis(chartPoint, 90, y_axis_length, chart.y_tick_info, "yaxis");
+		chart.y_axis = new Axis(chartPoint, 270, y_axis_length, chart.y_tick_info, "yaxis");
 		chart.y_axis.width = x_axis_length;
 		chart.y_axis.height = y_axis_length;
 		// This is necessary to allow the ticks to be calculated
 		chart.x_axis.startPoint = new haxe.ui.geom.Point(0, 40);
-		chart.y_axis.startPoint = new haxe.ui.geom.Point(40, 0);
+		chart.y_axis.startPoint = new haxe.ui.geom.Point(40, y_axis_length);
 		// Real positioning
 		chart.x_axis.startPoint = new haxe.ui.geom.Point(0, chart.y_axis.ticks[chart.y_tick_info.zeroIndex].top);
-		chart.y_axis.startPoint = new haxe.ui.geom.Point(chart.x_axis.ticks[chart.x_tick_info.zeroIndex].left, 0);
+		chart.y_axis.startPoint = new haxe.ui.geom.Point(chart.x_axis.ticks[chart.x_tick_info.zeroIndex].left, y_axis_length);
 
 		chart.y_axis.showZeroTick = false;
-		chart.x_axis.zeroTickPosition = CompassOrientation.SE;
-
+		chart.x_axis.zeroTickPosition = CompassOrientation.SW;
 		var xComponent:Absolute = chart.axisLayer.findComponent("xaxis");
 		if (xComponent == null) {
 			chart.axisLayer.addComponent(chart.x_axis);
