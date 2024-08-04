@@ -276,9 +276,9 @@ private class SetPoints extends Behaviour {
 private class SetAxis extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
-		var y_axis_length = ChartTools.calcAxisLength(chart.axisLayer.height, chart.marginTop, chart.marginBottom);
-		var x_axis_length = ChartTools.calcAxisLength(chart.axisLayer.width, chart.marginLeft, chart.marginRight);
-		var chartPoint = new haxe.ui.geom.Point(chart.marginLeft, chart.marginTop);
+		var y_axis_length = ChartTools.calcAxisLength(chart.axisLayer.height, chart.paddingTop, chart.paddingBottom);
+		var x_axis_length = ChartTools.calcAxisLength(chart.axisLayer.width, chart.paddingLeft, chart.paddingRight);
+		var chartPoint = new haxe.ui.geom.Point(chart.paddingLeft, chart.paddingTop);
 		chart.x_axis = new Axis(chartPoint, 0, x_axis_length, chart.x_tick_info, "xaxis");
 		chart.x_axis.width = x_axis_length;
 		chart.x_axis.height = y_axis_length;
