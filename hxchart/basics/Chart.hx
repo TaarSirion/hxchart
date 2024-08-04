@@ -347,9 +347,17 @@ class Builder extends CompositeBuilder {
 		_chart = chart;
 		_chart.width = 500;
 		_chart.height = 500;
+		_chart.backgroundColor = Color.fromString("#E5E5EB");
+		_chart.borderSize = 1;
+		_chart.borderColor = Color.fromString("black");
+		_chart.borderRadius = 0;
 		_chart.pointlayer = new Absolute();
 		_chart.pointlayer.percentHeight = 100;
 		_chart.pointlayer.percentWidth = 100;
+		_chart.pointlayer.borderColor = Color.fromString("black");
+		_chart.pointlayer.borderSize = 1;
+		_chart.pointlayer.borderRadius = 0;
+		_chart.pointlayer.backgroundColor = Color.fromString("#F8F8FC");
 		_chart.legendLayer = new Absolute();
 		_chart.legendLayer.top = _chart.top;
 		_chart.legendLayer.left = _chart.left;
