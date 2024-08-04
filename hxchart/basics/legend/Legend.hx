@@ -147,6 +147,12 @@ class Builder extends CompositeBuilder {
 	public function new(legend:Legend) {
 		super(legend);
 		_legend = legend;
+		_legend.marginBottom = 10;
+		_legend.marginTop = 10;
+		_legend.marginLeft = 10;
+		_legend.marginRight = 10;
+		_legend.top = 10;
+		_legend.left = 10;
 		_legend.percentHeight = 100;
 		_legend.percentWidth = 100;
 		_legend.childNodes = [];
