@@ -1,5 +1,6 @@
 package hxchart.basics.pointchart;
 
+import haxe.ui.styles.Style;
 import hxchart.basics.ticks.Ticks;
 import hxchart.basics.ticks.Ticks.CompassOrientation;
 import hxchart.basics.axis.NumericTickInfo;
@@ -392,6 +393,14 @@ class Builder extends CompositeBuilder {
 		} else {
 			return super.addComponent(child);
 		}
+	}
+
+	override function applyStyle(style:Style) {
+		super.applyStyle(style);
+		_chart.left = _chart.marginLeft;
+		_chart.top = _chart.marginTop;
+		_chart.width = _chart.width - _chart.marginRight;
+		_chart.height = _chart.height - _chart.marginBottom;
 	}
 
 	override function validateComponentData() {
