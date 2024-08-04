@@ -397,8 +397,9 @@ class Builder extends CompositeBuilder {
 
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
-		_chart.left = _chart.marginLeft;
-		_chart.top = _chart.marginTop;
+		// It seems that margin does not get applied.
+		_chart.left = _chart.left + _chart.marginLeft;
+		_chart.top = _chart.top + _chart.marginTop;
 		_chart.width = _chart.width - _chart.marginRight;
 		_chart.height = _chart.height - _chart.marginBottom;
 	}
