@@ -1,5 +1,6 @@
 package hxchart.basics;
 
+import hxchart.basics.ticks.Ticks;
 import hxchart.basics.ticks.Ticks.CompassOrientation;
 import hxchart.basics.axis.NumericTickInfo;
 import hxchart.basics.legend.LegendNode;
@@ -30,7 +31,8 @@ import haxe.ui.behaviours.DataBehaviour;
 import haxe.ui.behaviours.DefaultBehaviour;
 
 typedef ChartInfo = {
-	axis_info:AxisInfo,
+	xTicks:Array<Ticks>,
+	yTicks:Array<Ticks>,
 	x_tick_info:NumericTickInfo,
 	y_tick_info:NumericTickInfo,
 	x_dist:AxisDist,
@@ -314,16 +316,20 @@ private class SetAxis extends Behaviour {
 private class DrawPoints extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
+		if (chart.x_tick_info == null) {
+			return null;
+		}
 		var x_coord_min = chart.x_axis.ticks[0].left;
 		var x_coord_max = chart.x_axis.ticks[chart.x_axis.ticks.length - 1].left;
-		var ratio = 1 - chart.x_tick_info.negNum / chart.x_tick_info.tickNum;
+		var ratio = 1 - chart.x_tick_info.negNum / (chart.x_tick_info.tickNum - 1);
 		var x_dist = ChartTools.calcAxisDists(x_coord_min, x_coord_max, ratio);
 		var y_coord_min = chart.y_axis.ticks[0].top;
 		var y_coord_max = chart.y_axis.ticks[chart.y_axis.ticks.length - 1].top;
-		var ratio = 1 - chart.y_tick_info.negNum / chart.y_tick_info.tickNum;
+		var ratio = 1 - chart.y_tick_info.negNum / (chart.y_tick_info.tickNum - 1);
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, ratio);
 		chart.points.setInfo({
-			axis_info: {x_ticks: chart.x_axis.ticks, y_ticks: chart.y_axis.ticks},
+			xTicks: chart.x_axis.ticks,
+			yTicks: chart.y_axis.ticks,
 			x_dist: x_dist,
 			y_dist: y_dist,
 			y_tick_info: chart.y_tick_info,
@@ -386,6 +392,7 @@ class Builder extends CompositeBuilder {
 		var minmax = _chart.sortPoints();
 		_chart.setTickInfo(minmax);
 		_chart.setAxis();
+		_chart.drawPoints();
 	}
 
 	function setLegend(legend:Legend) {

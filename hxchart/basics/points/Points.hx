@@ -19,6 +19,7 @@ class Points extends Canvas {
 	}
 
 	public function setInfo(chartInfo:ChartInfo) {
+		componentGraphics.clear();
 		for (point in points) {
 			point.setPosition(chartInfo);
 			point.draw(this.componentGraphics);
