@@ -24,7 +24,10 @@ typedef LegendNodeData = {
 class LegendNode extends HBox {
 	@:style(layout) public var fontSize:Null<Float>;
 
-	@:clonable @:behaviour(DefaultBehaviour, "point") public var symbol:String;
+	/**
+	 * Symbol of the legend. Default is point.
+	 */
+	@:clonable @:behaviour(SymbolBehaviour, "rectangle") public var symbol:String;
 
 	@:clonable @:behaviour(TextBehaviour) public var text:String;
 
@@ -53,13 +56,17 @@ class LegendNode extends HBox {
 		return value;
 	}
 
-	public function drawSymbol() {
+	public function drawSymbol(symbol:String) {
 		canvas.componentGraphics.clear();
-		canvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
-		// 	case line:
-		// 		canvas.componentGraphics.moveTo(2, 5);
-		// 		canvas.componentGraphics.lineTo(8, 5);
-		// }
+		canvas.componentGraphics.fillStyle(color);
+		switch (symbol) {
+			case "point":
+				canvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
+			case "rectangle":
+				canvas.componentGraphics.rectangle(2, 2, 6, 6);
+			default:
+				canvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
+		}
 	}
 }
 
@@ -67,6 +74,15 @@ class LegendNode extends HBox {
 private class LegendLayout extends DefaultLayout {
 	override function resizeChildren() {
 		super.resizeChildren();
+	}
+}
+
+@:dox(hide) @:noCompletion
+private class SymbolBehaviour extends DataBehaviour {
+	private override function validateData() {
+		var node = cast(_component, LegendNode);
+		var symbol:String = _value;
+		node.drawSymbol(symbol);
 	}
 }
 
@@ -107,8 +123,7 @@ private class Builder extends CompositeBuilder {
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
 		_legendNode.canvas.height = _legendNode.childComponents[1].height;
-		_legendNode.canvas.componentGraphics.fillStyle(_legendNode.color);
-		_legendNode.drawSymbol();
+		_legendNode.drawSymbol(_legendNode.symbol);
 	}
 
 	override function validateComponentData() {
