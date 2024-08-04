@@ -1,6 +1,6 @@
 package hxchart.basics.points;
 
-import hxchart.basics.Chart.ChartInfo;
+import hxchart.basics.pointchart.Chart.ChartInfo;
 import hxchart.basics.axis.AxisInfo;
 import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
@@ -33,7 +33,7 @@ class Points extends Canvas {
 		var y_points = points.map(function(p) {
 			return p.y_val;
 		});
-		return ChartTools.sortPoints(x_points, y_points);
+		return hxchart.basics.pointchart.ChartTools.sortPoints(x_points, y_points);
 	}
 }
 

@@ -1,11 +1,11 @@
 package hxchart.basics.points;
 
 import hxchart.basics.ticks.Ticks;
-import hxchart.basics.ChartTools.AxisDist;
+import hxchart.basics.pointchart.ChartTools.AxisDist;
 import haxe.ui.util.Color;
 import haxe.ui.behaviours.DefaultBehaviour;
 import haxe.ui.events.MouseEvent;
-import hxchart.basics.Chart.ChartInfo;
+import hxchart.basics.pointchart.Chart.ChartInfo;
 import haxe.ui.core.Screen;
 import haxe.ui.graphics.ComponentGraphics;
 

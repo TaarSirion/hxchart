@@ -1,4 +1,4 @@
-package hxchart.basics;
+package hxchart.basics.pointchart;
 
 import hxchart.basics.ticks.Ticks;
 import hxchart.basics.ticks.Ticks.CompassOrientation;
@@ -22,7 +22,7 @@ import hxchart.basics.axis.AxisInfo;
 import hxchart.basics.axis.Axis;
 import haxe.ui.events.UIEvent;
 import haxe.ui.containers.Absolute;
-import hxchart.basics.ChartTools.AxisDist;
+import hxchart.basics.pointchart.ChartTools.AxisDist;
 import haxe.ui.core.Screen;
 import haxe.ui.components.Canvas;
 import hxchart.basics.points.Point;
@@ -59,7 +59,7 @@ class Chart extends Absolute {
 
 	public var colors:Array<Int>;
 
-	@:call(SetTickInfo) public function setTickInfo(data:hxchart.basics.ChartTools.ChartMinMax):Void;
+	@:call(SetTickInfo) public function setTickInfo(data:hxchart.basics.pointchart.ChartTools.ChartMinMax):Void;
 
 	@:call(SetPoints) public function setPoints(data:PointAdd):Void;
 
@@ -225,7 +225,7 @@ private class ColorPaletteBehaviour extends DataBehaviour {
 @:dox(hide) @:noCompletion
 private class SetTickInfo extends Behaviour {
 	public override function call(param:Any = null):Variant {
-		var pointInfo:hxchart.basics.ChartTools.ChartMinMax = param;
+		var pointInfo:hxchart.basics.pointchart.ChartTools.ChartMinMax = param;
 		var chart = cast(_component, Chart);
 		chart.x_tick_info = new NumericTickInfo(pointInfo.min_x, pointInfo.max_x);
 		chart.y_tick_info = new NumericTickInfo(pointInfo.min_y, pointInfo.max_y);
