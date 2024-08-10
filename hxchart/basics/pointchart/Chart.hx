@@ -84,6 +84,10 @@ class Chart extends Absolute {
 
 	public var x_axis:Axis;
 	public var y_axis:Axis;
+	public var axisPaddingT:Float = 0;
+	public var axisPaddingL:Float = 0;
+	public var axisPaddingR:Float = 0;
+	public var axisPaddingB:Float = 0;
 	public var axisLayer(default, set):Absolute;
 
 	function set_axisLayer(layer:Absolute) {
@@ -105,6 +109,46 @@ class Chart extends Absolute {
 	private var init_top:Float = 0;
 	private var init_left:Float = 0;
 
+	public var chartPoint:haxe.ui.geom.Point;
+
+	override function set_padding(value:Null<Float>):Null<Float> {
+		points.top = value;
+		points.left = value;
+		points.width -= 2 * value;
+		points.height -= 2 * value;
+		axisPaddingL = value;
+		axisPaddingT = value;
+		axisPaddingB = value;
+		axisPaddingR = value;
+		chartPoint.x = value;
+		chartPoint.y = value;
+		return super.set_padding(0);
+	}
+
+	override function set_paddingBottom(value:Null<Float>):Null<Float> {
+		axisPaddingB = value;
+		return super.set_paddingBottom(0);
+	}
+
+	override function set_paddingLeft(value:Null<Float>):Null<Float> {
+		axisPaddingL = value;
+		points.left = value;
+		chartPoint.x = value;
+		return super.set_paddingLeft(0);
+	}
+
+	override function set_paddingRight(value:Null<Float>):Null<Float> {
+		axisPaddingR = value;
+		return super.set_paddingRight(0);
+	}
+
+	override function set_paddingTop(value:Null<Float>):Null<Float> {
+		axisPaddingT = value;
+		points.top = value;
+		chartPoint.y = value;
+		return super.set_paddingTop(0);
+	}
+
 	/**
 	 * [Create a new object of type Chart]
 	 * @param top Initial top position of the chart.
@@ -114,6 +158,7 @@ class Chart extends Absolute {
 	 */
 	public function new() {
 		super();
+		chartPoint = new haxe.ui.geom.Point(0, 0);
 	}
 
 	private var init_width:Float = 0;
@@ -237,20 +282,16 @@ private class SetTickInfo extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
 		if (chart.min_x != null && chart.max_x != null) {
-			trace("B");
 			chart.x_tick_info = new NumericTickInfo(chart.min_x, chart.max_x);
 		} else {
-			trace("A");
 			var xVals = chart.points.points.map(x -> {
 				return x.x_val;
 			});
 			chart.x_tick_info = new StringTickInfo(xVals);
 		}
 		if (chart.min_y != null && chart.max_y != null) {
-			trace("C");
 			chart.y_tick_info = new NumericTickInfo(chart.min_y, chart.max_y);
 		} else {
-			trace("D");
 			var yVals = chart.points.points.map(x -> {
 				return x.y_val;
 			});
@@ -303,13 +344,13 @@ private class SetPoints extends Behaviour {
 private class SetAxis extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
-		var y_axis_length = ChartTools.calcAxisLength(chart.axisLayer.height, chart.paddingTop, chart.paddingBottom);
-		var x_axis_length = ChartTools.calcAxisLength(chart.axisLayer.width, chart.paddingLeft, chart.paddingRight);
-		var chartPoint = new haxe.ui.geom.Point(chart.paddingLeft, chart.paddingTop);
-		chart.x_axis = new Axis(chartPoint, 0, x_axis_length, chart.x_tick_info, "xaxis");
+		var y_axis_length = chart.axisLayer.height - chart.axisPaddingT - chart.axisPaddingB;
+		var x_axis_length = chart.axisLayer.width - chart.axisPaddingL - chart.axisPaddingR;
+
+		chart.x_axis = new Axis(chart.chartPoint, 0, x_axis_length, chart.x_tick_info, "xaxis");
 		chart.x_axis.width = x_axis_length;
 		chart.x_axis.height = y_axis_length;
-		chart.y_axis = new Axis(chartPoint, 270, y_axis_length, chart.y_tick_info, "yaxis");
+		chart.y_axis = new Axis(chart.chartPoint, 270, y_axis_length, chart.y_tick_info, "yaxis");
 		chart.y_axis.width = x_axis_length;
 		chart.y_axis.height = y_axis_length;
 		// This is necessary to allow the ticks to be calculated
@@ -346,6 +387,8 @@ private class DrawPoints extends Behaviour {
 		if (chart.x_tick_info == null || chart.y_tick_info == null) {
 			return null;
 		}
+		chart.points.width = chart.pointlayer.width - chart.axisPaddingL - chart.axisPaddingR;
+		chart.points.height = chart.pointlayer.height - chart.axisPaddingT - chart.axisPaddingB;
 		var x_coord_min = chart.x_axis.ticks[0].left;
 		var x_coord_max = chart.x_axis.ticks[chart.x_axis.ticks.length - 1].left;
 		var ratio = 1.0;
