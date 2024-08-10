@@ -1,21 +1,43 @@
 package hxchart.tests;
 
-import hxchart.basics.ChartTools;
+import hxchart.basics.points.Points;
+import hxchart.basics.pointchart.ChartTools;
+import hxchart.basics.pointchart.Chart;
 import utest.Assert;
 
 class TestChart extends utest.Test {
-	function testSortPoints() {
-		var minmax = ChartTools.sortPoints([1, 0], [2, 3, 1]);
+	function testPadding() {
+		var chart = new Chart();
+		chart.paddingTop = 10;
 
-		Assert.equals(0, minmax.min_x);
-		Assert.equals(1, minmax.max_x);
-		Assert.equals(1, minmax.min_y);
-		Assert.equals(3, minmax.max_y);
+		Assert.equals(0, chart.paddingTop);
+		Assert.equals(10, chart.chartPoint.y);
+		Assert.equals(10, chart.axisPaddingT);
+		Assert.equals(0, chart.axisPaddingB);
 	}
 
-	function testCalcAxisLength() {
-		var length = ChartTools.calcAxisLength(100, 10, 10);
-		Assert.equals(80, length);
+	function testSortPoints() {
+		var chart = new Chart();
+		chart.points = new Points();
+		chart.setPoints({
+			x_points: [2, 1, 3],
+			y_points: [1, 2, 3]
+		});
+		chart.sortPoints();
+		Assert.equals(3, chart.max_x);
+		Assert.equals(1, chart.min_x);
+	}
+
+	function testGroups() {
+		var chart = new Chart();
+		chart.points = new Points();
+		chart.setPoints({
+			x_points: [2, 1, 3],
+			y_points: [1, 2, 3],
+			groups: ["A", "A", "B"]
+		});
+		Assert.equals(2, chart.countGroups);
+		Assert.equals(1, chart.point_groups.get("B"));
 	}
 
 	function testCalcAxisDists() {
@@ -23,38 +45,5 @@ class TestChart extends utest.Test {
 
 		Assert.equals(60, dists.pos_dist);
 		Assert.equals(40, dists.neg_dist);
-	}
-
-	function testSetStartPoint() {
-		var point = ChartTools.setAxisStartPoint(0, 0, false, 0);
-
-		Assert.equals(0, point.x);
-		Assert.equals(0, point.y);
-
-		var point = ChartTools.setAxisStartPoint(0, 0, false);
-
-		Assert.equals(0, point.x);
-		Assert.equals(15, point.y);
-
-		var point = ChartTools.setAxisStartPoint(1, 0, false, 0);
-
-		Assert.equals(1, point.x);
-		Assert.equals(0, point.y);
-
-		var point = ChartTools.setAxisStartPoint(0, 1, true, 0);
-
-		Assert.equals(1, point.x);
-		Assert.equals(0, point.y);
-	}
-
-	function testSetEndPoint() {
-		var spoint = ChartTools.setAxisStartPoint(0, 0, false, 0);
-		var point = ChartTools.setAxisEndPoint(spoint, 100, false);
-		Assert.equals(100, point.x);
-		Assert.equals(0, point.y);
-
-		var point = ChartTools.setAxisEndPoint(spoint, 100, true);
-		Assert.equals(0, point.x);
-		Assert.equals(100, point.y);
 	}
 }

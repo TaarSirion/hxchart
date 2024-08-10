@@ -25,16 +25,6 @@ class Points extends Canvas {
 			point.draw(this.componentGraphics);
 		}
 	}
-
-	public function sortPoints() {
-		var x_points = points.map(function(p) {
-			return p.x_val;
-		});
-		var y_points = points.map(function(p) {
-			return p.y_val;
-		});
-		return hxchart.basics.pointchart.ChartTools.sortPoints(x_points, y_points);
-	}
 }
 
 class AddPoint extends Behaviour {

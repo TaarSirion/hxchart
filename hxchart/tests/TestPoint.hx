@@ -1,34 +1,97 @@
 package hxchart.tests;
 
-import hxchart.basics.points.PointTools;
+import hxchart.basics.ticks.Ticks;
+import hxchart.basics.points.Point;
 import utest.Assert;
 
 class TestPoint extends utest.Test {
-	function testCalcXCoord() {
-		var x = PointTools.calcXCoord(1, 2, 0, 0, {pos_dist: 2, neg_dist: 0});
-		Assert.equals(1, x);
+	function testCalcCoords() {
+		var p = new Point(0, 0, 0);
+		var t1 = new Ticks();
+		t1.left = 0;
+		t1.text = "0";
+		t1.top = 0;
+		var t2 = new Ticks();
+		t2.left = 10;
+		t2.text = "1";
+		t2.top = 0;
+		var x = p.calcXCoord([t1, t2], 0, {pos_dist: 10, neg_dist: 0});
+		Assert.equals(0, x);
+		var t1 = new Ticks();
+		t1.left = 0;
+		t1.text = "0";
+		t1.top = 10;
+		var t2 = new Ticks();
+		t2.left = 0;
+		t2.text = "1";
+		t2.top = 0;
+		var y = p.calcYCoord([t1, t2], 10, {pos_dist: 10, neg_dist: 0});
+		Assert.equals(10, y);
 
-		var x = PointTools.calcXCoord(-1, 0, -2, 0, {pos_dist: 0, neg_dist: 2});
-		Assert.equals(-1, x);
+		var p = new Point(0.5, 0, 0);
+		var t1 = new Ticks();
+		t1.left = 0;
+		t1.text = "0";
+		t1.top = 0;
+		var t2 = new Ticks();
+		t2.left = 10;
+		t2.text = "1";
+		t2.top = 0;
+		var x = p.calcXCoord([t1, t2], 0, {pos_dist: 10, neg_dist: 0});
+		Assert.equals(5, x);
+		var t1 = new Ticks();
+		t1.left = 0;
+		t1.text = "0";
+		t1.top = 10;
+		var t2 = new Ticks();
+		t2.left = 0;
+		t2.text = "1";
+		t2.top = 0;
+		var y = p.calcYCoord([t1, t2], 10, {pos_dist: 10, neg_dist: 0});
+		Assert.equals(10, y);
 
-		var x = PointTools.calcXCoord(0.5, 2, -2, 0, {pos_dist: 2, neg_dist: 2});
-		Assert.equals(0.5, x);
+		var p = new Point(0.5, 0.5, 0);
+		var t1 = new Ticks();
+		t1.left = 0;
+		t1.text = "0";
+		t1.top = 0;
+		var t2 = new Ticks();
+		t2.left = 10;
+		t2.text = "1";
+		t2.top = 0;
+		var x = p.calcXCoord([t1, t2], 0, {pos_dist: 10, neg_dist: 0});
+		Assert.equals(5, x);
+		var t1 = new Ticks();
+		t1.left = 0;
+		t1.text = "0";
+		t1.top = 10;
+		var t2 = new Ticks();
+		t2.left = 0;
+		t2.text = "1";
+		t2.top = 0;
+		var y = p.calcYCoord([t1, t2], 10, {pos_dist: 10, neg_dist: 0});
+		Assert.equals(5, y);
 
-		var x = PointTools.calcXCoord(0.5, 0.5, 0, 0, {pos_dist: 2, neg_dist: 0});
-		Assert.equals(2, x);
-
-		var x = PointTools.calcXCoord(0.5, 0.5, -0.5, 0, {pos_dist: 2, neg_dist: 2});
-		Assert.equals(2, x);
-	}
-
-	function testCalcYCoord() {
-		var x = PointTools.calcYCoord(1, 2, 0, 0, {pos_dist: 2, neg_dist: 0});
-		Assert.equals(-1, x);
-
-		var x = PointTools.calcYCoord(-1, 0, -2, 0, {pos_dist: 0, neg_dist: 2});
-		Assert.equals(1, x);
-
-		var x = PointTools.calcYCoord(0.5, 2, -2, 0, {pos_dist: 2, neg_dist: 2});
-		Assert.equals(-0.5, x);
+		var p = new Point(0, 1, 0);
+		var t1 = new Ticks();
+		t1.left = 0;
+		t1.text = "0";
+		t1.top = 0;
+		var t2 = new Ticks();
+		t2.left = 10;
+		t2.text = "1";
+		t2.top = 0;
+		var x = p.calcXCoord([t1, t2], 0, {pos_dist: 10, neg_dist: 0});
+		Assert.equals(0, x);
+		var t1 = new Ticks();
+		t1.left = 0;
+		t1.text = "0";
+		t1.top = 10;
+		var t2 = new Ticks();
+		t2.left = 0;
+		t2.text = "1";
+		t2.top = 0;
+		var y = p.calcYCoord([t1, t2], 10, {pos_dist: 10, neg_dist: 0});
+		Assert.equals(0, y);
 	}
 }

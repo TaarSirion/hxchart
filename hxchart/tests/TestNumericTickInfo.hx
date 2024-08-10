@@ -222,18 +222,14 @@ class TestNumericTickInfo extends utest.Test {
 
 	@:depends(testSubTickNum, testSubNegNum)
 	function testSubLabels() {
-		var tickInfo = new NumericTickInfo(0, 10, true);
-		tickInfo.calcTickNum();
-		tickInfo.calcTickLabels();
+		var tickInfo = new NumericTickInfo(0, 10, true, 3, true);
 		var labels = tickInfo.subLabels;
-		Assert.contains("0.25", labels);
-		Assert.contains("9.75", labels);
+		Assert.contains(".25", labels);
+		Assert.contains(".75", labels);
 		Assert.notContains("0", labels);
 		Assert.notContains("10.25", labels);
 
 		var tickInfo = new NumericTickInfo(-9, 80, true);
-		tickInfo.calcTickNum();
-		tickInfo.calcTickLabels();
 		var labels = tickInfo.subLabels;
 		Assert.contains("-7.5", labels);
 		Assert.contains("-5", labels);
@@ -243,9 +239,8 @@ class TestNumericTickInfo extends utest.Test {
 		Assert.notContains("82.5", labels);
 
 		var tickInfo = new NumericTickInfo(-0.6, 0.7, true);
-		tickInfo.calcTickNum();
-		tickInfo.calcTickLabels();
 		var labels = tickInfo.subLabels;
+
 		Assert.contains("-0.575", labels);
 		Assert.contains("0.025", labels);
 		Assert.contains("0.675", labels);

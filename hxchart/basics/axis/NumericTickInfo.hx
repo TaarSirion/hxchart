@@ -48,17 +48,24 @@ class NumericTickInfo extends TickInfo {
 		return subNegNum = num;
 	}
 
+	public var removeLead(default, set):Bool;
+
+	function set_removeLead(remove:Bool) {
+		return removeLead = remove;
+	}
+
 	/**
 	 * Create a new object of NumericTickInfo.
 	 * @param min Min value of the axis.
 	 * @param max Max value of the axis.
 	 */
-	public function new(min:Float, max:Float, useSubTicks:Bool = false, subTicksPerPart:Int = 3) {
+	public function new(min:Float, max:Float, useSubTicks:Bool = false, subTicksPerPart:Int = 3, removeLead:Bool = false) {
 		super();
 		this.min = min;
 		this.max = max;
 		this.useSubTicks = useSubTicks;
 		this.subTicksPerPart = subTicksPerPart;
+		this.removeLead = removeLead;
 		calcPower();
 		calcTickNum();
 		calcTickLabels();
@@ -172,7 +179,11 @@ class NumericTickInfo extends TickInfo {
 				for (j in 0...subTicksPerPart) {
 					loopValue += betweenTickStep;
 					var subLabel = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
-					subLabels[subIndex] = "." + Utils.removeLeadingNumbers(subLabel);
+					if (removeLead) {
+						subLabels[subIndex] = "." + Utils.removeLeadingNumbers(subLabel);
+					} else {
+						subLabels[subIndex] = subLabel;
+					}
 					subIndex++;
 				}
 			}
@@ -186,7 +197,11 @@ class NumericTickInfo extends TickInfo {
 				for (j in 0...subTicksPerPart) {
 					loopValue += betweenTickStep;
 					var subLabel = "" + Utils.floatToStringPrecision(loopValue, subTickPrec);
-					subLabels[subIndex] = "." + Utils.removeLeadingNumbers(subLabel);
+					if (removeLead) {
+						subLabels[subIndex] = "." + Utils.removeLeadingNumbers(subLabel);
+					} else {
+						subLabels[subIndex] = subLabel;
+					}
 					subIndex++;
 				}
 			}

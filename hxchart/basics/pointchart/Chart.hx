@@ -304,7 +304,7 @@ private class SetTickInfo extends Behaviour {
 typedef PointAdd = {
 	x_points:Array<Dynamic>,
 	y_points:Array<Dynamic>,
-	groups:Array<String>
+	?groups:Array<String>
 }
 
 @:dox(hide) @:noCompletion
@@ -454,12 +454,7 @@ class Builder extends CompositeBuilder {
 		_chart.pointlayer.addComponent(_chart.points);
 	}
 
-	override function onReady() {
-		// var minmax = _chart.sortPoints();
-		// _chart.setTickInfo(minmax);
-		// _chart.setAxis();
-		// _chart.drawPoints();
-	}
+	override function onReady() {}
 
 	override function addComponent(child:Component):Component {
 		if (child is Legend) {
