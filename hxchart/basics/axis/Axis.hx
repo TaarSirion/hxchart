@@ -169,7 +169,13 @@ private class SetTicks extends Behaviour {
 		axis.ticks = [];
 		axis.sub_ticks = [];
 		var start = axis.startPoint;
-		var tickPos = (axis.axisLength - 2 * axis.tickMargin) / (tickInfo.tickNum - 1);
+		var tickNum = tickInfo.tickNum;
+		if (tickInfo is StringTickInfo) {
+			// Increase tickNum size so that positioning centers the ticks.
+			tickNum++;
+		}
+
+		var tickPos = (axis.axisLength - 2 * axis.tickMargin) / (tickNum - 1);
 		var subTicksPerTick = 0;
 		if (tickInfo.useSubTicks) {
 			subTicksPerTick = tickInfo.subTicksPerPart;

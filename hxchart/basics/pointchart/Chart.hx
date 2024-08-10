@@ -1,5 +1,7 @@
 package hxchart.basics.pointchart;
 
+import hxchart.basics.axis.TickInfo;
+import hxchart.basics.axis.StringTickInfo;
 import haxe.ui.styles.Style;
 import hxchart.basics.ticks.Ticks;
 import hxchart.basics.ticks.Ticks.CompassOrientation;
@@ -34,15 +36,10 @@ import haxe.ui.behaviours.DefaultBehaviour;
 typedef ChartInfo = {
 	xTicks:Array<Ticks>,
 	yTicks:Array<Ticks>,
-	x_tick_info:NumericTickInfo,
-	y_tick_info:NumericTickInfo,
+	x_tick_info:TickInfo,
+	y_tick_info:TickInfo,
 	x_dist:AxisDist,
 	y_dist:AxisDist,
-}
-
-typedef TickInfos = {
-	x:NumericTickInfo,
-	y:NumericTickInfo,
 }
 
 /**
@@ -60,7 +57,7 @@ class Chart extends Absolute {
 
 	public var colors:Array<Int>;
 
-	@:call(SetTickInfo) public function setTickInfo(data:hxchart.basics.pointchart.ChartTools.ChartMinMax):Void;
+	@:call(SetTickInfo) public function setTickInfo():Void;
 
 	@:call(SetPoints) public function setPoints(data:PointAdd):Void;
 
@@ -82,8 +79,8 @@ class Chart extends Absolute {
 		return this.point_groups = point_groups;
 	}
 
-	public var x_tick_info:NumericTickInfo;
-	public var y_tick_info:NumericTickInfo;
+	public var x_tick_info:TickInfo;
+	public var y_tick_info:TickInfo;
 
 	public var x_axis:Axis;
 	public var y_axis:Axis;
@@ -140,12 +137,24 @@ class Chart extends Absolute {
 	public var max_y:Float;
 
 	public function sortPoints() {
-		var minmax = points.sortPoints();
-		min_x = minmax.min_x;
-		max_x = minmax.max_x;
-		min_y = minmax.min_y;
-		max_y = minmax.max_y;
-		return minmax;
+		var xVals = points.points.map(x -> {
+			return x.x_val;
+		});
+		var yVals = points.points.map(x -> {
+			return x.y_val;
+		});
+		if (xVals[0] is Float) {
+			xVals.sort(Reflect.compare);
+			min_x = xVals[0];
+			max_x = xVals[xVals.length - 1];
+		}
+
+		if (yVals[0] is Float) {
+			yVals.sort(Reflect.compare);
+			min_y = yVals[0];
+			max_y = yVals[yVals.length - 1];
+		}
+		return null;
 	}
 
 	private var margin_bottom:Float = 60;
@@ -226,17 +235,34 @@ private class ColorPaletteBehaviour extends DataBehaviour {
 @:dox(hide) @:noCompletion
 private class SetTickInfo extends Behaviour {
 	public override function call(param:Any = null):Variant {
-		var pointInfo:hxchart.basics.pointchart.ChartTools.ChartMinMax = param;
 		var chart = cast(_component, Chart);
-		chart.x_tick_info = new NumericTickInfo(pointInfo.min_x, pointInfo.max_x);
-		chart.y_tick_info = new NumericTickInfo(pointInfo.min_y, pointInfo.max_y);
+		if (chart.min_x != null && chart.max_x != null) {
+			trace("B");
+			chart.x_tick_info = new NumericTickInfo(chart.min_x, chart.max_x);
+		} else {
+			trace("A");
+			var xVals = chart.points.points.map(x -> {
+				return x.x_val;
+			});
+			chart.x_tick_info = new StringTickInfo(xVals);
+		}
+		if (chart.min_y != null && chart.max_y != null) {
+			trace("C");
+			chart.y_tick_info = new NumericTickInfo(chart.min_y, chart.max_y);
+		} else {
+			trace("D");
+			var yVals = chart.points.points.map(x -> {
+				return x.y_val;
+			});
+			chart.y_tick_info = new StringTickInfo(yVals);
+		}
 		return chart;
 	}
 }
 
 typedef PointAdd = {
-	x_points:Array<Float>,
-	y_points:Array<Float>,
+	x_points:Array<Dynamic>,
+	y_points:Array<Dynamic>,
 	groups:Array<String>
 }
 
@@ -317,16 +343,24 @@ private class SetAxis extends Behaviour {
 private class DrawPoints extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var chart = cast(_component, Chart);
-		if (chart.x_tick_info == null) {
+		if (chart.x_tick_info == null || chart.y_tick_info == null) {
 			return null;
 		}
 		var x_coord_min = chart.x_axis.ticks[0].left;
 		var x_coord_max = chart.x_axis.ticks[chart.x_axis.ticks.length - 1].left;
-		var ratio = 1 - chart.x_tick_info.negNum / (chart.x_tick_info.tickNum - 1);
+		var ratio = 1.0;
+		if (chart.x_tick_info is NumericTickInfo) {
+			var tickInfo:NumericTickInfo = cast(chart.x_tick_info, NumericTickInfo);
+			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
+		}
 		var x_dist = ChartTools.calcAxisDists(x_coord_min, x_coord_max, ratio);
 		var y_coord_min = chart.y_axis.ticks[0].top;
 		var y_coord_max = chart.y_axis.ticks[chart.y_axis.ticks.length - 1].top;
-		var ratio = 1 - chart.y_tick_info.negNum / (chart.y_tick_info.tickNum - 1);
+		ratio = 1.0;
+		if (chart.y_tick_info is NumericTickInfo) {
+			var tickInfo:NumericTickInfo = cast(chart.y_tick_info, NumericTickInfo);
+			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
+		}
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, ratio);
 		chart.points.setInfo({
 			xTicks: chart.x_axis.ticks,
@@ -407,8 +441,8 @@ class Builder extends CompositeBuilder {
 	override function validateComponentData() {
 		super.validateComponentData();
 		setLayerPosition();
-		var minmax = _chart.sortPoints();
-		_chart.setTickInfo(minmax);
+		_chart.sortPoints();
+		_chart.setTickInfo();
 		_chart.setAxis();
 		_chart.drawPoints();
 	}
