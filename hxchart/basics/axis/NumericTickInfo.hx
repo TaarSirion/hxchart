@@ -2,7 +2,16 @@ package hxchart.basics.axis;
 
 import haxe.ds.Vector;
 
-class NumericTickInfo extends TickInfo {
+class NumericTickInfo implements TickInfo {
+	public var tickNum:Int;
+	public var tickDist:Float;
+	public var zeroIndex:Int;
+	public var labels:Array<String>;
+	public var useSubTicks:Bool;
+	public var subTickNum:Int;
+	public var subLabels:Array<String>;
+	public var subTicksPerPart:Int;
+
 	public var precision(default, set):Int;
 
 	function set_precision(precision:Int) {
@@ -60,7 +69,6 @@ class NumericTickInfo extends TickInfo {
 	 * @param max Max value of the axis.
 	 */
 	public function new(min:Float, max:Float, useSubTicks:Bool = false, subTicksPerPart:Int = 3, removeLead:Bool = false) {
-		super();
 		this.min = min;
 		this.max = max;
 		this.useSubTicks = useSubTicks;
@@ -68,7 +76,7 @@ class NumericTickInfo extends TickInfo {
 		this.removeLead = removeLead;
 		calcPower();
 		calcTickNum();
-		calcTickLabels();
+		setLabels([]);
 	}
 
 	function calcPower() {
@@ -157,7 +165,7 @@ class NumericTickInfo extends TickInfo {
 		}
 	}
 
-	public function calcTickLabels() {
+	public function setLabels(values:Array<String>) {
 		labels = new Vector(tickNum).toArray();
 		var betweenTickStep = 0.0;
 		var subTickPrec = 0;

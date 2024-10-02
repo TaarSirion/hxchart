@@ -1,16 +1,28 @@
 package hxchart.basics.axis;
 
-class StringTickInfo extends TickInfo {
+class StringTickInfo implements TickInfo {
+	public var tickNum:Int;
+	public var tickDist:Float;
+	public var zeroIndex:Int;
+	public var labels:Array<String>;
+	public var useSubTicks:Bool;
+	public var subTickNum:Int;
+	public var subLabels:Array<String>;
+	public var subTicksPerPart:Int;
+
 	public function new(values:Array<String>) {
-		super();
 		labels = [];
 		labels.push("");
 		zeroIndex = 0;
-		getUniqueLabels(values);
+		setLabels(values);
+		calcTickNum();
+	}
+
+	public function calcTickNum() {
 		tickNum = labels.length;
 	}
 
-	public function getUniqueLabels(values:Array<String>) {
+	public function setLabels(values:Array<String>) {
 		for (label in values) {
 			if (labels.indexOf(label) == -1) {
 				labels.push(label);

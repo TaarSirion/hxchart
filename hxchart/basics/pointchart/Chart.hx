@@ -43,7 +43,7 @@ typedef ChartInfo = {
 }
 
 /**
- * Basic `Chart` displaying points on a 2d coordinate system.
+ * Basic `Point-Chart` displaying points on a 2d coordinate system.
  */
 @:composite(Builder, ChartLayout)
 class Chart extends Absolute {

@@ -129,7 +129,7 @@ class TestNumericTickInfo extends utest.Test {
 	function testCalcLabels() {
 		var tickInfo = new NumericTickInfo(0, 10);
 		tickInfo.calcTickNum();
-		tickInfo.calcTickLabels();
+		tickInfo.setLabels();
 		var labels = tickInfo.labels;
 		Assert.contains("7", labels);
 		Assert.contains("10", labels);
@@ -138,7 +138,7 @@ class TestNumericTickInfo extends utest.Test {
 
 		var tickInfo = new NumericTickInfo(-9, 80);
 		tickInfo.calcTickNum();
-		tickInfo.calcTickLabels();
+		tickInfo.setLabels();
 		var labels = tickInfo.labels;
 		Assert.contains("-10", labels);
 		Assert.contains("0", labels);
@@ -158,7 +158,7 @@ class TestNumericTickInfo extends utest.Test {
 
 		var tickInfo = new NumericTickInfo(-0.6, 0.7);
 		tickInfo.calcTickNum();
-		tickInfo.calcTickLabels();
+		tickInfo.setLabels();
 		var labels = tickInfo.labels;
 		Assert.contains("-0.2", labels);
 		Assert.contains("0", labels);
