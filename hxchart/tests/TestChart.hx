@@ -19,9 +19,9 @@ class TestChart extends utest.Test {
 	function testSortPoints() {
 		var chart = new Chart();
 		chart.points = new Points();
-		chart.setPoints({
-			x_points: [2, 1, 3],
-			y_points: [1, 2, 3]
+		chart.addData({
+			xValues: [2, 1, 3],
+			yValues: [1, 2, 3]
 		});
 		chart.sortPoints();
 		Assert.equals(3, chart.max_x);
@@ -31,10 +31,10 @@ class TestChart extends utest.Test {
 	function testGroups() {
 		var chart = new Chart();
 		chart.points = new Points();
-		chart.setPoints({
-			x_points: [2, 1, 3],
-			y_points: [1, 2, 3],
-			groups: ["A", "A", "B"]
+		chart.addData({
+			xValues: [2, 1, 3],
+			yValues: [1, 2, 3] // ,
+			// groups: ["A", "A", "B"]
 		});
 		Assert.equals(2, chart.countGroups);
 		Assert.equals(1, chart.point_groups.get("B"));

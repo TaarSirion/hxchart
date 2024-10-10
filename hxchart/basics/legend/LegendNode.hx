@@ -25,7 +25,7 @@ class LegendNode extends HBox {
 	@:style(layout) public var fontSize:Null<Float>;
 
 	/**
-	 * Symbol of the legend. Default is point.
+	 * Symbol of the node. Default is point.
 	 */
 	@:clonable @:behaviour(SymbolBehaviour, "rectangle") public var symbol:String;
 
