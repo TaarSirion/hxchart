@@ -11,6 +11,11 @@ import hxchart.basics.ticks.Ticks;
 import haxe.ui.geom.Point;
 import haxe.ui.behaviours.DefaultBehaviour;
 
+enum AxisTypes {
+	linear;
+	categorical;
+}
+
 @:composite(AxisBuilder, Layout)
 class Axis extends Absolute {
 	@:clonable @:behaviour(DefaultBehaviour, 10) public var tickMargin:Null<Float>;

@@ -1,5 +1,8 @@
 package hxchart.basics.data;
 
+import hxchart.basics.axis.Axis;
+import hxchart.basics.axis.TickInfo;
+import haxe.ui.util.Color;
 import haxe.ui.components.Canvas;
 import haxe.ui.containers.Absolute;
 
@@ -10,10 +13,11 @@ typedef AddDataType = {
 }
 
 interface DataLayer {
+	public var id:String;
 	public var data:Array<Data2D>;
-	public var dataLayer:Absolute;
+	public var parent:Absolute;
 	public var dataCanvas:Canvas;
+	public var colors:Array<Color>;
 
-	public function addData(data:AddDataType):Void;
-	public function positionData():Void;
+	public function positionData(tickInfos:Array<TickInfo>, axes:Array<Axis>):Void;
 }
