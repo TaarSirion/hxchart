@@ -56,6 +56,7 @@ private class AddChart extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var plot = cast(_component, Plot);
 		var chartInfo:ChartInfo = param;
+		trace(chartInfo);
 		plot.chartInfos.push(chartInfo);
 		trace("ADDED CHART INFO");
 		return null;
@@ -78,10 +79,19 @@ class Builder extends CompositeBuilder {
 		super.validateComponentData();
 		_plot.axes = new Map();
 		var axisID = "axis_0";
+		trace(_plot.chartInfos);
+
 		for (i => chartInfo in _plot.chartInfos) {
+			var chartInfo = Reflect.copy(_plot.chartInfos[i]);
 			var chartID = "chart_" + i;
 			if (chartInfo.axisInfo != null) {
 				axisID = "axis_" + i;
+			}
+			if (chartInfo.data.groups == null) {
+				chartInfo.data.groups = [];
+				for (j in 0...chartInfo.data.xValues.length) {
+					chartInfo.data.groups.push(Std.string(i + 1));
+				}
 			}
 			switch (chartInfo.type) {
 				case scatter:
@@ -89,6 +99,7 @@ class Builder extends CompositeBuilder {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
 					if (_plot.axes.exists(axisID)) {
+						trace("Exists?", axisID);
 						chartInfo.axisInfo = [
 							{
 								type: linear,
@@ -102,6 +113,7 @@ class Builder extends CompositeBuilder {
 					}
 					var scatter = new Scatter(chartInfo, _plot.plotBody, chartID, axisID);
 					if (!_plot.axes.exists(axisID)) {
+						trace(axisID, scatter.axes[0].ticks[1].text);
 						_plot.axes.set(axisID, scatter.axes);
 					}
 				case bar:
