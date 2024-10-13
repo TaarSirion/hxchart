@@ -9,5 +9,4 @@ interface AxisLayer {
 	public var parent:Absolute;
 
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Data2D>):Void;
-	public function styleAxes():Void;
 }

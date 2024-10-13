@@ -1,5 +1,6 @@
 package hxchart.basics.plot;
 
+import hxchart.basics.colors.ColorPalettes;
 import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
 import hxchart.basics.axis.Axis;
@@ -24,9 +25,15 @@ typedef AxisInfo = {
 	?values:Array<Dynamic>
 }
 
+typedef ChartStyle = {
+	colorPalette:Array<Int>,
+	groups:Map<String, Int>
+}
+
 typedef ChartInfo = {
 	data:AddDataType,
 	type:ChartTypes,
+	?style:ChartStyle,
 	?axisInfo:Array<AxisInfo>
 }
 
@@ -35,6 +42,8 @@ class Plot extends Absolute {
 	public var chartInfos:Array<ChartInfo>;
 
 	public var plotBody:Absolute;
+	public var groups:Map<String, Int>;
+	public var groupNumber:Int;
 	public var axes:Map<String, Array<Axis>>;
 	public var legend:Legend;
 
@@ -42,6 +51,8 @@ class Plot extends Absolute {
 		super();
 		chartInfos = [];
 		axes = new Map();
+		groups = new Map();
+		groupNumber = 0;
 		chartInfos.push(chartInfo);
 		if (legend != null) {
 			this.legend = legend;
@@ -56,9 +67,7 @@ private class AddChart extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var plot = cast(_component, Plot);
 		var chartInfo:ChartInfo = param;
-		trace(chartInfo);
 		plot.chartInfos.push(chartInfo);
-		trace("ADDED CHART INFO");
 		return null;
 	}
 }
@@ -79,8 +88,6 @@ class Builder extends CompositeBuilder {
 		super.validateComponentData();
 		_plot.axes = new Map();
 		var axisID = "axis_0";
-		trace(_plot.chartInfos);
-
 		for (i => chartInfo in _plot.chartInfos) {
 			var chartInfo = Reflect.copy(_plot.chartInfos[i]);
 			var chartID = "chart_" + i;
@@ -93,13 +100,26 @@ class Builder extends CompositeBuilder {
 					chartInfo.data.groups.push(Std.string(i + 1));
 				}
 			}
+			if (chartInfo.style == null) {
+				for (j => group in chartInfo.data.groups) {
+					if (!_plot.groups.exists(group)) {
+						_plot.groups.set(group, _plot.groupNumber);
+						_plot.groupNumber++;
+					}
+				}
+
+				chartInfo.style = {
+					colorPalette: ColorPalettes.defaultColors(_plot.groupNumber),
+					groups: _plot.groups
+				};
+			}
+			trace(chartInfo);
 			switch (chartInfo.type) {
 				case scatter:
 					if (chartInfo.axisInfo != null && chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
 					if (_plot.axes.exists(axisID)) {
-						trace("Exists?", axisID);
 						chartInfo.axisInfo = [
 							{
 								type: linear,
@@ -113,7 +133,6 @@ class Builder extends CompositeBuilder {
 					}
 					var scatter = new Scatter(chartInfo, _plot.plotBody, chartID, axisID);
 					if (!_plot.axes.exists(axisID)) {
-						trace(axisID, scatter.axes[0].ticks[1].text);
 						_plot.axes.set(axisID, scatter.axes);
 					}
 				case bar:

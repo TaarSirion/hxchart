@@ -1,5 +1,6 @@
 package hxchart.basics.pointchart;
 
+import hxchart.basics.plot.Plot.ChartStyle;
 import hxchart.basics.pointchart.ChartTools.AxisDist;
 import hxchart.basics.ticks.Ticks;
 import haxe.Exception;
@@ -24,8 +25,6 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var axisID:String;
 	public var axes:Array<Axis>;
 
-	public function styleAxes():Void {};
-
 	public var data:Array<Data2D>;
 	public var groups:Map<String, Int>;
 	public var colors:Array<Color>;
@@ -46,12 +45,12 @@ class Scatter implements AxisLayer implements DataLayer {
 		dataCanvas.percentWidth = 100;
 		this.id = id;
 		this.axisID = axisID;
-		setData(chartInfo.data);
+		setData(chartInfo.data, chartInfo.style);
 		positionAxes(chartInfo.axisInfo, data);
-		positionData();
+		positionData(chartInfo.style);
 	}
 
-	public function setData(newData:AddDataType) {
+	public function setData(newData:AddDataType, style:ChartStyle) {
 		var groupsArr = newData.groups;
 		if (groupsArr == null) {
 			groupsArr = [];
@@ -59,21 +58,10 @@ class Scatter implements AxisLayer implements DataLayer {
 				groupsArr.push("1");
 			}
 		}
-		var j = 0;
-		groups = new Map();
-		for (i => val in groupsArr) {
-			if (groupsArr.indexOf(val) == i) {
-				groups.set(val, j);
-				j++;
-			}
-		}
-		var countGroups = j;
-		if (colorPalette == null) {
-			colorPalette = ColorPalettes.defaultColors(countGroups);
-		}
 		for (i in 0...newData.xValues.length) {
-			var point = new Data2D(newData.xValues[i], newData.yValues[i], groups.get(groupsArr[i]));
-			colors.push(colorPalette[point.group]);
+			var group = groupsArr[i];
+			var point = new Data2D(newData.xValues[i], newData.yValues[i], style.groups.get(group));
+			colors.push(style.colorPalette[style.groups.get(group)]);
 			data.push(point);
 		}
 		sortData();
@@ -206,7 +194,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 	}
 
-	public function positionData() {
+	public function positionData(style:ChartStyle) {
 		if (axes.length < 2) {
 			throw new Exception("Too few axes for drawing data.");
 		}
@@ -229,14 +217,10 @@ class Scatter implements AxisLayer implements DataLayer {
 			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
 		}
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, ratio);
-		// if (id == "chart_1") {
-		trace(axes[0].tickInfo.zeroIndex, axes[0].ticks.length, axes[0].ticks[1].text);
-		// }
 		for (i => dataPoint in data) {
 			var x = calcXCoord(dataPoint.xValue, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, x_dist);
 			var y = calcYCoord(dataPoint.yValue, axes[1].ticks, axes[1].ticks[axes[1].tickInfo.zeroIndex].top, y_dist);
 			dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
-			trace(x, y, id);
 			if (x == null || y == null) {
 				continue;
 			}

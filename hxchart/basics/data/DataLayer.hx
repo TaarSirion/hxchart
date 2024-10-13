@@ -1,5 +1,6 @@
 package hxchart.basics.data;
 
+import hxchart.basics.plot.Plot.ChartStyle;
 import hxchart.basics.axis.Axis;
 import hxchart.basics.axis.TickInfo;
 import haxe.ui.util.Color;
@@ -19,5 +20,6 @@ interface DataLayer {
 	public var dataCanvas:Canvas;
 	public var colors:Array<Color>;
 
-	public function positionData():Void;
+	public function setData(newData:AddDataType, style:ChartStyle):Void;
+	public function positionData(style:ChartStyle):Void;
 }
