@@ -19,5 +19,5 @@ interface DataLayer {
 	public var dataCanvas:Canvas;
 	public var colors:Array<Color>;
 
-	public function positionData(tickInfos:Array<TickInfo>, axes:Array<Axis>):Void;
+	public function positionData():Void;
 }

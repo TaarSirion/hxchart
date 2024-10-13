@@ -5,7 +5,6 @@ import hxchart.basics.data.Data2D;
 import haxe.ui.containers.Absolute;
 
 interface AxisLayer {
-	public var tickInfos:Array<TickInfo>;
 	public var axes:Array<Axis>;
 	public var parent:Absolute;
 

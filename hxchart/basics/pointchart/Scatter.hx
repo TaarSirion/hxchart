@@ -21,7 +21,7 @@ import hxchart.basics.axis.AxisLayer;
 
 class Scatter implements AxisLayer implements DataLayer {
 	public var id:String;
-	public var tickInfos:Array<TickInfo>;
+	public var axisID:String;
 	public var axes:Array<Axis>;
 
 	public function styleAxes():Void {};
@@ -36,7 +36,7 @@ class Scatter implements AxisLayer implements DataLayer {
 
 	public var parent:Absolute;
 
-	public function new(chartInfo:ChartInfo, parent:Absolute, id:String) {
+	public function new(chartInfo:ChartInfo, parent:Absolute, id:String, axisID:String) {
 		this.parent = parent;
 		colors = [];
 		data = [];
@@ -45,9 +45,10 @@ class Scatter implements AxisLayer implements DataLayer {
 		dataCanvas.percentHeight = 100;
 		dataCanvas.percentWidth = 100;
 		this.id = id;
+		this.axisID = axisID;
 		setData(chartInfo.data);
 		positionAxes(chartInfo.axisInfo, data);
-		positionData(tickInfos, axes);
+		positionData();
 	}
 
 	public function setData(newData:AddDataType) {
@@ -102,6 +103,7 @@ class Scatter implements AxisLayer implements DataLayer {
 	}
 
 	function setTickInfo(type:AxisTypes, infoValues:Array<Dynamic>, dataValues:Array<Dynamic>, dataMin:Float, dataMax:Float) {
+		var tickInfo:TickInfo = null;
 		switch (type) {
 			case linear:
 				var min:Float = dataMin;
@@ -110,7 +112,7 @@ class Scatter implements AxisLayer implements DataLayer {
 					min = infoValues[0];
 					max = infoValues[1];
 				}
-				tickInfos.push(new NumericTickInfo(min, max));
+				tickInfo = new NumericTickInfo(min, max);
 			case categorical:
 				var values:Array<String> = [];
 				if (infoValues == null || infoValues.length == 0) {
@@ -122,78 +124,117 @@ class Scatter implements AxisLayer implements DataLayer {
 						values.push(val);
 					}
 				}
-				tickInfos.push(new StringTickInfo(values));
+				tickInfo = new StringTickInfo(values);
 		}
+		return tickInfo;
 	}
 
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Data2D>) {
-		tickInfos = [];
-		axes = [];
-		setTickInfo(axisInfo[0].type, axisInfo[0].values, data.map(x -> {
-			return x.xValue;
-		}), minX, maxX);
-		setTickInfo(axisInfo[1].type, axisInfo[1].values, data.map(x -> {
-			return x.yValue;
-		}), minY, maxY);
+		axes = [null, null];
+		if (axisInfo[0].axis != null) {
+			axes[0] = axisInfo[0].axis;
+		}
+		if (axisInfo[1].axis != null) {
+			axes[1] = axisInfo[1].axis;
+		}
+		if (axes[0] != null && axes[1] != null) {
+			addAxisToParent(axes[0], parent);
+			addAxisToParent(axes[1], parent);
+			return;
+		}
+
 		var yAxisLength = parent.height - parent.paddingTop - parent.paddingBottom;
 		var xAxisLength = parent.width - parent.paddingLeft - parent.paddingRight;
-		axes.push(new Axis(new Point(0, 0), 0, xAxisLength, tickInfos[0], "xaxis"));
+		var isPreviousXAxis = false;
+		var isPreviousYAxis = false;
+		if (axes[0] == null) {
+			var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, data.map(x -> {
+				return x.xValue;
+			}), minX, maxX);
+			axes[0] = new Axis(new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
+		} else {
+			isPreviousXAxis = true;
+		}
+		if (axes[1] == null) {
+			var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, data.map(x -> {
+				return x.yValue;
+			}), minY, maxY);
+			axes[1] = new Axis(new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
+		} else {
+			isPreviousYAxis = true;
+		}
+
 		axes[0].width = xAxisLength;
 		axes[0].height = yAxisLength;
-		axes.push(new Axis(new Point(0, 0), 270, yAxisLength, tickInfos[1], "yaxis"));
 		axes[1].width = xAxisLength;
 		axes[1].height = yAxisLength;
 		// This is necessary to allow the ticks to be calculated
 		axes[0].startPoint = new haxe.ui.geom.Point(0, 40);
 		axes[1].startPoint = new haxe.ui.geom.Point(40, yAxisLength);
 		// Real positioning
-		axes[0].startPoint = new haxe.ui.geom.Point(0, axes[1].ticks[tickInfos[1].zeroIndex].top);
-		axes[1].startPoint = new haxe.ui.geom.Point(axes[0].ticks[tickInfos[0].zeroIndex].left, yAxisLength);
+		axes[0].startPoint = new haxe.ui.geom.Point(0, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
+		axes[1].startPoint = new haxe.ui.geom.Point(axes[0].ticks[axes[0].tickInfo.zeroIndex].left, yAxisLength);
 		axes[1].showZeroTick = false;
 		axes[0].zeroTickPosition = CompassOrientation.SW;
-		var xComponent:Absolute = parent.findComponent("xaxis");
-		if (xComponent == null) {
-			parent.addComponent(axes[0]);
+		if (isPreviousXAxis) {
+			addAxisToParent(axes[0], parent);
 		} else {
-			parent.removeComponent(xComponent);
-			parent.addComponent(axes[0]);
+			replaceAxisInParent(axes[0], parent);
 		}
-		var yComponent:Absolute = parent.findComponent("yaxis");
-		if (yComponent == null) {
-			parent.addComponent(axes[1]);
+		if (isPreviousYAxis) {
+			addAxisToParent(axes[1], parent);
 		} else {
-			parent.removeComponent(yComponent);
-			parent.addComponent(axes[1]);
+			replaceAxisInParent(axes[1], parent);
 		}
 	}
 
-	public function positionData(tickInfos:Array<TickInfo>, axes:Array<Axis>) {
-		if (tickInfos.length < 2 || tickInfos[0] == null || tickInfos[1] == null) {
-			throw new Exception("Two tickinfos are needed for positioning the data correctly!");
+	function addAxisToParent(axis:Axis, parent:Absolute) {
+		var comp = parent.findComponent(axis.id);
+		if (comp == null) {
+			parent.addComponent(axis);
 		}
-		if (tickInfos.length != axes.length) {
-			throw new Exception("TickInfos and Axes don't have the same length!");
+	}
+
+	function replaceAxisInParent(axis:Axis, parent:Absolute) {
+		var comp = parent.findComponent(axis.id);
+		if (comp == null) {
+			parent.addComponent(axis);
+		} else {
+			parent.removeComponent(comp);
+			parent.addComponent(axis);
+		}
+	}
+
+	public function positionData() {
+		if (axes.length < 2) {
+			throw new Exception("Too few axes for drawing data.");
+		}
+		if (axes[0].tickInfo == null || axes[1].tickInfo == null) {
+			throw new Exception("Two tickinfos are needed for positioning the data correctly!");
 		}
 		var x_coord_min = axes[0].ticks[0].left;
 		var x_coord_max = axes[0].ticks[axes[0].ticks.length - 1].left;
 		var ratio = 1.0;
-		if (tickInfos[0] is NumericTickInfo) {
-			var tickInfo:NumericTickInfo = cast(tickInfos[0], NumericTickInfo);
+		if (axes[0].tickInfo is NumericTickInfo) {
+			var tickInfo:NumericTickInfo = cast(axes[0].tickInfo, NumericTickInfo);
 			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
 		}
 		var x_dist = ChartTools.calcAxisDists(x_coord_min, x_coord_max, ratio);
 		var y_coord_min = axes[1].ticks[0].top;
 		var y_coord_max = axes[1].ticks[axes[1].ticks.length - 1].top;
 		ratio = 1.0;
-		if (tickInfos[1] is NumericTickInfo) {
-			var tickInfo:NumericTickInfo = cast(tickInfos[1], NumericTickInfo);
+		if (axes[1].tickInfo is NumericTickInfo) {
+			var tickInfo:NumericTickInfo = cast(axes[1].tickInfo, NumericTickInfo);
 			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
 		}
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, ratio);
 		for (i => dataPoint in data) {
-			var x = calcXCoord(dataPoint.xValue, axes[0].ticks, axes[0].ticks[tickInfos[0].zeroIndex].left, x_dist);
-			var y = calcYCoord(dataPoint.yValue, axes[1].ticks, axes[1].ticks[tickInfos[1].zeroIndex].top, y_dist);
+			var x = calcXCoord(dataPoint.xValue, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, x_dist);
+			var y = calcYCoord(dataPoint.yValue, axes[1].ticks, axes[1].ticks[axes[1].tickInfo.zeroIndex].top, y_dist);
 			dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
+			if (x == null || y == null) {
+				continue;
+			}
 			dataCanvas.componentGraphics.circle(x, y, 1);
 		}
 		var canvasComponent = parent.findComponent(id);
@@ -203,7 +244,6 @@ class Scatter implements AxisLayer implements DataLayer {
 			parent.removeComponent(canvasComponent);
 			parent.addComponent(dataCanvas);
 		}
-		return null;
 	}
 
 	public function calcXCoord(xValue:Dynamic, ticks:Array<Ticks>, zeroPos:Float, xDist:AxisDist) {
@@ -211,6 +251,9 @@ class Scatter implements AxisLayer implements DataLayer {
 			var ticksFiltered = ticks.filter(x -> {
 				return x.text == xValue;
 			});
+			if (ticksFiltered == null || ticksFiltered.length == 0) {
+				return null;
+			}
 			return ticksFiltered[0].left;
 		}
 		var xMax = Std.parseFloat(ticks[ticks.length - 1].text);
@@ -229,6 +272,9 @@ class Scatter implements AxisLayer implements DataLayer {
 			var ticksFiltered = ticks.filter(x -> {
 				return x.text == yValue;
 			});
+			if (ticksFiltered == null || ticksFiltered.length == 0) {
+				return null;
+			}
 			return ticksFiltered[0].top;
 		}
 		var yMax = Std.parseFloat(ticks[ticks.length - 1].text);

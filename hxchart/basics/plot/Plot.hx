@@ -1,5 +1,8 @@
 package hxchart.basics.plot;
 
+import haxe.ui.util.Variant;
+import haxe.ui.behaviours.Behaviour;
+import hxchart.basics.axis.Axis;
 import hxchart.basics.pointchart.Scatter;
 import hxchart.basics.data.DataLayer.AddDataType;
 import haxe.ui.core.CompositeBuilder;
@@ -17,13 +20,14 @@ enum ChartTypes {
 
 typedef AxisInfo = {
 	type:AxisTypes,
+	?axis:Axis,
 	?values:Array<Dynamic>
 }
 
 typedef ChartInfo = {
 	data:AddDataType,
 	type:ChartTypes,
-	axisInfo:Array<AxisInfo>
+	?axisInfo:Array<AxisInfo>
 }
 
 @:composite(Builder)
@@ -31,15 +35,30 @@ class Plot extends Absolute {
 	public var chartInfos:Array<ChartInfo>;
 
 	public var plotBody:Absolute;
+	public var axes:Map<String, Array<Axis>>;
 	public var legend:Legend;
 
 	public function new(chartInfo:ChartInfo, width:Float, height:Float, ?legend:Legend) {
 		super();
 		chartInfos = [];
+		axes = new Map();
 		chartInfos.push(chartInfo);
 		if (legend != null) {
 			this.legend = legend;
 		}
+	}
+
+	@:call(AddChart) public function addChart(chartInfo:ChartInfo):Void;
+}
+
+@:dox(hide) @:noCompletion
+private class AddChart extends Behaviour {
+	public override function call(param:Any = null):Variant {
+		var plot = cast(_component, Plot);
+		var chartInfo:ChartInfo = param;
+		plot.chartInfos.push(chartInfo);
+		trace("ADDED CHART INFO");
+		return null;
 	}
 }
 
@@ -57,16 +76,34 @@ class Builder extends CompositeBuilder {
 
 	override function validateComponentData() {
 		super.validateComponentData();
-		trace("TEST1");
+		_plot.axes = new Map();
+		var axisID = "axis_0";
 		for (i => chartInfo in _plot.chartInfos) {
 			var chartID = "chart_" + i;
+			if (chartInfo.axisInfo != null) {
+				axisID = "axis_" + i;
+			}
 			switch (chartInfo.type) {
 				case scatter:
-					if (chartInfo.axisInfo.length > 2) {
+					if (chartInfo.axisInfo != null && chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
-					var scatter = new Scatter(chartInfo, _plot.plotBody, chartID);
-					return;
+					if (_plot.axes.exists(axisID)) {
+						chartInfo.axisInfo = [
+							{
+								type: linear,
+								axis: _plot.axes.get(axisID)[0]
+							},
+							{
+								type: linear,
+								axis: _plot.axes.get(axisID)[1]
+							}
+						];
+					}
+					var scatter = new Scatter(chartInfo, _plot.plotBody, chartID, axisID);
+					if (!_plot.axes.exists(axisID)) {
+						_plot.axes.set(axisID, scatter.axes);
+					}
 				case bar:
 					return;
 				case pie:
@@ -86,7 +123,6 @@ class Builder extends CompositeBuilder {
 		_plot.plotBody.top = _plot.paddingTop;
 		_plot.plotBody.width -= _plot.paddingLeft + _plot.paddingRight;
 		_plot.plotBody.height -= _plot.paddingTop + _plot.paddingBottom;
-
 		return true;
 	}
 }
