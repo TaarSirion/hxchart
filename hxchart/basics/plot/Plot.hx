@@ -132,6 +132,7 @@ class Builder extends CompositeBuilder {
 						];
 					}
 					var scatter = new Scatter(chartInfo, _plot.plotBody, chartID, axisID);
+					scatter.validateChart();
 					if (!_plot.axes.exists(axisID)) {
 						_plot.axes.set(axisID, scatter.axes);
 					}

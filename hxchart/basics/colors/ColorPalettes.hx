@@ -67,12 +67,9 @@ class ColorPalettes {
 		var res:Array<Int> = [];
 		var x = Math.ceil(n / def.length);
 		var ddef = [];
-		trace(x, "def", def);
-
 		for (i in 0...x) {
 			ddef = ddef.concat(def);
 		}
-		trace("set colors", ddef);
 		for (i in 0...n) {
 			res.push(ddef[i]);
 		}

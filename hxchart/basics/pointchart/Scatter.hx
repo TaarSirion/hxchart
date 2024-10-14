@@ -31,26 +31,33 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var dataLayer:Absolute;
 	public var dataCanvas:Canvas;
 
+	@:allow(hxchart.tests)
+	private var chartInfo:ChartInfo;
+
 	public var colorPalette:Array<Int>;
 
 	public var parent:Absolute;
 
 	public function new(chartInfo:ChartInfo, parent:Absolute, id:String, axisID:String) {
 		this.parent = parent;
-		colors = [];
-		data = [];
 		dataCanvas = new Canvas();
 		dataCanvas.id = id;
 		dataCanvas.percentHeight = 100;
 		dataCanvas.percentWidth = 100;
 		this.id = id;
 		this.axisID = axisID;
+		this.chartInfo = chartInfo;
+	}
+
+	public function validateChart() {
 		setData(chartInfo.data, chartInfo.style);
 		positionAxes(chartInfo.axisInfo, data);
 		positionData(chartInfo.style);
 	}
 
 	public function setData(newData:AddDataType, style:ChartStyle) {
+		data = [];
+		colors = [];
 		var groupsArr = newData.groups;
 		if (groupsArr == null) {
 			groupsArr = [];
@@ -67,11 +74,16 @@ class Scatter implements AxisLayer implements DataLayer {
 		sortData();
 	}
 
+	@:allow(hxchart.tests)
 	var minX:Float;
+	@:allow(hxchart.tests)
 	var maxX:Float;
+	@:allow(hxchart.tests)
 	var minY:Float;
+	@:allow(hxchart.tests)
 	var maxY:Float;
 
+	@:allow(hxchart.tests)
 	function sortData() {
 		var xVals = data.map(x -> {
 			return x.xValue;
@@ -91,6 +103,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 	}
 
+	@:allow(hxchart.tests)
 	function setTickInfo(type:AxisTypes, infoValues:Array<Dynamic>, dataValues:Array<Dynamic>, dataMin:Float, dataMax:Float) {
 		var tickInfo:TickInfo = null;
 		switch (type) {
