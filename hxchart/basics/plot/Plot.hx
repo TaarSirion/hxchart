@@ -37,9 +37,16 @@ typedef ChartInfo = {
 	?axisInfo:Array<AxisInfo>
 }
 
+typedef LegendInfo = {
+	?title:String,
+	?nodeFontSize:Int,
+	?useLegend:Bool
+}
+
 @:composite(Builder)
 class Plot extends Absolute {
 	public var chartInfos:Array<ChartInfo>;
+	public var legendInfo:LegendInfo;
 
 	public var plotBody:Absolute;
 	public var groups:Map<String, Int>;
@@ -47,15 +54,32 @@ class Plot extends Absolute {
 	public var axes:Map<String, Array<Axis>>;
 	public var legend:Legend;
 
-	public function new(chartInfo:ChartInfo, width:Float, height:Float, ?legend:Legend) {
+	public function new(chartInfo:ChartInfo, width:Float, height:Float, ?legendInfo:LegendInfo) {
 		super();
 		chartInfos = [];
 		axes = new Map();
 		groups = new Map();
 		groupNumber = 0;
 		chartInfos.push(chartInfo);
-		if (legend != null) {
-			this.legend = legend;
+		if (legendInfo == null) {
+			legendInfo = {
+				useLegend: true,
+				nodeFontSize: 12,
+				title: "Legend"
+			};
+		}
+
+		if (legendInfo.useLegend == null || legendInfo.useLegend) {
+			this.legend = new Legend();
+			legend.legendTitle = "Legend";
+			if (legendInfo.title != null) {
+				legend.legendTitle = legendInfo.title;
+			}
+			if (legendInfo.nodeFontSize == null) {
+				legendInfo.nodeFontSize = 12;
+			}
+			this.legendInfo = legendInfo;
+			addComponent(legend);
 		}
 	}
 
@@ -88,28 +112,43 @@ class Builder extends CompositeBuilder {
 		super.validateComponentData();
 		_plot.axes = new Map();
 		var axisID = "axis_0";
+
+		for (i => info in _plot.chartInfos) {
+			if (info.data.groups == null) {
+				info.data.groups = [];
+				for (j in 0...info.data.xValues.length) {
+					info.data.groups.push(Std.string(i + 1));
+				}
+			}
+			for (j => group in info.data.groups) {
+				if (!_plot.groups.exists(group)) {
+					_plot.groups.set(group, _plot.groupNumber);
+					_plot.groupNumber++;
+				}
+			}
+		}
+		var colors = ColorPalettes.defaultColors(_plot.groupNumber);
+		var groupIterationIndex = 0;
+		for (group in _plot.groups.keys()) {
+			if (_plot.legend.childNodes.contains(group)) {
+				continue;
+			}
+			_plot.legend.addNode({
+				text: group,
+				fontSize: _plot.legendInfo.nodeFontSize,
+				color: colors[groupIterationIndex]
+			});
+			groupIterationIndex++;
+		}
 		for (i => chartInfo in _plot.chartInfos) {
 			var chartInfo = Reflect.copy(_plot.chartInfos[i]);
 			var chartID = "chart_" + i;
 			if (chartInfo.axisInfo != null) {
 				axisID = "axis_" + i;
 			}
-			if (chartInfo.data.groups == null) {
-				chartInfo.data.groups = [];
-				for (j in 0...chartInfo.data.xValues.length) {
-					chartInfo.data.groups.push(Std.string(i + 1));
-				}
-			}
 			if (chartInfo.style == null) {
-				for (j => group in chartInfo.data.groups) {
-					if (!_plot.groups.exists(group)) {
-						_plot.groups.set(group, _plot.groupNumber);
-						_plot.groupNumber++;
-					}
-				}
-
 				chartInfo.style = {
-					colorPalette: ColorPalettes.defaultColors(_plot.groupNumber),
+					colorPalette: colors,
 					groups: _plot.groups
 				};
 			}
@@ -155,6 +194,12 @@ class Builder extends CompositeBuilder {
 		_plot.plotBody.top = _plot.paddingTop;
 		_plot.plotBody.width -= _plot.paddingLeft + _plot.paddingRight;
 		_plot.plotBody.height -= _plot.paddingTop + _plot.paddingBottom;
+
+		if (_plot.legend != null) {
+			_plot.plotBody.percentWidth = 80;
+			_plot.legend.percentWidth = 20;
+			_plot.legend.left = _plot.plotBody.width + _plot.legend.marginLeft;
+		}
 		return true;
 	}
 }

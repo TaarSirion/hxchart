@@ -36,7 +36,7 @@ class Legend extends VBox {
 
 	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
 
-	public var childNodes:Array<LegendNode>;
+	public var childNodes:Array<String>;
 
 	public function new() {
 		super();
@@ -132,7 +132,7 @@ private class AddNode extends Behaviour {
 		}
 		node.data = param;
 		legend.addComponent(node);
-		legend.childNodes.push(node);
+		legend.childNodes.push(node.text);
 		return node;
 	}
 }
@@ -151,9 +151,7 @@ class Builder extends CompositeBuilder {
 		_legend.marginTop = 10;
 		_legend.marginLeft = 10;
 		_legend.marginRight = 10;
-		_legend.top = 10;
-		_legend.left = 10;
-		_legend.percentHeight = 100;
+		_legend.height = 30;
 		_legend.percentWidth = 100;
 		_legend.childNodes = [];
 		_legend.addClass("legend-class");
@@ -201,26 +199,35 @@ class Builder extends CompositeBuilder {
 
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
+		_legend.top += style.marginTop;
+		_legend.height -= style.marginBottom;
 	}
 
 	override function validateComponentLayout():Bool {
-		return super.validateComponentLayout();
+		super.validateComponentLayout();
+		trace("B");
+		if (_legend.align < 2) {
+			_legend.childComponents[1].hide();
+			var heights = 0.0;
+			for (child in _legend.childComponents[0].childComponents) {
+				heights += child.height;
+			}
+			_legend.height = (35 - _legend.marginBottom) + heights;
+		} // else {
+		// 	_legend.childComponents[0].hide();
+		// 	var fullLength = _legend.childComponents[1].width;
+		// 	for (child in _legend.childComponents[1].childComponents) {
+		// 		if (child.numComponents == 0) {
+		// 			fullLength -= child.width;
+		// 			continue;
+		// 		}
+		// 		child.width = fullLength / _legend.childNodes.length;
+		// 	}
+		// }
+		return true;
 	}
 
-	override function validateComponentData() {
-		super.validateComponentData();
-		if (_legend.align >= 2) {
-			_legend.childComponents[0].hide();
-			var fullLength = _legend.childComponents[1].width;
-			for (child in _legend.childComponents[1].childComponents) {
-				if (child.numComponents == 0) {
-					fullLength -= child.width;
-					continue;
-				}
-				child.width = fullLength / _legend.childNodes.length;
-			}
-		} else {
-			_legend.childComponents[1].hide();
-		}
-	}
+	// override function validateComponentData() {
+	// 	super.validateComponentData();
+	// }
 }
