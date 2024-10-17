@@ -67,8 +67,6 @@ class Ticks extends Box {
 		return labelPosition = pos;
 	}
 
-	public var options:Options;
-
 	public function new(is_sub:Bool = false, rotation:Int = 0) {
 		super();
 		this.is_sub = is_sub;

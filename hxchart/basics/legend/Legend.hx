@@ -10,7 +10,6 @@ import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
 import haxe.ui.behaviours.DataBehaviour;
 import haxe.ui.core.CompositeBuilder;
-import hxchart.basics.legend.LegendTools.LegendPosition;
 import haxe.ui.containers.VBox;
 import haxe.ui.styles.StyleSheet;
 import haxe.ui.components.Label;
@@ -46,25 +45,11 @@ class Legend extends VBox {
 @:dox(hide) @:noCompletion
 private class LegendLayout extends DefaultLayout {
 	public override function repositionChildren() {
-		var _legend:Legend = cast(_component, Legend);
-		var width = _legend.width;
-		var height = _legend.height;
-		var layer = _legend.parentComponent;
-		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.align]);
-		_legend.left = coords.x;
-		_legend.top = coords.y;
 		trace("Repositin legend");
 	}
 
 	public override function resizeChildren() {
 		trace("RESIZE LEGEND");
-		var _legend:Legend = cast(_component, Legend);
-		var width = _legend.width;
-		var height = _legend.height;
-		var layer = _legend.parentComponent;
-		var coords = LegendTools.calcPosition(width, height, layer.width, layer.height, LegendPosition.createAll()[_legend.align]);
-		_legend.left = coords.x;
-		_legend.top = coords.y;
 	}
 
 	override function marginLeft(child:Component):Float {
@@ -205,7 +190,6 @@ class Builder extends CompositeBuilder {
 
 	override function validateComponentLayout():Bool {
 		super.validateComponentLayout();
-		trace("B");
 		if (_legend.align < 2) {
 			_legend.childComponents[1].hide();
 			var heights = 0.0;
@@ -213,17 +197,17 @@ class Builder extends CompositeBuilder {
 				heights += child.height;
 			}
 			_legend.height = (35 - _legend.marginBottom) + heights;
-		} // else {
-		// 	_legend.childComponents[0].hide();
-		// 	var fullLength = _legend.childComponents[1].width;
-		// 	for (child in _legend.childComponents[1].childComponents) {
-		// 		if (child.numComponents == 0) {
-		// 			fullLength -= child.width;
-		// 			continue;
-		// 		}
-		// 		child.width = fullLength / _legend.childNodes.length;
-		// 	}
-		// }
+		} else {
+			_legend.childComponents[0].hide();
+			var fullLength = _legend.childComponents[1].width;
+			for (child in _legend.childComponents[1].childComponents) {
+				if (child.numComponents == 0) {
+					fullLength -= child.width;
+					continue;
+				}
+				child.width = fullLength / _legend.childNodes.length;
+			}
+		}
 		return true;
 	}
 
