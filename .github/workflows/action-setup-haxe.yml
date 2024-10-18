@@ -28,6 +28,8 @@ jobs:
           - 4.3.3
           - 4.2.5
           - 4.1.5
+        include:
+          - lib_hxml = lib.hxml
 
     steps:
     - name: Show environment variables
@@ -41,14 +43,13 @@ jobs:
       uses: krdlab/setup-haxe@master # https://github.com/krdlab/setup-haxe
       with:
         haxe-version: ${{ matrix.haxe }}
+        cache-dependency-path: ${{ matrix.lib_hxml }}
 
     - name: Install haxe libs
       shell: bash
       id: prerequisites
       run: |
-        haxelib install haxeui-core 1.7.0
-        haxelib install haxeui-html5 1.7.0
-        haxelib install utest
+        haxelib install ${{ matrix.lib_hxml }} --always
     
     - name: Test hxchart
       run: haxe tests.hxml
