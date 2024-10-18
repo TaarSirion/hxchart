@@ -55,6 +55,7 @@ jobs:
       id: prerequisites
       run: |
         haxelib install haxeui-core 1.6.0
+        haxelib install haxeui-html5
         haxelib install utest
     
     - name: Test hxchart
