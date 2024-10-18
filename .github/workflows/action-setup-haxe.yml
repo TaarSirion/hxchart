@@ -43,13 +43,13 @@ jobs:
       uses: krdlab/setup-haxe@v1.5.1 # https://github.com/krdlab/setup-haxe
       with:
         haxe-version: ${{ matrix.haxe }}
-        cache-dependency-path: ${{ matrix.lib_hxml }}
+        cache-dependency-path: 'workflow/${{ matrix.lib_hxml }}''
 
     - name: Install haxe libs
       shell: bash
       id: prerequisites
       run: |
-        haxelib install ${{ matrix.lib_hxml }} --always
+        haxelib install workflow/${{ matrix.lib_hxml }} --always
     
     - name: Test hxchart
       run: haxe tests.hxml

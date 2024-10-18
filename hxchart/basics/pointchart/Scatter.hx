@@ -91,12 +91,12 @@ class Scatter implements AxisLayer implements DataLayer {
 		var yVals = data.map(x -> {
 			return x.yValue;
 		});
-		if (xVals[0] is Float) {
+		if (Std.isOfType(xVals[0], Float)) {
 			xVals.sort(Reflect.compare);
 			minX = xVals[0];
 			maxX = xVals[xVals.length - 1];
 		}
-		if (yVals[0] is Float) {
+		if (Std.isOfType(yVals[0], Float)) {
 			yVals.sort(Reflect.compare);
 			minY = yVals[0];
 			maxY = yVals[yVals.length - 1];
@@ -217,7 +217,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		var x_coord_min = axes[0].ticks[0].left;
 		var x_coord_max = axes[0].ticks[axes[0].ticks.length - 1].left;
 		var ratio = 1.0;
-		if (axes[0].tickInfo is NumericTickInfo) {
+		if (Std.isOfType(axes[0].tickInfo, NumericTickInfo)) {
 			var tickInfo:NumericTickInfo = cast(axes[0].tickInfo, NumericTickInfo);
 			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
 		}
@@ -225,7 +225,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		var y_coord_min = axes[1].ticks[0].top;
 		var y_coord_max = axes[1].ticks[axes[1].ticks.length - 1].top;
 		ratio = 1.0;
-		if (axes[1].tickInfo is NumericTickInfo) {
+		if (Std.isOfType(axes[1].tickInfo, NumericTickInfo)) {
 			var tickInfo:NumericTickInfo = cast(axes[1].tickInfo, NumericTickInfo);
 			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
 		}
@@ -249,7 +249,7 @@ class Scatter implements AxisLayer implements DataLayer {
 	}
 
 	public function calcXCoord(xValue:Dynamic, ticks:Array<Ticks>, zeroPos:Float, xDist:AxisDist) {
-		if (xValue is String) {
+		if (Std.isOfType(xValue, String)) {
 			var ticksFiltered = ticks.filter(x -> {
 				return x.text == xValue;
 			});
@@ -270,7 +270,7 @@ class Scatter implements AxisLayer implements DataLayer {
 	}
 
 	public function calcYCoord(yValue:Dynamic, ticks:Array<Ticks>, zeroPos:Float, yDist:AxisDist) {
-		if (yValue is String) {
+		if (Std.isOfType(yValue, String)) {
 			var ticksFiltered = ticks.filter(x -> {
 				return x.text == yValue;
 			});

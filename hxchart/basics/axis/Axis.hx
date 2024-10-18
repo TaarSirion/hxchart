@@ -175,7 +175,7 @@ private class SetTicks extends Behaviour {
 		axis.sub_ticks = [];
 		var start = axis.startPoint;
 		var tickNum = tickInfo.tickNum;
-		if (tickInfo is StringTickInfo) {
+		if (Std.isOfType(tickInfo, StringTickInfo)) {
 			// Increase tickNum size so that positioning centers the ticks.
 			tickNum++;
 		}

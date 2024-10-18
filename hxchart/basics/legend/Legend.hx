@@ -154,7 +154,7 @@ class Builder extends CompositeBuilder {
 	}
 
 	public override function addComponent(child:Component):Component {
-		if (child is LegendNode) {
+		if (Std.isOfType(child, LegendNode)) {
 			if (_legend.align < 2) {
 				return _textVBox.addComponent(child);
 			} else {
