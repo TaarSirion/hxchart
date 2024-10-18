@@ -46,7 +46,7 @@ jobs:
           ${{ runner.os }}-haxelib-
 
     - name: Install Haxe ${{ matrix.haxe }}
-      uses: krdlab/setup-haxe@v1.5.1 # https://github.com/krdlab/setup-haxe
+      uses: krdlab/setup-haxe # https://github.com/krdlab/setup-haxe
       with:
         haxe-version: ${{ matrix.haxe }}
 
@@ -54,8 +54,8 @@ jobs:
       shell: bash
       id: prerequisites
       run: |
-        haxelib install haxeui-core 1.7.0
-        haxelib install haxeui-html5 1.7.0
+        haxelib install haxeui-core 1.6.0
+        haxelib install haxeui-html5 1.6.0
         haxelib install utest
     
     - name: Test hxchart
