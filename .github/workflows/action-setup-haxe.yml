@@ -28,8 +28,6 @@ jobs:
           - 4.3.3
           - 4.2.5
           - 4.1.5
-        include:
-          - lib_hxml: lib.hxml
 
     steps:
     - name: Show environment variables
@@ -39,17 +37,25 @@ jobs:
     - name: Git Checkout
       uses: actions/checkout@v2 #https://github.com/actions/checkout
 
+    - name: "Cache Haxelib Repository"
+      uses: actions/cache@v2
+      with:
+        path: $RUNNER_TOOL_CACHE/haxe/${{ matrix.haxe }}/x64/lib
+        key: ${{ runner.os }}-haxelib-${{ hashFiles('**/haxelib.json') }}
+        restore-keys: |
+          ${{ runner.os }}-haxelib-
     - name: Install Haxe ${{ matrix.haxe }}
-      uses: krdlab/setup-haxe@master # https://github.com/krdlab/setup-haxe
+      uses: krdlab/setup-haxe@v1.5.1 # https://github.com/krdlab/setup-haxe
       with:
         haxe-version: ${{ matrix.haxe }}
-        cache-dependency-path: ${{ matrix.lib_hxml }}
 
     - name: Install haxe libs
       shell: bash
       id: prerequisites
       run: |
-        haxelib install ${{ matrix.lib_hxml }} --always
+        haxelib install haxeui-core 1.7.0
+        haxelib install haxeui-html5 1.7.0
+        haxelib install utest
     
     - name: Test hxchart
       run: haxe tests.hxml
