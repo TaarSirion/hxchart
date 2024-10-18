@@ -46,7 +46,7 @@ jobs:
           ${{ runner.os }}-haxelib-
 
     - name: Install Haxe ${{ matrix.haxe }}
-      uses: krdlab/setup-haxe # https://github.com/krdlab/setup-haxe
+      uses: krdlab/setup-haxe@master # https://github.com/krdlab/setup-haxe
       with:
         haxe-version: ${{ matrix.haxe }}
 
