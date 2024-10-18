@@ -29,7 +29,7 @@ jobs:
           - 4.2.5
           - 4.1.5
         include:
-          - lib_hxml = lib.hxml
+          - lib_hxml: lib.hxml
 
     steps:
     - name: Show environment variables
