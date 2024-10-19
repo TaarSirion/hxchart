@@ -59,6 +59,10 @@ class ColorPalettes {
 	}
 
 	public static function defaultColors(n:Int) {
+		if (n == 1) {
+			return [Color.fromString("black").toInt()];
+		}
+
 		var def = [
 			Color.fromString("red"), Color.fromString("orange"), Color.fromString("green"), Color.fromString("#6699FF"), Color.fromString("purple"),
 			Color.fromString("#99991E"), Color.fromString("grey"), Color.fromString("pink"), Color.fromString("brown"), Color.fromString("white"),

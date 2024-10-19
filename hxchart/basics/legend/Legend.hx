@@ -164,6 +164,12 @@ class Builder extends CompositeBuilder {
 		return null;
 	}
 
+	override function removeAllComponents(dispose:Bool = true):Bool {
+		_textHBox.removeAllComponents();
+		_textVBox.removeAllComponents();
+		return true;
+	}
+
 	private function setStyleSheet() {
 		_legend.styleSheet = new StyleSheet();
 		_legend.styleSheet.parse("

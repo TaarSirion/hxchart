@@ -33,6 +33,8 @@ typedef ChartStyle = {
 typedef ChartInfo = {
 	data:AddDataType,
 	type:ChartTypes,
+	?x:String,
+	?y:String,
 	?style:ChartStyle,
 	?axisInfo:Array<AxisInfo>
 }
@@ -81,6 +83,78 @@ class Plot extends Absolute {
 			this.legendInfo = legendInfo;
 			addComponent(legend);
 		}
+
+		setData();
+	}
+
+	public function setData(reset:Bool = false) {
+		if (reset) {
+			legend.removeAllComponents();
+			legend.childNodes = [];
+		}
+		for (info in chartInfos) {
+			switch (info.type) {
+				case scatter:
+					if (info.data.values == null && info.data.xValues == null && info.data.yValues == null) {
+						throw new Exception("No data available. Please set some data in chartInfo.data.values or chartInfo.data.xValues");
+					}
+					if (info.x == null && info.data.xValues == null) {
+						throw new Exception("Not possible to discern the values for x-axis. Please set chartInfo.x or chartInfo.data.xValues");
+					} else if (info.data.xValues == null) {
+						info.data.xValues = info.data.values.get(info.x);
+					}
+					if (info.y == null && info.data.yValues == null) {
+						throw new Exception("Not possible to discern the values for y-axis. Please set chartInfo.y or chartInfo.data.yValues");
+					} else if (info.data.yValues == null) {
+						info.data.yValues = info.data.values.get(info.y);
+					}
+				case bar:
+				case pie:
+			}
+		}
+
+		for (i => info in chartInfos) {
+			if (info.data.groups == null) {
+				info.data.groups = [];
+				if (info.data.values != null && info.data.values.exists("groups")) {
+					info.data.groups = info.data.values.get("groups").map(x -> Std.string(x));
+				} else {
+					for (j in 0...info.data.xValues.length) {
+						info.data.groups.push(Std.string(i + 1));
+					}
+				}
+			}
+			for (j => group in info.data.groups) {
+				if (!groups.exists(group)) {
+					groups.set(group, groupNumber);
+					groupNumber++;
+				}
+			}
+		}
+		var colors = ColorPalettes.defaultColors(groupNumber);
+		var groupIterationIndex = 0;
+		for (group in groups.keys()) {
+			if (legend.childNodes.contains(group)) {
+				continue;
+			}
+			legend.addNode({
+				text: group,
+				fontSize: legendInfo.nodeFontSize,
+				color: colors[groupIterationIndex]
+			});
+			groupIterationIndex++;
+		}
+		for (info in chartInfos) {
+			if (reset) {
+				info.style = null;
+			}
+			if (info.style == null) {
+				info.style = {
+					colorPalette: colors,
+					groups: groups
+				};
+			}
+		}
 	}
 
 	@:call(AddChart) public function addChart(chartInfo:ChartInfo):Void;
@@ -92,6 +166,7 @@ private class AddChart extends Behaviour {
 		var plot = cast(_component, Plot);
 		var chartInfo:ChartInfo = param;
 		plot.chartInfos.push(chartInfo);
+		plot.setData(true);
 		return null;
 	}
 }
@@ -113,46 +188,12 @@ class Builder extends CompositeBuilder {
 		_plot.axes = new Map();
 		var axisID = "axis_0";
 
-		for (i => info in _plot.chartInfos) {
-			if (info.data.groups == null) {
-				info.data.groups = [];
-				for (j in 0...info.data.xValues.length) {
-					info.data.groups.push(Std.string(i + 1));
-				}
-			}
-			for (j => group in info.data.groups) {
-				if (!_plot.groups.exists(group)) {
-					_plot.groups.set(group, _plot.groupNumber);
-					_plot.groupNumber++;
-				}
-			}
-		}
-		var colors = ColorPalettes.defaultColors(_plot.groupNumber);
-		var groupIterationIndex = 0;
-		for (group in _plot.groups.keys()) {
-			if (_plot.legend.childNodes.contains(group)) {
-				continue;
-			}
-			_plot.legend.addNode({
-				text: group,
-				fontSize: _plot.legendInfo.nodeFontSize,
-				color: colors[groupIterationIndex]
-			});
-			groupIterationIndex++;
-		}
 		for (i => chartInfo in _plot.chartInfos) {
 			var chartInfo = Reflect.copy(_plot.chartInfos[i]);
 			var chartID = "chart_" + i;
 			if (chartInfo.axisInfo != null) {
 				axisID = "axis_" + i;
 			}
-			if (chartInfo.style == null) {
-				chartInfo.style = {
-					colorPalette: colors,
-					groups: _plot.groups
-				};
-			}
-			trace(chartInfo);
 			switch (chartInfo.type) {
 				case scatter:
 					if (chartInfo.axisInfo != null && chartInfo.axisInfo.length > 2) {

@@ -11,7 +11,7 @@ typedef AddDataType = {
 	?xValues:Array<Dynamic>,
 	?yValues:Array<Dynamic>,
 	?groups:Array<String>,
-	?values:Array<Array<Dynamic>>
+	?values:Map<String, Array<Dynamic>>
 }
 
 interface DataLayer {

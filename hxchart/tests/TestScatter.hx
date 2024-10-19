@@ -58,7 +58,7 @@ class TestScatter extends Test {
 		Assert.equals(1, scatter.data[0].yValue);
 		Assert.equals(3, scatter.data.length);
 		Assert.equals(3, scatter.colors.length);
-		Assert.equals(16711680, scatter.colors[2]);
+		Assert.equals(0, scatter.colors[2]);
 	}
 
 	function testSortData() {
