@@ -5,7 +5,7 @@ import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
 import hxchart.basics.axis.Axis;
 import hxchart.basics.pointchart.Scatter;
-import hxchart.basics.data.DataLayer.AddDataType;
+import hxchart.basics.data.DataLayer.TrailData;
 import haxe.ui.core.CompositeBuilder;
 import haxe.Exception;
 import hxchart.basics.axis.Axis.AxisTypes;
@@ -13,41 +13,89 @@ import hxchart.basics.data.Data2D;
 import hxchart.basics.legend.Legend;
 import haxe.ui.containers.Absolute;
 
-enum ChartTypes {
+enum TrailTypes {
 	scatter;
 	bar;
 	pie;
 }
 
+/**
+ * Axis information. Usually used in the first trail.
+ * 
+ * When only `type` is set, the corresponding trail will calculate its own axis.
+ * 
+ * When supplying `values` beware of these differences based on `type`:
+ * - linear: Only the first two values in the array will be used, the represent the min and max values of the axis.
+ * - categorical: All values will be used.
+ * 
+ * @param type Type of axis. The positioning of data depends on this. 
+ * @param axis Optional. A full axis object. If this is supplied, the trail will use this axis instead trying to generate its own.
+ * @param values Optional. Values the axis should have. Depending on the type, this will work differently.
+ */
 typedef AxisInfo = {
 	type:AxisTypes,
 	?axis:Axis,
 	?values:Array<Dynamic>
 }
 
-typedef ChartStyle = {
+/**
+ * Styling of a trail
+ * @param colorPalette Color values in integer form. The length should be equal or greater than the length of `groups`. 
+ * @param groups Mapping of groups from the data, 
+ */
+typedef TrailStyle = {
 	colorPalette:Array<Int>,
 	groups:Map<String, Int>
 }
 
-typedef ChartInfo = {
-	data:AddDataType,
-	type:ChartTypes,
+/**
+ * Information about a trail.
+ * 
+ * Beware `axisInfo` is mandatory for some types of trails:
+ * - scatter
+ * - bar
+ * @param data The data that should be shown. 
+ * @param type Type of trail that should be used.
+ * @param x Optional. Key of the x values. This is necessary for `type = scatter` when only `data.values` is set.
+ * @param y Optional. Key of the y values. This is necessary for `type = scatter` when only `data.values` is set.
+ * @param style Optional. Style of the trail. Beware, this will reset if an additional trail is added to the plot, to keep styling consistent.
+ * @param axisInfo Optional. Information about the axes. Technically it is possible to give every trail their own axes, resulting in multiple sub-plots (currently not implemented).
+ */
+typedef TrailInfo = {
+	data:TrailData,
+	type:TrailTypes,
 	?x:String,
 	?y:String,
-	?style:ChartStyle,
+	?style:TrailStyle,
 	?axisInfo:Array<AxisInfo>
 }
 
+/**
+ * Information about a plot legend.
+ * 
+ * Legends are always plot specific and not trail specific. Meaning multiple trails in a plot share the same legend.
+ * @param title Optional. Title displayed on top of the legend. Will default to `"Legend"`.
+ * @param nodeFontSize Optional. Fontsize for all legend nodes.
+ * @param useLegend Optional. If a legend should be used. Per default a legend will be used.
+ */
 typedef LegendInfo = {
 	?title:String,
 	?nodeFontSize:Int,
 	?useLegend:Bool
 }
 
+/**
+ * Object for visualising one or multiple plots. 
+ * 
+ * A plot consists of one or multiple trails. A trail can be something like a scatter-plot, line-chart, bar-chart etc.
+ * 
+ * This allows the mixing of different types, for example scatter and line, into a single plot.
+ * 
+ * Beware that trails in the same plot share the same underlying coordinates (i.e. axes, or something similar) and styling. This may have unintended consequences, when the types don't mix well.
+ */
 @:composite(Builder)
 class Plot extends Absolute {
-	public var chartInfos:Array<ChartInfo>;
+	public var trailInfos:Array<TrailInfo>;
 	public var legendInfo:LegendInfo;
 
 	public var plotBody:Absolute;
@@ -56,13 +104,13 @@ class Plot extends Absolute {
 	public var axes:Map<String, Array<Axis>>;
 	public var legend:Legend;
 
-	public function new(chartInfo:ChartInfo, width:Float, height:Float, ?legendInfo:LegendInfo) {
+	public function new(chartInfo:TrailInfo, width:Float, height:Float, ?legendInfo:LegendInfo) {
 		super();
-		chartInfos = [];
+		trailInfos = [];
 		axes = new Map();
 		groups = new Map();
 		groupNumber = 0;
-		chartInfos.push(chartInfo);
+		trailInfos.push(chartInfo);
 		if (legendInfo == null) {
 			legendInfo = {
 				useLegend: true,
@@ -92,7 +140,7 @@ class Plot extends Absolute {
 			legend.removeAllComponents();
 			legend.childNodes = [];
 		}
-		for (info in chartInfos) {
+		for (info in trailInfos) {
 			switch (info.type) {
 				case scatter:
 					if (info.data.values == null && info.data.xValues == null && info.data.yValues == null) {
@@ -113,7 +161,7 @@ class Plot extends Absolute {
 			}
 		}
 
-		for (i => info in chartInfos) {
+		for (i => info in trailInfos) {
 			if (info.data.groups == null) {
 				info.data.groups = [];
 				if (info.data.values != null && info.data.values.exists("groups")) {
@@ -144,7 +192,7 @@ class Plot extends Absolute {
 			});
 			groupIterationIndex++;
 		}
-		for (info in chartInfos) {
+		for (info in trailInfos) {
 			if (reset) {
 				info.style = null;
 			}
@@ -157,15 +205,15 @@ class Plot extends Absolute {
 		}
 	}
 
-	@:call(AddChart) public function addChart(chartInfo:ChartInfo):Void;
+	@:call(AddChart) public function addChart(chartInfo:TrailInfo):Void;
 }
 
 @:dox(hide) @:noCompletion
 private class AddChart extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var plot = cast(_component, Plot);
-		var chartInfo:ChartInfo = param;
-		plot.chartInfos.push(chartInfo);
+		var chartInfo:TrailInfo = param;
+		plot.trailInfos.push(chartInfo);
 		plot.setData(true);
 		return null;
 	}
@@ -188,8 +236,8 @@ class Builder extends CompositeBuilder {
 		_plot.axes = new Map();
 		var axisID = "axis_0";
 
-		for (i => chartInfo in _plot.chartInfos) {
-			var chartInfo = Reflect.copy(_plot.chartInfos[i]);
+		for (i => chartInfo in _plot.trailInfos) {
+			var chartInfo = Reflect.copy(_plot.trailInfos[i]);
 			var chartID = "chart_" + i;
 			if (chartInfo.axisInfo != null) {
 				axisID = "axis_" + i;

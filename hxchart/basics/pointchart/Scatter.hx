@@ -1,6 +1,6 @@
 package hxchart.basics.pointchart;
 
-import hxchart.basics.plot.Plot.ChartStyle;
+import hxchart.basics.plot.Plot.TrailStyle;
 import hxchart.basics.pointchart.ChartTools.AxisDist;
 import hxchart.basics.ticks.Ticks;
 import haxe.Exception;
@@ -16,7 +16,7 @@ import hxchart.basics.colors.ColorPalettes;
 import haxe.ui.util.Color;
 import hxchart.basics.data.Data2D;
 import hxchart.basics.plot.Plot.AxisInfo;
-import hxchart.basics.plot.Plot.ChartInfo;
+import hxchart.basics.plot.Plot.TrailInfo;
 import hxchart.basics.data.DataLayer;
 import hxchart.basics.axis.AxisLayer;
 
@@ -32,13 +32,13 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var dataCanvas:Canvas;
 
 	@:allow(hxchart.tests)
-	private var chartInfo:ChartInfo;
+	private var chartInfo:TrailInfo;
 
 	public var colorPalette:Array<Int>;
 
 	public var parent:Absolute;
 
-	public function new(chartInfo:ChartInfo, parent:Absolute, id:String, axisID:String) {
+	public function new(chartInfo:TrailInfo, parent:Absolute, id:String, axisID:String) {
 		this.parent = parent;
 		dataCanvas = new Canvas();
 		dataCanvas.id = id;
@@ -55,7 +55,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		positionData(chartInfo.style);
 	}
 
-	public function setData(newData:AddDataType, style:ChartStyle) {
+	public function setData(newData:TrailData, style:TrailStyle) {
 		data = [];
 		colors = [];
 		var groupsArr = newData.groups;
@@ -207,7 +207,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 	}
 
-	public function positionData(style:ChartStyle) {
+	public function positionData(style:TrailStyle) {
 		if (axes.length < 2) {
 			throw new Exception("Too few axes for drawing data.");
 		}

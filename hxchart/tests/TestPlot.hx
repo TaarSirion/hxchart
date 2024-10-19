@@ -14,8 +14,8 @@ class TestPlot extends Test {
 			},
 			type: scatter
 		}, 100, 100);
-		Assert.equals(1, plot.chartInfos[0].data.xValues[0]);
-		Assert.equals(scatter, plot.chartInfos[0].type);
+		Assert.equals(1, plot.trailInfos[0].data.xValues[0]);
+		Assert.equals(scatter, plot.trailInfos[0].type);
 	}
 
 	function testPlotWithLegend() {
@@ -97,7 +97,7 @@ class TestPlot extends Test {
 			xValues: [1, 2],
 			yValues: [3, 4],
 			groups: ["1", "1"]
-		}, plot.chartInfos[0].data);
+		}, plot.trailInfos[0].data);
 
 		var plot = new Plot({
 			data: {
@@ -114,7 +114,7 @@ class TestPlot extends Test {
 			xValues: [3, 4],
 			yValues: [1, 2],
 			groups: ["1", "1"]
-		}, plot.chartInfos[0].data);
+		}, plot.trailInfos[0].data);
 	}
 
 	function testPlotGroups() {
@@ -159,7 +159,7 @@ class TestPlot extends Test {
 			},
 			type: scatter
 		}, 100, 100);
-		Assert.contains(Color.fromString("black").toInt(), plot.chartInfos[0].style.colorPalette);
+		Assert.contains(Color.fromString("black").toInt(), plot.trailInfos[0].style.colorPalette);
 
 		var plot = new Plot({
 			data: {
@@ -169,6 +169,6 @@ class TestPlot extends Test {
 			},
 			type: scatter
 		}, 100, 100);
-		Assert.contains(Color.fromString("orange").toInt(), plot.chartInfos[0].style.colorPalette);
+		Assert.contains(Color.fromString("orange").toInt(), plot.trailInfos[0].style.colorPalette);
 	}
 }
