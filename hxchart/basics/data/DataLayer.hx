@@ -8,9 +8,10 @@ import haxe.ui.components.Canvas;
 import haxe.ui.containers.Absolute;
 
 typedef AddDataType = {
-	xValues:Array<Dynamic>,
-	yValues:Array<Dynamic>,
-	?groups:Array<String>
+	?xValues:Array<Dynamic>,
+	?yValues:Array<Dynamic>,
+	?groups:Array<String>,
+	?values:Array<Array<Dynamic>>
 }
 
 interface DataLayer {
