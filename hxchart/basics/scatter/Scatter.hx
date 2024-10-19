@@ -1,7 +1,7 @@
-package hxchart.basics.pointchart;
+package hxchart.basics.scatter;
 
+import hxchart.basics.utils.ChartTools;
 import hxchart.basics.plot.Plot.TrailStyle;
-import hxchart.basics.pointchart.ChartTools.AxisDist;
 import hxchart.basics.ticks.Ticks;
 import haxe.Exception;
 import hxchart.basics.ticks.Ticks.CompassOrientation;
@@ -12,7 +12,6 @@ import hxchart.basics.axis.TickInfo;
 import haxe.ui.geom.Point;
 import haxe.ui.containers.Absolute;
 import hxchart.basics.axis.NumericTickInfo;
-import hxchart.basics.colors.ColorPalettes;
 import haxe.ui.util.Color;
 import hxchart.basics.data.Data2D;
 import hxchart.basics.plot.Plot.AxisInfo;

@@ -1,4 +1,4 @@
-package hxchart.basics.pointchart;
+package hxchart.basics.utils;
 
 typedef AxisDist = {
 	pos_dist:Float,

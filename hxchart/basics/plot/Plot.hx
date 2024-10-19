@@ -4,7 +4,7 @@ import hxchart.basics.colors.ColorPalettes;
 import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
 import hxchart.basics.axis.Axis;
-import hxchart.basics.pointchart.Scatter;
+import hxchart.basics.scatter.Scatter;
 import hxchart.basics.data.DataLayer.TrailData;
 import haxe.ui.core.CompositeBuilder;
 import haxe.Exception;
