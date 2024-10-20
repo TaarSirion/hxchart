@@ -1,4 +1,4 @@
-package hxchart.basics.scatter;
+package hxchart.basics.trails;
 
 import hxchart.basics.utils.ChartTools;
 import hxchart.basics.plot.Plot.TrailStyle;

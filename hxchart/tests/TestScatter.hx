@@ -10,7 +10,7 @@ import hxchart.basics.axis.Axis.AxisTypes;
 import hxchart.basics.plot.Plot.TrailTypes;
 import utest.Assert;
 import haxe.ui.containers.Absolute;
-import hxchart.basics.scatter.Scatter;
+import hxchart.basics.trails.Scatter;
 import utest.Test;
 
 class TestScatter extends Test {
