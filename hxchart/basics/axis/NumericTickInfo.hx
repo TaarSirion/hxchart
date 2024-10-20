@@ -100,6 +100,8 @@ class NumericTickInfo implements TickInfo {
 	public function calcTickNum() {
 		var maxRound = max < 0 ? 0 : Utils.roundToPrec(max, precision);
 		var minRound = min < 0 ? Utils.roundToPrec(min, precision) : 0;
+		max = maxRound;
+		min = minRound;
 		var dist = Math.abs(minRound) + maxRound;
 		tickNum = Math.round(dist * Math.pow(10, -precision));
 		if (power < 1) {

@@ -1,5 +1,6 @@
 package hxchart.basics.trails;
 
+import hxchart.basics.axis.AxisTools;
 import hxchart.basics.utils.ChartTools;
 import hxchart.basics.plot.Plot.TrailStyle;
 import hxchart.basics.ticks.Ticks;
@@ -139,8 +140,8 @@ class Scatter implements AxisLayer implements DataLayer {
 			axes[1] = axisInfo[1].axis;
 		}
 		if (axes[0] != null && axes[1] != null) {
-			addAxisToParent(axes[0], parent);
-			addAxisToParent(axes[1], parent);
+			AxisTools.addAxisToParent(axes[0], parent);
+			AxisTools.addAxisToParent(axes[1], parent);
 			return;
 		}
 
@@ -170,39 +171,22 @@ class Scatter implements AxisLayer implements DataLayer {
 		axes[1].width = xAxisLength;
 		axes[1].height = yAxisLength;
 		// This is necessary to allow the ticks to be calculated
-		axes[0].startPoint = new haxe.ui.geom.Point(0, 40);
-		axes[1].startPoint = new haxe.ui.geom.Point(40, yAxisLength);
+		axes[0].startPoint = new Point(0, 40);
+		axes[1].startPoint = new Point(40, yAxisLength);
 		// Real positioning
-		axes[0].startPoint = new haxe.ui.geom.Point(0, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
-		axes[1].startPoint = new haxe.ui.geom.Point(axes[0].ticks[axes[0].tickInfo.zeroIndex].left, yAxisLength);
+		axes[0].startPoint = new Point(0, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
+		axes[1].startPoint = new Point(axes[0].ticks[axes[0].tickInfo.zeroIndex].left, yAxisLength);
 		axes[1].showZeroTick = false;
 		axes[0].zeroTickPosition = CompassOrientation.SW;
 		if (isPreviousXAxis) {
-			addAxisToParent(axes[0], parent);
+			AxisTools.addAxisToParent(axes[0], parent);
 		} else {
-			replaceAxisInParent(axes[0], parent);
+			AxisTools.replaceAxisInParent(axes[0], parent);
 		}
 		if (isPreviousYAxis) {
-			addAxisToParent(axes[1], parent);
+			AxisTools.addAxisToParent(axes[1], parent);
 		} else {
-			replaceAxisInParent(axes[1], parent);
-		}
-	}
-
-	function addAxisToParent(axis:Axis, parent:Absolute) {
-		var comp = parent.findComponent(axis.id);
-		if (comp == null) {
-			parent.addComponent(axis);
-		}
-	}
-
-	function replaceAxisInParent(axis:Axis, parent:Absolute) {
-		var comp = parent.findComponent(axis.id);
-		if (comp == null) {
-			parent.addComponent(axis);
-		} else {
-			parent.removeComponent(comp);
-			parent.addComponent(axis);
+			AxisTools.replaceAxisInParent(axes[1], parent);
 		}
 	}
 

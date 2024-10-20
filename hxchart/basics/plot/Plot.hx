@@ -1,5 +1,6 @@
 package hxchart.basics.plot;
 
+import hxchart.basics.trails.Bar;
 import hxchart.basics.colors.ColorPalettes;
 import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
@@ -107,6 +108,8 @@ class Plot extends Absolute {
 	public function new(chartInfo:TrailInfo, width:Float, height:Float, ?legendInfo:LegendInfo) {
 		super();
 		trailInfos = [];
+		this.width = width;
+		this.height = height;
 		axes = new Map();
 		groups = new Map();
 		groupNumber = 0;
@@ -157,6 +160,19 @@ class Plot extends Absolute {
 						info.data.yValues = info.data.values.get(info.y);
 					}
 				case bar:
+					if (info.data.values == null && info.data.xValues == null && info.data.yValues == null) {
+						throw new Exception("No data available. Please set some data in chartInfo.data.values or chartInfo.data.xValues");
+					}
+					if (info.x == null && info.data.xValues == null) {
+						throw new Exception("Not possible to discern the values for x-axis. Please set chartInfo.x or chartInfo.data.xValues");
+					} else if (info.data.xValues == null) {
+						info.data.xValues = info.data.values.get(info.x);
+					}
+					if (info.y == null && info.data.yValues == null) {
+						throw new Exception("Not possible to discern the values for y-axis. Please set chartInfo.y or chartInfo.data.yValues");
+					} else if (info.data.yValues == null) {
+						info.data.yValues = info.data.values.get(info.y);
+					}
 				case pie:
 			}
 		}
@@ -265,7 +281,26 @@ class Builder extends CompositeBuilder {
 						_plot.axes.set(axisID, scatter.axes);
 					}
 				case bar:
-					return;
+					if (chartInfo.axisInfo != null && chartInfo.axisInfo.length > 2) {
+						throw new Exception("Not able to use more than 2 axes for bar-chart!");
+					}
+					if (_plot.axes.exists(axisID)) {
+						chartInfo.axisInfo = [
+							{
+								type: categorical,
+								axis: _plot.axes.get(axisID)[0]
+							},
+							{
+								type: linear,
+								axis: _plot.axes.get(axisID)[1]
+							}
+						];
+					}
+					var bar = new Bar(chartInfo, _plot.plotBody, chartID, axisID);
+					bar.validateChart();
+					if (!_plot.axes.exists(axisID)) {
+						_plot.axes.set(axisID, bar.axes);
+					}
 				case pie:
 					return;
 			}

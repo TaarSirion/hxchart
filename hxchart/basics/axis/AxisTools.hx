@@ -1,5 +1,6 @@
 package hxchart.basics.axis;
 
+import haxe.ui.containers.Absolute;
 import haxe.ui.geom.Point;
 
 class AxisTools {
@@ -43,5 +44,22 @@ class AxisTools {
 		var x = endPoint.x * c - endPoint.y * s;
 		var y = endPoint.x * s + endPoint.y * c;
 		return new Point(x + startPoint.x, y + startPoint.y);
+	}
+
+	public static function addAxisToParent(axis:Axis, parent:Absolute) {
+		var comp = parent.findComponent(axis.id);
+		if (comp == null) {
+			parent.addComponent(axis);
+		}
+	}
+
+	public static function replaceAxisInParent(axis:Axis, parent:Absolute) {
+		var comp = parent.findComponent(axis.id);
+		if (comp == null) {
+			parent.addComponent(axis);
+		} else {
+			parent.removeComponent(comp);
+			parent.addComponent(axis);
+		}
 	}
 }
