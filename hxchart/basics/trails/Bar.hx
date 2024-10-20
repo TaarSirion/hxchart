@@ -121,9 +121,9 @@ class Bar implements AxisLayer implements DataLayer {
 		}
 		var yDist = ChartTools.calcAxisDists(yCoordMax, yCoordMin, ratio);
 		for (i => dataPoint in data) {
-			var x = calcXCoords(dataPoint.xValue, dataPoint.group, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, xDist, groupNum);
-			var y = calcYCoords(dataPoint.yValue, dataPoint.group, axes[1].ticks, axes[1].ticks[axes[1].tickInfo.zeroIndex].top, yDist, groupNum);
-			dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
+			var x = calcXCoords(dataPoint.xValue, dataPoint.group, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, xDist, groupNum, style);
+			var y = calcYCoords(dataPoint.yValue, dataPoint.group, axes[1].ticks, axes[1].ticks[axes[1].tickInfo.zeroIndex].top, yDist, groupNum, style);
+			dataCanvas.componentGraphics.fillStyle(colors[i], 1);
 			if (x == null || y == null) {
 				continue;
 			}
@@ -138,7 +138,7 @@ class Bar implements AxisLayer implements DataLayer {
 		}
 	};
 
-	function calcXCoords(value:Dynamic, group:Int, ticks:Array<Ticks>, zeroPos:Float, dist:AxisDist, groupNum:Int):Array<Float> {
+	function calcXCoords(value:Dynamic, group:Int, ticks:Array<Ticks>, zeroPos:Float, dist:AxisDist, groupNum:Int, style:TrailStyle):Array<Float> {
 		if (Std.isOfType(value, String)) {
 			var ticksFiltered = ticks.filter(x -> {
 				return x.text == value;
@@ -146,9 +146,14 @@ class Bar implements AxisLayer implements DataLayer {
 			if (ticksFiltered == null || ticksFiltered.length == 0) {
 				return null;
 			}
-			var groupOffset = groupNum - group * 2;
 			var spacePerTick = (dist.pos_dist / (ticks.length - 1)) * 2 / 3;
 			var spacePerGroup = spacePerTick / groupNum;
+
+			var overlapEffect = 2.0; // This means basically no effect, everything smaller will make the bars overlap
+			if (style.layered) {
+				overlapEffect = 1.3;
+			}
+			var groupOffset = groupNum - group * overlapEffect;
 			var posOffset = ticksFiltered[0].left - (spacePerGroup / 2) * groupOffset;
 			return [posOffset, spacePerGroup];
 		}
@@ -163,7 +168,7 @@ class Bar implements AxisLayer implements DataLayer {
 		return [0, x];
 	}
 
-	function calcYCoords(value:Dynamic, group:Int, ticks:Array<Ticks>, zeroPos:Float, dist:AxisDist, groupNum:Int):Array<Float> {
+	function calcYCoords(value:Dynamic, group:Int, ticks:Array<Ticks>, zeroPos:Float, dist:AxisDist, groupNum:Int, style:TrailStyle):Array<Float> {
 		if (Std.isOfType(value, String)) {
 			var ticksFiltered = ticks.filter(y -> {
 				return y.text == value;
@@ -171,9 +176,14 @@ class Bar implements AxisLayer implements DataLayer {
 			if (ticksFiltered == null || ticksFiltered.length == 0) {
 				return null;
 			}
-			var groupOffset = groupNum - group * 2;
+
 			var spacePerTick = (dist.pos_dist / (ticks.length - 1)) * 2 / 3;
 			var spacePerGroup = spacePerTick / groupNum;
+			var overlapEffect = 2.0; // This means basically no effect, everything smaller will make the bars overlap
+			if (style.layered) {
+				overlapEffect = 1.3;
+			}
+			var groupOffset = groupNum - group * overlapEffect;
 			var posOffset = ticksFiltered[0].top + (spacePerGroup / 2) * groupOffset;
 			return [posOffset, spacePerGroup];
 		}

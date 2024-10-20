@@ -45,8 +45,9 @@ typedef AxisInfo = {
  * @param groups Mapping of groups from the data, 
  */
 typedef TrailStyle = {
-	colorPalette:Array<Int>,
-	groups:Map<String, Int>
+	?colorPalette:Array<Int>,
+	?groups:Map<String, Int>,
+	?layered:Bool
 }
 
 /**
@@ -213,10 +214,11 @@ class Plot extends Absolute {
 				info.style = null;
 			}
 			if (info.style == null) {
-				info.style = {
-					colorPalette: colors,
-					groups: groups
-				};
+				info.style = {};
+			}
+			if (info.style.groups == null) {
+				info.style.groups = groups;
+				info.style.colorPalette = colors;
 			}
 		}
 	}
