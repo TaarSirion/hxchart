@@ -47,7 +47,8 @@ typedef AxisInfo = {
 typedef TrailStyle = {
 	?colorPalette:Array<Int>,
 	?groups:Map<String, Int>,
-	?layered:Bool
+	?layered:Bool,
+	?stacked:Bool
 }
 
 /**

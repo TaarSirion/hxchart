@@ -1,3 +1,4 @@
+import hxchart.tests.TestStatistics;
 import haxe.ui.Toolkit;
 import hxchart.tests.TestAxisTools;
 import hxchart.tests.TestScatter;
@@ -17,6 +18,7 @@ class TestAll {
 		runner.addCase(new TestScatter());
 		runner.addCase(new TestLegend());
 		runner.addCase(new TestPlot());
+		runner.addCase(new TestStatistics());
 		Report.create(runner);
 		runner.run();
 	}
