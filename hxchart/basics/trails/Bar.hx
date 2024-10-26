@@ -41,6 +41,10 @@ class Bar implements AxisLayer implements DataLayer {
 			throw new Exception("It is not possible to use two 'categorical' axes for a bar-chart. Please change one of them to 'linear'.");
 		}
 
+		valueGroups = [];
+		xValues = [];
+		yValues = [];
+
 		this.parent = parent;
 		dataCanvas = new Canvas();
 		dataCanvas.id = id;
@@ -67,6 +71,10 @@ class Bar implements AxisLayer implements DataLayer {
 			colors.push(style.colorPalette[style.groups.get(group)]);
 			data.push(point);
 		}
+		groupNum = 0;
+		for (key in style.groups.keys()) {
+			groupNum++;
+		}
 		sortData();
 	};
 
@@ -74,27 +82,46 @@ class Bar implements AxisLayer implements DataLayer {
 	var minY:Float;
 	var maxX:Float;
 	var maxY:Float;
-	var sortedIndexes:Array<Int>;
+	var isXCategoric:Bool = false;
+	var valueGroups:Array<Dynamic>;
+	var xValues:Array<Dynamic>;
+	var yValues:Array<Dynamic>;
+	var groupNum:Int;
 
 	function sortData() {
-		var xVals = data.map(x -> {
+		xValues = data.map(x -> {
 			return x.xValue;
 		});
-		var yVals = data.map(x -> {
+		yValues = data.map(x -> {
 			return x.yValue;
 		});
-		if (Std.isOfType(xVals[0], Float)) {
-			xVals.sort(Reflect.compare);
-			minX = xVals[0];
-			maxX = xVals[xVals.length - 1];
+
+		if (Std.isOfType(xValues[0], Float)) {
+			var a = xValues.copy();
+			a.sort(Reflect.compare);
+			minX = a[0];
+			maxX = a[a.length - 1];
+		} else {
+			isXCategoric = true;
+			valueGroups = xValues.unique();
 		}
-		if (Std.isOfType(yVals[0], Float)) {
-			yVals.sort(Reflect.compare);
-			minY = yVals[0];
-			maxY = yVals[yVals.length - 1];
+		if (Std.isOfType(yValues[0], Float)) {
+			var a = yValues.copy();
+			a.sort(Reflect.compare);
+			minY = a[0];
+			maxY = a[a.length - 1];
+		} else {
+			valueGroups = yValues.unique();
 		}
-		// sortedIndexes = xVals.order();
-		// trace(sortedIndexes);
+	}
+
+	function setAxisDist(min, max, axis) {
+		var ratio = 1.0;
+		if (Std.isOfType(axis.tickInfo, NumericTickInfo)) {
+			var tickInfo:NumericTickInfo = cast(axis.tickInfo, NumericTickInfo);
+			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
+		}
+		return ChartTools.calcAxisDists(min, max, ratio);
 	}
 
 	public function positionData(style:TrailStyle):Void {
@@ -104,60 +131,31 @@ class Bar implements AxisLayer implements DataLayer {
 		if (axes[0].tickInfo == null || axes[1].tickInfo == null) {
 			throw new Exception("Two tickinfos are needed for positioning the data correctly!");
 		}
-		var groupNum = 0;
-		for (key in style.groups.keys()) {
-			groupNum++;
-		}
-		var xValues = data.map(v -> v.xValue);
-		var yValues = data.map(v -> v.yValue);
 
-		var isXCategory = false;
-		var valueGroups = [];
-		var xCoordMin = axes[0].ticks[0].left;
-		var xCoordMax = axes[0].ticks[axes[0].ticks.length - 1].left;
-		var ratio = 1.0;
-		if (Std.isOfType(axes[0].tickInfo, NumericTickInfo)) {
-			var tickInfo:NumericTickInfo = cast(axes[0].tickInfo, NumericTickInfo);
-			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
-		} else {
-			isXCategory = true;
-			valueGroups = xValues.unique();
-			trace(valueGroups);
-		}
-		var xDist = ChartTools.calcAxisDists(xCoordMin, xCoordMax, ratio);
-		var yCoordMin = axes[1].ticks[0].top;
-		var yCoordMax = axes[1].ticks[axes[1].ticks.length - 1].top;
-		ratio = 1.0;
-		if (Std.isOfType(axes[1].tickInfo, NumericTickInfo)) {
-			var tickInfo:NumericTickInfo = cast(axes[1].tickInfo, NumericTickInfo);
-			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
-		} else {
-			valueGroups = yValues.unique();
-		}
-		var yDist = ChartTools.calcAxisDists(yCoordMax, yCoordMin, ratio);
+		var xDist = setAxisDist(axes[0].ticks[0].left, axes[0].ticks[axes[0].ticks.length - 1].left, axes[0]);
+		var yDist = setAxisDist(axes[1].ticks[axes[1].ticks.length - 1].top, axes[1].ticks[0].top, axes[1]);
 		var yZeroPos = axes[1].ticks[axes[1].tickInfo.zeroIndex].top;
+		var xZeroPos = axes[0].ticks[axes[0].tickInfo.zeroIndex].left;
 		for (valueGroup in valueGroups) {
 			var indexes = [];
 			var previousValue:Float = 0;
-			if (isXCategory) {
+			if (isXCategoric) {
 				indexes = xValues.position(valueGroup);
 				previousValue = yZeroPos;
-				trace(yZeroPos);
 			} else {
 				indexes = yValues.position(valueGroup);
+				previousValue = xZeroPos;
 			}
 
 			for (i in indexes) {
 				var dataPoint = data[i];
-				var x = calcXCoords(dataPoint.xValue, dataPoint.group, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, xDist, groupNum, style,
-					previousValue);
-				var y = calcYCoords(dataPoint.yValue, dataPoint.group, axes[1].ticks, yZeroPos, yDist, groupNum, style, previousValue);
+				var x = calcCoordinate(dataPoint.xValue, dataPoint.group, axes[0].ticks, xZeroPos, xDist, style, previousValue, false);
+				var y = calcCoordinate(dataPoint.yValue, dataPoint.group, axes[1].ticks, yZeroPos, yDist, style, previousValue, true);
 				dataCanvas.componentGraphics.fillStyle(colors[i], 1);
 				if (x == null || y == null) {
 					continue;
 				}
-				trace(i, dataPoint, y[0], y[1], previousValue);
-				if (isXCategory) {
+				if (isXCategoric) {
 					previousValue = y[0];
 				} else {
 					previousValue = x[0];
@@ -175,8 +173,7 @@ class Bar implements AxisLayer implements DataLayer {
 		}
 	};
 
-	function calcXCoords(value:Dynamic, group:Int, ticks:Array<Ticks>, zeroPos:Float, dist:AxisDist, groupNum:Int, style:TrailStyle,
-			previousPosition:Float):Array<Float> {
+	function calcCoordinate(value:Dynamic, group:Int, ticks:Array<Ticks>, zeroPos:Float, dist:AxisDist, style:TrailStyle, previousPosition:Float, isY:Bool) {
 		if (Std.isOfType(value, String)) {
 			var ticksFiltered = ticks.filter(x -> {
 				return x.text == value;
@@ -186,7 +183,7 @@ class Bar implements AxisLayer implements DataLayer {
 			}
 			var spacePerTick = (dist.pos_dist / (ticks.length - 1)) * 2 / 3;
 			if (style.stacked) {
-				var pos = ticksFiltered[0].left - (spacePerTick / 2);
+				var pos = (isY ? ticksFiltered[0].top : ticksFiltered[0].left) - (isY ? -1 : 1) * (spacePerTick / 2);
 				return [pos, spacePerTick];
 			}
 			var spacePerGroup = spacePerTick / groupNum;
@@ -196,53 +193,18 @@ class Bar implements AxisLayer implements DataLayer {
 				overlapEffect = 1.3;
 			}
 			var groupOffset = groupNum - group * overlapEffect;
-			var posOffset = ticksFiltered[0].left - (spacePerGroup / 2) * groupOffset;
+			var posOffset = (isY ? ticksFiltered[0].top : ticksFiltered[0].left) - (isY ? -1 : 1) * (spacePerGroup / 2) * groupOffset;
 			return [posOffset, spacePerGroup];
 		}
-		var xMax = Std.parseFloat(ticks[ticks.length - 1].text);
-		var xMin = Std.parseFloat(ticks[0].text);
-		var x_ratio = value / xMax;
-		var x = zeroPos + dist.pos_dist * x_ratio;
-		if (value < 0) {
-			x_ratio = value / xMin;
-			x = zeroPos - dist.neg_dist * x_ratio;
-		}
-		return [0, x];
-	}
-
-	function calcYCoords(value:Dynamic, group:Int, ticks:Array<Ticks>, zeroPos:Float, dist:AxisDist, groupNum:Int, style:TrailStyle,
-			previousPosition:Float):Array<Float> {
-		if (Std.isOfType(value, String)) {
-			var ticksFiltered = ticks.filter(y -> {
-				return y.text == value;
-			});
-			if (ticksFiltered == null || ticksFiltered.length == 0) {
-				return null;
-			}
-
-			var spacePerTick = (dist.pos_dist / (ticks.length - 1)) * 2 / 3;
-			var spacePerGroup = spacePerTick / groupNum;
-			var overlapEffect = 2.0; // This means basically no effect, everything smaller will make the bars overlap
-			if (style.layered) {
-				overlapEffect = 1.3;
-			}
-			var groupOffset = groupNum - group * overlapEffect;
-			var posOffset = ticksFiltered[0].top + (spacePerGroup / 2) * groupOffset;
-			return [posOffset, spacePerGroup];
-		}
-		var yMax = Std.parseFloat(ticks[ticks.length - 1].text);
-		var yMin = Std.parseFloat(ticks[0].text);
-		var y_ratio = value / yMax;
-		var y = zeroPos - dist.pos_dist * y_ratio;
-		if (value < 0) {
-			y_ratio = value / yMin;
-			y = zeroPos + dist.neg_dist * y_ratio;
-		}
-		var pos = y;
+		var max = Std.parseFloat(ticks[ticks.length - 1].text);
+		var min = Std.parseFloat(ticks[0].text);
+		var ratio = value < 0 ? value / min : value / max;
+		var pos = zeroPos + (isY ? -1 : 1) * (value < 0 ? -1 * dist.neg_dist : dist.pos_dist) * ratio;
+		var finalPos = pos;
 		if (style.stacked) {
-			pos = previousPosition - dist.pos_dist * y_ratio;
+			finalPos = previousPosition + (isY ? -1 : 1) * dist.pos_dist * ratio;
 		}
-		return [pos, zeroPos - y];
+		return [finalPos, isY ? zeroPos - pos : zeroPos + pos];
 	}
 
 	@:allow(hxchart.tests)
