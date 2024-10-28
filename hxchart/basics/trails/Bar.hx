@@ -57,7 +57,7 @@ class Bar implements AxisLayer implements DataLayer {
 
 	public function validateChart() {
 		setData(trailInfo.data, trailInfo.style);
-		positionAxes(trailInfo.axisInfo, data);
+		positionAxes(trailInfo.axisInfo, data, trailInfo.style);
 		positionData(trailInfo.style);
 	}
 
@@ -258,7 +258,7 @@ class Bar implements AxisLayer implements DataLayer {
 		return tickInfo;
 	}
 
-	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Data2D>):Void {
+	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Data2D>, style:TrailStyle):Void {
 		axes = [null, null];
 		if (axisInfo[0].axis != null) {
 			axes[0] = axisInfo[0].axis;
@@ -274,12 +274,21 @@ class Bar implements AxisLayer implements DataLayer {
 
 		var yAxisLength = parent.height - parent.paddingTop - parent.paddingBottom;
 		var xAxisLength = parent.width - parent.paddingLeft - parent.paddingRight;
+		if (isXCategoric) {
+			yAxisLength = parent.height - parent.paddingTop - parent.paddingBottom - 20; // Additional 20 added to height, so it shows ticks correctly
+		} else {
+			xAxisLength = parent.width - parent.paddingLeft - parent.paddingRight - 20;
+		}
+
 		var isPreviousXAxis = false;
 		var isPreviousYAxis = false;
 		if (axes[0] == null) {
 			var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, data.map(x -> {
 				return x.xValue;
 			}), minX, maxX);
+			if (isXCategoric) {
+				xTickInfo.labelPosition = S;
+			}
 			axes[0] = new Axis(new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
 		} else {
 			isPreviousXAxis = true;
@@ -288,15 +297,18 @@ class Bar implements AxisLayer implements DataLayer {
 			var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, data.map(x -> {
 				return x.yValue;
 			}), minY, maxY);
+			if (!isXCategoric) {
+				yTickInfo.labelPosition = N;
+			}
 			axes[1] = new Axis(new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
 		} else {
 			isPreviousYAxis = true;
 		}
 
-		axes[0].width = xAxisLength;
-		axes[0].height = yAxisLength;
-		axes[1].width = xAxisLength;
-		axes[1].height = yAxisLength;
+		axes[0].width = parent.width;
+		axes[0].height = parent.height;
+		axes[1].width = parent.width;
+		axes[1].height = parent.height;
 		// This is necessary to allow the ticks to be calculated
 		axes[0].startPoint = new Point(0, 40);
 		axes[1].startPoint = new Point(40, yAxisLength);

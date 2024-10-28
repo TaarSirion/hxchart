@@ -1,5 +1,6 @@
 package hxchart.basics.axis;
 
+import hxchart.basics.ticks.Ticks.CompassOrientation;
 import haxe.ds.Vector;
 
 class NumericTickInfo implements TickInfo {
@@ -11,6 +12,7 @@ class NumericTickInfo implements TickInfo {
 	public var subTickNum:Int;
 	public var subLabels:Array<String>;
 	public var subTicksPerPart:Int;
+	public var labelPosition:CompassOrientation;
 
 	public var precision(default, set):Int;
 

@@ -51,7 +51,7 @@ class Scatter implements AxisLayer implements DataLayer {
 
 	public function validateChart() {
 		setData(chartInfo.data, chartInfo.style);
-		positionAxes(chartInfo.axisInfo, data);
+		positionAxes(chartInfo.axisInfo, data, chartInfo.style);
 		positionData(chartInfo.style);
 	}
 
@@ -131,7 +131,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		return tickInfo;
 	}
 
-	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Data2D>) {
+	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Data2D>, style:TrailStyle) {
 		axes = [null, null];
 		if (axisInfo[0].axis != null) {
 			axes[0] = axisInfo[0].axis;

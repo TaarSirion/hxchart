@@ -1,5 +1,7 @@
 package hxchart.basics.axis;
 
+import hxchart.basics.ticks.Ticks.CompassOrientation;
+
 class StringTickInfo implements TickInfo {
 	public var tickNum:Int;
 	public var tickDist:Float;
@@ -9,6 +11,7 @@ class StringTickInfo implements TickInfo {
 	public var subTickNum:Int;
 	public var subLabels:Array<String>;
 	public var subTicksPerPart:Int;
+	public var labelPosition:CompassOrientation;
 
 	public function new(values:Array<String>) {
 		labels = [];

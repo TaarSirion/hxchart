@@ -209,6 +209,7 @@ private class SetTicks extends Behaviour {
 				tick.left = tickPoint.x;
 				tick.top = tickPoint.y;
 				tick.text = tickInfo.subLabels[subIndex];
+				tick.labelPosition = tickInfo.labelPosition;
 				subIndex++;
 				axis.sub_ticks.push(tick);
 				layer.addComponent(tick);
