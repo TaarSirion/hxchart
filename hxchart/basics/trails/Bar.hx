@@ -181,7 +181,7 @@ class Bar implements AxisLayer implements DataLayer {
 				if (isXCategoric) {
 					previousValue = y[0];
 				} else {
-					previousValue = x[0];
+					previousValue = x[0] + x[1];
 				}
 
 				dataCanvas.componentGraphics.rectangle(x[0], y[0], x[1], y[1]);
@@ -206,7 +206,7 @@ class Bar implements AxisLayer implements DataLayer {
 			}
 			var spacePerTick = (dist.pos_dist / (ticks.length - 1)) * 2 / 3;
 			if (style.stacked) {
-				var pos = (isY ? ticksFiltered[0].top : ticksFiltered[0].left) - (isY ? -1 : 1) * (spacePerTick / 2);
+				var pos = (isY ? ticksFiltered[0].top : ticksFiltered[0].left) - (spacePerTick / 2);
 				return [pos, spacePerTick];
 			}
 			var spacePerGroup = spacePerTick / groupNum;
@@ -215,8 +215,9 @@ class Bar implements AxisLayer implements DataLayer {
 			if (style.layered) {
 				overlapEffect = 1.3;
 			}
+
 			var groupOffset = groupNum - group * overlapEffect;
-			var posOffset = (isY ? ticksFiltered[0].top : ticksFiltered[0].left) - (isY ? -1 : 1) * (spacePerGroup / 2) * groupOffset;
+			var posOffset = (isY ? ticksFiltered[0].top : ticksFiltered[0].left) - (spacePerGroup / 2) * groupOffset;
 			return [posOffset, spacePerGroup];
 		}
 		var max = Std.parseFloat(ticks[ticks.length - 1].text);
@@ -225,9 +226,13 @@ class Bar implements AxisLayer implements DataLayer {
 		var pos = zeroPos + (isY ? -1 : 1) * (value < 0 ? -1 * dist.neg_dist : dist.pos_dist) * ratio;
 		var finalPos = pos;
 		if (style.stacked) {
-			finalPos = previousPosition + (isY ? -1 : 1) * dist.pos_dist * ratio;
+			if (isY) {
+				finalPos = previousPosition - dist.pos_dist * ratio;
+			} else {
+				finalPos = previousPosition;
+			}
 		}
-		return [finalPos, isY ? zeroPos - pos : zeroPos + pos];
+		return [finalPos, isY ? zeroPos - pos : pos - zeroPos];
 	}
 
 	@:allow(hxchart.tests)
@@ -274,10 +279,11 @@ class Bar implements AxisLayer implements DataLayer {
 
 		var yAxisLength = parent.height - parent.paddingTop - parent.paddingBottom;
 		var xAxisLength = parent.width - parent.paddingLeft - parent.paddingRight;
-		if (isXCategoric) {
+		if (minY >= 0) {
 			yAxisLength = parent.height - parent.paddingTop - parent.paddingBottom - 20; // Additional 20 added to height, so it shows ticks correctly
-		} else {
-			xAxisLength = parent.width - parent.paddingLeft - parent.paddingRight - 20;
+		}
+		if (minX >= 0) {
+			xAxisLength = parent.width - parent.paddingLeft - parent.paddingRight;
 		}
 
 		var isPreviousXAxis = false;
@@ -286,9 +292,6 @@ class Bar implements AxisLayer implements DataLayer {
 			var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, data.map(x -> {
 				return x.xValue;
 			}), minX, maxX);
-			if (isXCategoric) {
-				xTickInfo.labelPosition = S;
-			}
 			axes[0] = new Axis(new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
 		} else {
 			isPreviousXAxis = true;
@@ -297,9 +300,6 @@ class Bar implements AxisLayer implements DataLayer {
 			var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, data.map(x -> {
 				return x.yValue;
 			}), minY, maxY);
-			if (!isXCategoric) {
-				yTickInfo.labelPosition = N;
-			}
 			axes[1] = new Axis(new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
 		} else {
 			isPreviousYAxis = true;
@@ -310,11 +310,22 @@ class Bar implements AxisLayer implements DataLayer {
 		axes[1].width = parent.width;
 		axes[1].height = parent.height;
 		// This is necessary to allow the ticks to be calculated
-		axes[0].startPoint = new Point(0, 40);
+		if (isXCategoric) {
+			axes[0].startPoint = new Point(0, 40);
+		} else {
+			axes[0].startPoint = new Point(20, 40);
+		}
 		axes[1].startPoint = new Point(40, yAxisLength);
 		// Real positioning
-		axes[0].startPoint = new Point(0, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
-		axes[1].startPoint = new Point(axes[0].ticks[axes[0].tickInfo.zeroIndex].left, yAxisLength);
+
+		if (isXCategoric) {
+			axes[0].startPoint = new Point(0, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
+			axes[1].startPoint = new Point(axes[0].ticks[axes[0].tickInfo.zeroIndex].left, yAxisLength);
+		} else {
+			axes[0].startPoint = new Point(20, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
+			axes[1].startPoint = new Point(axes[0].ticks[axes[0].tickInfo.zeroIndex].left, yAxisLength);
+		}
+
 		axes[1].showZeroTick = false;
 		axes[0].zeroTickPosition = CompassOrientation.SW;
 		if (isPreviousXAxis) {
