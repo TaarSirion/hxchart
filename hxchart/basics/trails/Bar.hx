@@ -75,7 +75,7 @@ class Bar implements AxisLayer implements DataLayer {
 		for (key in style.groups.keys()) {
 			groupNum++;
 		}
-		sortData();
+		sortData(style);
 	};
 
 	var minX:Float;
@@ -88,7 +88,7 @@ class Bar implements AxisLayer implements DataLayer {
 	var yValues:Array<Dynamic>;
 	var groupNum:Int;
 
-	function sortData() {
+	function sortData(style:TrailStyle) {
 		xValues = data.map(x -> {
 			return x.xValue;
 		});
@@ -112,6 +112,29 @@ class Bar implements AxisLayer implements DataLayer {
 			maxY = a[a.length - 1];
 		} else {
 			valueGroups = yValues.unique();
+		}
+		if (style.stacked) {
+			if (isXCategoric) {
+				for (v in valueGroups) {
+					var indexes = xValues.position(v);
+					var sum = 0;
+					for (i in indexes) {
+						var val = yValues[i];
+						sum += val;
+					}
+					maxY = Math.max(maxY, sum);
+				}
+			} else {
+				for (v in valueGroups) {
+					var indexes = yValues.position(v);
+					var sum = 0;
+					for (i in indexes) {
+						var val = xValues[i];
+						sum += val;
+					}
+					maxX = Math.max(maxX, sum);
+				}
+			}
 		}
 	}
 
