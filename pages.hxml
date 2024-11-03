@@ -1,0 +1,7 @@
+-cp local
+-main MainPages
+
+-lib haxeui-core
+-lib haxeui-html5
+
+-js Export/html/main-pages.js
