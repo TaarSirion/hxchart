@@ -1,4 +1,7 @@
 # hxchart
+
+https://taarsirion.github.io/hxchart/
+
 `hxchart` is a library for creating charts. It is based on top of `haxeui` using its flexibility to allow easier creation of charts for different targets/backends.
 
 It is still in early development and rather featureless, but will hopefully see a lot of development over the coming months.
