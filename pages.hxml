@@ -1,7 +1,0 @@
--cp local
--main MainPages
-
--lib haxeui-core
--lib haxeui-html5
-
--js main-pages.js
