@@ -305,10 +305,10 @@ class Bar implements AxisLayer implements DataLayer {
 			isPreviousYAxis = true;
 		}
 
-		axes[0].width = parent.width;
-		axes[0].height = parent.height;
-		axes[1].width = parent.width;
-		axes[1].height = parent.height;
+		axes[0].percentWidth = 100;
+		axes[0].percentHeight = 100;
+		axes[1].percentWidth = 100;
+		axes[1].percentHeight = 100;
 		// This is necessary to allow the ticks to be calculated
 		if (isXCategoric) {
 			axes[0].startPoint = new Point(0, 40);
