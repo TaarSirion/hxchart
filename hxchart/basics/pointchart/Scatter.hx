@@ -1,5 +1,6 @@
 package hxchart.basics.pointchart;
 
+import haxe.Timer;
 import hxchart.basics.plot.Plot.TrailStyle;
 import hxchart.basics.pointchart.ChartTools.AxisDist;
 import hxchart.basics.ticks.Ticks;
@@ -166,10 +167,10 @@ class Scatter implements AxisLayer implements DataLayer {
 			isPreviousYAxis = true;
 		}
 
-		axes[0].width = xAxisLength;
-		axes[0].height = yAxisLength;
-		axes[1].width = xAxisLength;
-		axes[1].height = yAxisLength;
+		axes[0].percentWidth = 100;
+		axes[0].percentHeight = 100;
+		axes[1].percentWidth = 100;
+		axes[1].percentHeight = 100;
 		// This is necessary to allow the ticks to be calculated
 		axes[0].startPoint = new haxe.ui.geom.Point(0, 40);
 		axes[1].startPoint = new haxe.ui.geom.Point(40, yAxisLength);
@@ -230,6 +231,7 @@ class Scatter implements AxisLayer implements DataLayer {
 			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
 		}
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, ratio);
+		dataCanvas.componentGraphics.clear();
 		for (i => dataPoint in data) {
 			var x = calcXCoord(dataPoint.xValue, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, x_dist);
 			var y = calcYCoord(dataPoint.yValue, axes[1].ticks, axes[1].ticks[axes[1].tickInfo.zeroIndex].top, y_dist);

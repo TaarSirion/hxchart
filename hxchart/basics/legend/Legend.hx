@@ -43,25 +43,7 @@ class Legend extends VBox {
 }
 
 @:dox(hide) @:noCompletion
-private class LegendLayout extends DefaultLayout {
-	public override function repositionChildren() {
-		trace("Repositin legend");
-	}
-
-	public override function resizeChildren() {
-		trace("RESIZE LEGEND");
-	}
-
-	override function marginLeft(child:Component):Float {
-		return super.marginLeft(child);
-		trace("SETTING MARGIN LEFT");
-	}
-
-	override function set_component(value:Component):Component {
-		return super.set_component(value);
-		trace("Set component");
-	}
-}
+private class LegendLayout extends DefaultLayout {}
 
 @:dox(hide) @:noCompletion
 private class TitleBehaviour extends DataBehaviour {

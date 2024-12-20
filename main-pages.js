@@ -35107,8 +35107,8 @@ var hxchart_basics_plot_Builder = function(plot) {
 	haxe_ui_core_CompositeBuilder.call(this,plot);
 	this._plot = plot;
 	this._plot.plotBody = new haxe_ui_containers_Absolute();
-	this._plot.plotBody.set_percentHeight(100);
-	this._plot.plotBody.set_percentWidth(100);
+	this._plot.plotBody.set_width(this._plot.get_width() - 10);
+	this._plot.plotBody.set_height(this._plot.get_height() - 10);
 	this._plot.addComponent(this._plot.plotBody);
 };
 $hxClasses["hxchart.basics.plot.Builder"] = hxchart_basics_plot_Builder;
@@ -35161,12 +35161,13 @@ hxchart_basics_plot_Builder.prototype = $extend(haxe_ui_core_CompositeBuilder.pr
 		fh.set_width(fh.get_width() - (this._plot.get_marginLeft() + this._plot.get_marginRight()));
 		var fh = this._plot;
 		fh.set_height(fh.get_height() - (this._plot.get_marginTop() + this._plot.get_marginBottom()));
+		haxe_Log.trace("HH",{ fileName : "hxchart/basics/plot/Plot.hx", lineNumber : 281, className : "hxchart.basics.plot.Builder", methodName : "validateComponentLayout"});
 		this._plot.plotBody.set_left(this._plot.get_paddingLeft());
 		this._plot.plotBody.set_top(this._plot.get_paddingTop());
 		var fh = this._plot.plotBody;
-		fh.set_width(fh.get_width() - (this._plot.get_paddingLeft() + this._plot.get_paddingRight()));
+		fh.set_width(fh.get_width() - (this._plot.get_paddingLeft() + this._plot.get_paddingRight() + 10));
 		var fh = this._plot.plotBody;
-		fh.set_height(fh.get_height() - (this._plot.get_paddingTop() + this._plot.get_paddingBottom()));
+		fh.set_height(fh.get_height() - (this._plot.get_paddingTop() + this._plot.get_paddingBottom() + 10));
 		if(this._plot.legend != null) {
 			this._plot.plotBody.set_percentWidth(80);
 			this._plot.legend.set_percentWidth(20);

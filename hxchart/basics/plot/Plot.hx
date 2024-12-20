@@ -1,5 +1,9 @@
 package hxchart.basics.plot;
 
+import haxe.ui.core.Component;
+import haxe.ui.geom.Size;
+import haxe.ui.layouts.DefaultLayout;
+import haxe.ui.events.UIEvent;
 import hxchart.basics.colors.ColorPalettes;
 import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
@@ -209,6 +213,9 @@ class Plot extends Absolute {
 }
 
 @:dox(hide) @:noCompletion
+class PlotLayout extends DefaultLayout {}
+
+@:dox(hide) @:noCompletion
 private class AddChart extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var plot = cast(_component, Plot);
@@ -219,6 +226,11 @@ private class AddChart extends Behaviour {
 	}
 }
 
+enum PlotStatus {
+	start;
+	redraw;
+}
+
 class Builder extends CompositeBuilder {
 	var _plot:Plot;
 
@@ -226,16 +238,41 @@ class Builder extends CompositeBuilder {
 		super(plot);
 		_plot = plot;
 		_plot.plotBody = new Absolute();
-		_plot.plotBody.percentHeight = 100;
-		_plot.plotBody.percentWidth = 100;
+		_plot.plotBody.width = _plot.width;
+		_plot.plotBody.height = _plot.height;
 		_plot.addComponent(_plot.plotBody);
 	}
 
 	override function validateComponentData() {
 		super.validateComponentData();
-		_plot.axes = new Map();
-		var axisID = "axis_0";
+		validateCharts(PlotStatus.start);
+	}
 
+	override function validateComponentLayout():Bool {
+		_plot.left = _plot.marginLeft;
+		_plot.top = _plot.marginTop;
+		_plot.width -= _plot.marginLeft + _plot.marginRight;
+		_plot.height -= _plot.marginTop + _plot.marginBottom;
+
+		_plot.plotBody.left = _plot.paddingLeft;
+		_plot.plotBody.top = _plot.paddingTop;
+		_plot.plotBody.width = _plot.width - _plot.paddingLeft + _plot.paddingRight;
+		_plot.plotBody.height = _plot.height - _plot.paddingTop + _plot.paddingBottom + 10;
+
+		if (_plot.legend != null) {
+			_plot.plotBody.percentWidth = 80;
+			_plot.legend.percentWidth = 20;
+			_plot.legend.left = _plot.plotBody.width + _plot.legend.marginLeft;
+		}
+		validateCharts(PlotStatus.redraw);
+		return super.validateComponentLayout();
+	}
+
+	function validateCharts(status:PlotStatus) {
+		if (status == PlotStatus.start) {
+			_plot.axes = new Map();
+		}
+		var axisID = "axis_0";
 		for (i => chartInfo in _plot.trailInfos) {
 			var chartInfo = Reflect.copy(_plot.trailInfos[i]);
 			var chartID = "chart_" + i;
@@ -270,25 +307,5 @@ class Builder extends CompositeBuilder {
 					return;
 			}
 		}
-	}
-
-	override function validateComponentLayout():Bool {
-		super.validateComponentLayout();
-		_plot.left = _plot.marginLeft;
-		_plot.top = _plot.marginTop;
-		_plot.width -= _plot.marginLeft + _plot.marginRight;
-		_plot.height -= _plot.marginTop + _plot.marginBottom;
-
-		_plot.plotBody.left = _plot.paddingLeft;
-		_plot.plotBody.top = _plot.paddingTop;
-		_plot.plotBody.width -= _plot.paddingLeft + _plot.paddingRight;
-		_plot.plotBody.height -= _plot.paddingTop + _plot.paddingBottom;
-
-		if (_plot.legend != null) {
-			_plot.plotBody.percentWidth = 80;
-			_plot.legend.percentWidth = 20;
-			_plot.legend.left = _plot.plotBody.width + _plot.legend.marginLeft;
-		}
-		return true;
 	}
 }
