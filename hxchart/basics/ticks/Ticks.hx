@@ -82,6 +82,9 @@ private class TickLayout extends DefaultLayout {
 	public override function repositionChildren() {
 		var _tick = cast(_component, Ticks);
 		var _label = _component.findComponent("tick-label", Label, null, "css");
+		if (_tick == null || _label == null) {
+			return;
+		}
 		TickUtils.drawTicks(_tick, _label);
 	}
 }

@@ -1,5 +1,7 @@
 Export/
 local/Main.hx
+local/MainPages.hx
 hl.hxml
 html.hxml
 Haxechart.hxproj
+pages.hxml
