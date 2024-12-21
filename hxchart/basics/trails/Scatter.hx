@@ -245,7 +245,10 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 		var xMax = Std.parseFloat(ticks[ticks.length - 1].text);
 		var xMin = Std.parseFloat(ticks[0].text);
-		var x_ratio = xValue / xMax;
+		var x_ratio:Float = 0.0;
+		if (xValue > 0) {
+			x_ratio = xValue / xMax;
+		}
 		var x = zeroPos + xDist.pos_dist * x_ratio;
 		if (xValue < 0) {
 			x_ratio = xValue / xMin;
@@ -266,7 +269,10 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 		var yMax = Std.parseFloat(ticks[ticks.length - 1].text);
 		var yMin = Std.parseFloat(ticks[0].text);
-		var y_ratio = yValue / yMax;
+		var y_ratio:Float = 0;
+		if (yValue > 0) {
+			y_ratio = yValue / yMax;
+		}
 		var y = zeroPos - yDist.pos_dist * y_ratio;
 		if (yValue < 0) {
 			y_ratio = yValue / yMin;
