@@ -146,8 +146,8 @@ class Scatter implements AxisLayer implements DataLayer {
 			return;
 		}
 
-		var yAxisLength = parent.height - parent.paddingTop - parent.paddingBottom;
-		var xAxisLength = parent.width - parent.paddingLeft - parent.paddingRight;
+		var yAxisLength = (parent.height - parent.paddingTop - parent.paddingBottom) * 0.9;
+		var xAxisLength = (parent.width - parent.paddingLeft - parent.paddingRight) * 0.9;
 		var isPreviousXAxis = false;
 		var isPreviousYAxis = false;
 		if (axes[0] == null) {

@@ -108,9 +108,9 @@ class Axis extends Absolute {
 	}
 
 	override function onResized() {
-		axisLength = width;
+		axisLength = width * 0.9;
 		if (rotation == 270) {
-			axisLength = height;
+			axisLength = height * 0.9;
 		}
 		super.onResized();
 	}

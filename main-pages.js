@@ -151,8 +151,8 @@ MainPages.main = function() {
 	var tabs = new haxe_ui_containers_TabView();
 	var scatterBox = new haxe_ui_containers_HBox();
 	scatterBox.set_text("Scatter Plots");
-	scatterBox.set_width(haxe_ui_core_Screen.get_instance().get_width());
-	scatterBox.set_height(1000);
+	scatterBox.set_percentWidth(100);
+	scatterBox.set_height(600);
 	var scatterStack = new haxe_ui_containers_Stack();
 	scatterStack.set_percentWidth(80);
 	scatterStack.set_percentHeight(100);
@@ -165,18 +165,54 @@ MainPages.main = function() {
 	});
 	var simpleScatterScroll = new haxe_ui_containers_ScrollView();
 	simpleScatterScroll.set_percentWidth(100);
-	simpleScatterScroll.set_height(700);
+	simpleScatterScroll.set_percentHeight(100);
+	simpleScatterScroll.get_contents().set_percentWidth(100);
 	scatterStack.addComponent(simpleScatterScroll);
+	var hbox = new haxe_ui_containers_HBox();
+	hbox.set_percentWidth(100);
 	var simpleScatterInfo = { data : { xValues : [0,1,2], yValues : [0,1,2]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.linear},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.scatter};
 	var scatterPlot = new hxchart_basics_plot_Plot(simpleScatterInfo,haxe_ui_core_Screen.get_instance().get_width(),500);
 	scatterPlot.set_left(0);
 	scatterPlot.set_top(0);
-	scatterPlot.set_width(500);
+	scatterPlot.set_percentWidth(45);
 	scatterPlot.set_height(500);
-	simpleScatterScroll.addComponent(scatterPlot);
+	hbox.addComponent(scatterPlot);
+	var simpleScatterInfo = { data : { xValues : [0,-1,-2], yValues : [0,1,2]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.linear},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.scatter};
+	var scatterPlot = new hxchart_basics_plot_Plot(simpleScatterInfo,haxe_ui_core_Screen.get_instance().get_width(),500);
+	scatterPlot.set_left(0);
+	scatterPlot.set_top(0);
+	scatterPlot.set_percentWidth(45);
+	scatterPlot.set_height(500);
+	hbox.addComponent(scatterPlot);
+	simpleScatterScroll.addComponent(hbox);
+	var hbox = new haxe_ui_containers_HBox();
+	hbox.set_percentWidth(100);
+	var simpleScatterInfo = { data : { xValues : [0,1,2], yValues : [0,-1,-2]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.linear},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.scatter};
+	var scatterPlot = new hxchart_basics_plot_Plot(simpleScatterInfo,haxe_ui_core_Screen.get_instance().get_width(),500);
+	scatterPlot.set_left(0);
+	scatterPlot.set_top(0);
+	scatterPlot.set_percentWidth(45);
+	scatterPlot.set_height(500);
+	hbox.addComponent(scatterPlot);
+	var simpleScatterInfo = { data : { xValues : [0,-1,-2], yValues : [0,-1,-2]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.linear},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.scatter};
+	var scatterPlot = new hxchart_basics_plot_Plot(simpleScatterInfo,haxe_ui_core_Screen.get_instance().get_width(),500);
+	scatterPlot.set_left(0);
+	scatterPlot.set_top(0);
+	scatterPlot.set_percentWidth(45);
+	scatterPlot.set_height(500);
+	hbox.addComponent(scatterPlot);
+	simpleScatterScroll.addComponent(hbox);
 	scatterBox.addComponent(scatterListView);
 	scatterBox.addComponent(scatterStack);
 	tabs.addComponent(scatterBox);
+	tabs.set_percentWidth(100);
+	var box = new haxe_ui_containers_Stack();
+	box.set_percentWidth(100);
+	box.set_height(200);
+	var scroll = new haxe_ui_containers_ScrollView();
+	scroll.set_percentWidth(80);
+	scroll.set_percentHeight(100);
+	box.addComponent(scroll);
 	app.ready(function() {
 		app.addComponent(tabs);
 		app.start();
@@ -33716,9 +33752,9 @@ hxchart_basics_axis_Axis.prototype = $extend(haxe_ui_containers_Absolute.prototy
 		return this.zeroTickPosition = pos;
 	}
 	,onResized: function() {
-		this.set_axisLength(this.get_width());
+		this.set_axisLength(this.get_width() * 0.9);
 		if(this.rotation == 270) {
-			this.set_axisLength(this.get_height());
+			this.set_axisLength(this.get_height() * 0.9);
 		}
 		haxe_ui_containers_Absolute.prototype.onResized.call(this);
 	}
@@ -35288,8 +35324,9 @@ var hxchart_basics_plot_Builder = function(plot) {
 	haxe_ui_core_CompositeBuilder.call(this,plot);
 	this._plot = plot;
 	this._plot.plotBody = new haxe_ui_containers_Absolute();
-	this._plot.plotBody.set_width(this._plot.get_width());
-	this._plot.plotBody.set_height(this._plot.get_height());
+	this._plot.plotBody.set_percentWidth(100);
+	this._plot.plotBody.set_percentHeight(100);
+	this._plot.plotBody.set_padding(10);
 	this._plot.addComponent(this._plot.plotBody);
 };
 $hxClasses["hxchart.basics.plot.Builder"] = hxchart_basics_plot_Builder;
@@ -35310,8 +35347,6 @@ hxchart_basics_plot_Builder.prototype = $extend(haxe_ui_core_CompositeBuilder.pr
 		fh.set_height(fh.get_height() - (this._plot.get_marginTop() + this._plot.get_marginBottom()));
 		this._plot.plotBody.set_left(this._plot.get_paddingLeft());
 		this._plot.plotBody.set_top(this._plot.get_paddingTop());
-		this._plot.plotBody.set_width(this._plot.get_width() - this._plot.get_paddingLeft() + this._plot.get_paddingRight());
-		this._plot.plotBody.set_height(this._plot.get_height() - this._plot.get_paddingTop() + this._plot.get_paddingBottom() + 10);
 		if(this._plot.legend != null) {
 			this._plot.plotBody.set_percentWidth(80);
 			this._plot.legend.set_percentWidth(20);
@@ -36138,8 +36173,8 @@ hxchart_basics_trails_Scatter.prototype = {
 			hxchart_basics_axis_AxisTools.addAxisToParent(this.axes[1],this.parent);
 			return;
 		}
-		var yAxisLength = this.parent.get_height() - this.parent.get_paddingTop() - this.parent.get_paddingBottom();
-		var xAxisLength = this.parent.get_width() - this.parent.get_paddingLeft() - this.parent.get_paddingRight();
+		var yAxisLength = (this.parent.get_height() - this.parent.get_paddingTop() - this.parent.get_paddingBottom()) * 0.9;
+		var xAxisLength = (this.parent.get_width() - this.parent.get_paddingLeft() - this.parent.get_paddingRight()) * 0.9;
 		var isPreviousXAxis = false;
 		var isPreviousYAxis = false;
 		if(this.axes[0] == null) {
@@ -36260,7 +36295,10 @@ hxchart_basics_trails_Scatter.prototype = {
 		}
 		var xMax = parseFloat(ticks[ticks.length - 1].get_text());
 		var xMin = parseFloat(ticks[0].get_text());
-		var x_ratio = xValue / xMax;
+		var x_ratio = 0.0;
+		if(xValue > 0) {
+			x_ratio = xValue / xMax;
+		}
 		var x = zeroPos + xDist.pos_dist * x_ratio;
 		if(xValue < 0) {
 			x_ratio = xValue / xMin;
@@ -36288,7 +36326,10 @@ hxchart_basics_trails_Scatter.prototype = {
 		}
 		var yMax = parseFloat(ticks[ticks.length - 1].get_text());
 		var yMin = parseFloat(ticks[0].get_text());
-		var y_ratio = yValue / yMax;
+		var y_ratio = 0;
+		if(yValue > 0) {
+			y_ratio = yValue / yMax;
+		}
 		var y = zeroPos - yDist.pos_dist * y_ratio;
 		if(yValue < 0) {
 			y_ratio = yValue / yMin;

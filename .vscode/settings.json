@@ -1,14 +1,18 @@
 {
-    "[haxe]":{
+    "[haxe]": {
         "editor.formatOnSave": true
     },
     "haxe.renameSourceFolders": [
-        
         "src",
         "source",
         "Source",
         "test",
         "tests",
         "hxchart"
+    ],
+    "haxe.configurations": [
+        [
+            "tests.hxml"
+        ]
     ]
 }
