@@ -176,7 +176,6 @@ MainPages.main = function() {
 	scatterPlot.set_top(0);
 	scatterPlot.set_percentWidth(45);
 	scatterPlot.set_height(500);
-	hbox.addComponent(scatterPlot);
 	var simpleScatterInfo = { data : { xValues : [0,-1,-2], yValues : [0,1,2]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.linear},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.scatter};
 	var scatterPlot = new hxchart_basics_plot_Plot(simpleScatterInfo,haxe_ui_core_Screen.get_instance().get_width(),500);
 	scatterPlot.set_left(0);
@@ -193,14 +192,12 @@ MainPages.main = function() {
 	scatterPlot.set_top(0);
 	scatterPlot.set_percentWidth(45);
 	scatterPlot.set_height(500);
-	hbox.addComponent(scatterPlot);
 	var simpleScatterInfo = { data : { xValues : [0,-1,-2], yValues : [0,-1,-2]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.linear},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.scatter};
 	var scatterPlot = new hxchart_basics_plot_Plot(simpleScatterInfo,haxe_ui_core_Screen.get_instance().get_width(),500);
 	scatterPlot.set_left(0);
 	scatterPlot.set_top(0);
 	scatterPlot.set_percentWidth(45);
 	scatterPlot.set_height(500);
-	hbox.addComponent(scatterPlot);
 	simpleScatterScroll.addComponent(hbox);
 	scatterBox.addComponent(scatterListView);
 	scatterBox.addComponent(scatterStack);
@@ -33719,9 +33716,18 @@ hxchart_basics_axis_Axis.prototype = $extend(haxe_ui_containers_Absolute.prototy
 	}
 	,startPoint: null
 	,set_startPoint: function(point) {
-		this.startPoint = point;
-		this.setTicks(this.tickInfo);
+		if(this.startPoint == null) {
+			this.startPoint = point;
+			this.setTicks(this.tickInfo);
+		} else {
+			this.startPoint = point;
+			this.updateTicks(this.tickInfo);
+		}
 		return this.startPoint;
+	}
+	,linkedAxes: null
+	,set_linkedAxes: function(links) {
+		return this.linkedAxes = links;
 	}
 	,endPoint: null
 	,set_endPoint: function(point) {
@@ -33811,7 +33817,7 @@ hxchart_basics_axis_Axis.prototype = $extend(haxe_ui_containers_Absolute.prototy
 		return new hxchart_basics_axis_Axis(this._constructorParam_start,this._constructorParam_rotation,this._constructorParam_length,this._constructorParam_tickInfo,this._constructorParam_idName,this._constructorParam_color);
 	}
 	,__class__: hxchart_basics_axis_Axis
-	,__properties__: $extend(haxe_ui_containers_Absolute.prototype.__properties__,{set_tickMargin:"set_tickMargin",get_tickMargin:"get_tickMargin",set_zeroTickPosition:"set_zeroTickPosition",set_showZeroTick:"set_showZeroTick",set_sub_ticks:"set_sub_ticks",set_tickInfo:"set_tickInfo",set_ticks:"set_ticks",set_axisLength:"set_axisLength",set_endPoint:"set_endPoint",set_startPoint:"set_startPoint",set_rotation:"set_rotation"})
+	,__properties__: $extend(haxe_ui_containers_Absolute.prototype.__properties__,{set_tickMargin:"set_tickMargin",get_tickMargin:"get_tickMargin",set_zeroTickPosition:"set_zeroTickPosition",set_showZeroTick:"set_showZeroTick",set_sub_ticks:"set_sub_ticks",set_tickInfo:"set_tickInfo",set_ticks:"set_ticks",set_axisLength:"set_axisLength",set_endPoint:"set_endPoint",set_linkedAxes:"set_linkedAxes",set_startPoint:"set_startPoint",set_rotation:"set_rotation"})
 });
 var hxchart_basics_axis__$Axis_Layout = function() {
 	haxe_ui_layouts_DefaultLayout.call(this);
@@ -33846,6 +33852,7 @@ hxchart_basics_axis__$Axis_Draw.prototype = $extend(haxe_ui_behaviours_Behaviour
 		var axis = js_Boot.__cast(this._component , hxchart_basics_axis_Axis);
 		var canvas = this._component.findComponent(null,haxe_ui_components_Canvas);
 		if(canvas != null) {
+			haxe_Log.trace("DRAW",{ fileName : "hxchart/basics/axis/Axis.hx", lineNumber : 147, className : "hxchart.basics.axis._Axis.Draw", methodName : "call"});
 			canvas.componentGraphics.strokeStyle(axis.get_color());
 			canvas.componentGraphics.moveTo(axis.startPoint.x,axis.startPoint.y);
 			if(axis.endPoint == null) {
@@ -33908,6 +33915,7 @@ hxchart_basics_axis__$Axis_SetTicks.prototype = $extend(haxe_ui_behaviours_Behav
 		return null;
 	}
 	,setTickPosition: function(tickInfo) {
+		haxe_Log.trace("SET",{ fileName : "hxchart/basics/axis/Axis.hx", lineNumber : 201, className : "hxchart.basics.axis._Axis.SetTicks", methodName : "setTickPosition"});
 		this.axis.set_ticks([]);
 		this.axis.set_sub_ticks([]);
 		var start = this.axis.startPoint;
@@ -33988,6 +33996,7 @@ hxchart_basics_axis__$Axis_UpdateTicks.prototype = $extend(haxe_ui_behaviours_Be
 		return null;
 	}
 	,setTickPosition: function(tickInfo) {
+		haxe_Log.trace("UPDATE",{ fileName : "hxchart/basics/axis/Axis.hx", lineNumber : 278, className : "hxchart.basics.axis._Axis.UpdateTicks", methodName : "setTickPosition"});
 		var start = this.axis.startPoint;
 		var tickNum = tickInfo.tickNum;
 		if(((tickInfo) instanceof hxchart_basics_axis_StringTickInfo)) {
@@ -34052,6 +34061,7 @@ hxchart_basics_axis__$Axis_AxisBuilder.prototype = $extend(haxe_ui_core_Composit
 	,validateComponentData: function() {
 		this._tickCanvasLayer.componentGraphics.clear();
 		this._tickLabelLayer.removeAllComponents();
+		haxe_Log.trace("VALID",{ fileName : "hxchart/basics/axis/Axis.hx", lineNumber : 341, className : "hxchart.basics.axis._Axis.AxisBuilder", methodName : "validateComponentData"});
 		if(this._axis.startPoint == null) {
 			this._axis.set_startPoint(new haxe_ui_geom_Point(40,40));
 		}
@@ -34101,6 +34111,33 @@ hxchart_basics_axis__$Axis_AxisBuilder.prototype = $extend(haxe_ui_core_Composit
 		this._tickCanvasLayer.componentGraphics.clear();
 		if(this._axis.startPoint == null) {
 			this._axis.set_startPoint(new haxe_ui_geom_Point(40,40));
+		}
+		if(this._axis.linkedAxes != null) {
+			var lengthPerRotation = 0;
+			if(this._axis.rotation == 270) {
+				lengthPerRotation = this._axis.axisLength;
+			}
+			var h = this._axis.linkedAxes.h;
+			var key_h = h;
+			var key_keys = Object.keys(h);
+			var key_length = key_keys.length;
+			var key_current = 0;
+			while(key_current < key_length) {
+				var key = key_keys[key_current++];
+				var linkedAxis = this._axis.linkedAxes.h[key];
+				switch(key) {
+				case "both":
+					break;
+				case "x":
+					this._axis.set_startPoint(new haxe_ui_geom_Point(linkedAxis.ticks[linkedAxis.tickInfo.zeroIndex].get_left(),lengthPerRotation));
+					break;
+				case "y":
+					this._axis.set_startPoint(new haxe_ui_geom_Point(lengthPerRotation,linkedAxis.ticks[linkedAxis.tickInfo.zeroIndex].get_top()));
+					break;
+				default:
+					this._axis.set_startPoint(new haxe_ui_geom_Point(40,40));
+				}
+			}
 		}
 		this._axis.set_endPoint(hxchart_basics_axis_AxisTools.positionEndpoint(this._axis.startPoint,this._axis.rotation,this._axis.axisLength));
 		this._axis.updateTicks(this._axis.tickInfo);
@@ -36207,6 +36244,10 @@ hxchart_basics_trails_Scatter.prototype = {
 		} else {
 			isPreviousYAxis = true;
 		}
+		this.axes[0].set_linkedAxes(new haxe_ds_StringMap());
+		this.axes[0].linkedAxes.h["y"] = this.axes[1];
+		this.axes[1].set_linkedAxes(new haxe_ds_StringMap());
+		this.axes[1].linkedAxes.h["x"] = this.axes[0];
 		this.axes[0].set_percentWidth(100);
 		this.axes[0].set_percentHeight(100);
 		this.axes[1].set_percentWidth(100);
@@ -36215,6 +36256,7 @@ hxchart_basics_trails_Scatter.prototype = {
 		this.axes[1].set_startPoint(new haxe_ui_geom_Point(40,yAxisLength));
 		this.axes[0].set_startPoint(new haxe_ui_geom_Point(0,this.axes[1].ticks[this.axes[1].tickInfo.zeroIndex].get_top()));
 		this.axes[1].set_startPoint(new haxe_ui_geom_Point(this.axes[0].ticks[this.axes[0].tickInfo.zeroIndex].get_left(),yAxisLength));
+		haxe_Log.trace("Startt",{ fileName : "hxchart/basics/trails/Scatter.hx", lineNumber : 185, className : "hxchart.basics.trails.Scatter", methodName : "positionAxes", customParams : [this.axes[1].startPoint.x,this.axes[1].startPoint.y]});
 		this.axes[1].set_showZeroTick(false);
 		this.axes[0].set_zeroTickPosition(hxchart_basics_ticks_CompassOrientation.SW);
 		if(isPreviousXAxis) {

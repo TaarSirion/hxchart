@@ -167,6 +167,11 @@ class Scatter implements AxisLayer implements DataLayer {
 			isPreviousYAxis = true;
 		}
 
+		axes[0].linkedAxes = new Map();
+		axes[0].linkedAxes.set("y", axes[1]);
+		axes[1].linkedAxes = new Map();
+		axes[1].linkedAxes.set("x", axes[0]);
+
 		axes[0].percentWidth = 100;
 		axes[0].percentHeight = 100;
 		axes[1].percentWidth = 100;

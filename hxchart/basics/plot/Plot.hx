@@ -1,5 +1,6 @@
 package hxchart.basics.plot;
 
+import haxe.ui.geom.Point;
 import hxchart.basics.trails.Bar;
 import haxe.ui.core.Component;
 import haxe.ui.geom.Size;
