@@ -20,7 +20,7 @@ enum AxisTypes {
 
 @:composite(AxisBuilder, Layout)
 class Axis extends Absolute {
-	@:clonable @:behaviour(DefaultBehaviour, 50) public var tickMargin:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 10) public var tickMargin:Null<Float>;
 
 	@:call(SetTicks) public function setTicks(data:TickInfo):Void;
 
