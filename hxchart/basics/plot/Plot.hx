@@ -260,7 +260,7 @@ class Builder extends CompositeBuilder {
 		_plot.plotBody = new Absolute();
 		_plot.plotBody.percentWidth = 100;
 		_plot.plotBody.percentHeight = 100;
-		_plot.plotBody.padding = 10;
+		// _plot.plotBody.padding = 10; //Setting padding fucks with the inital positioning (redraw works fine)
 		_plot.addComponent(_plot.plotBody);
 	}
 
@@ -274,11 +274,6 @@ class Builder extends CompositeBuilder {
 		_plot.top = _plot.marginTop;
 		_plot.width -= _plot.marginLeft + _plot.marginRight;
 		_plot.height -= _plot.marginTop + _plot.marginBottom;
-
-		_plot.plotBody.left = _plot.paddingLeft;
-		_plot.plotBody.top = _plot.paddingTop;
-		// _plot.plotBody.width = _plot.width - _plot.paddingLeft + _plot.paddingRight;
-		// _plot.plotBody.height = _plot.height - _plot.paddingTop + _plot.paddingBottom + 10;
 
 		if (_plot.legend != null) {
 			_plot.plotBody.percentWidth = 80;

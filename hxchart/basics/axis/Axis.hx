@@ -1,5 +1,6 @@
 package hxchart.basics.axis;
 
+import js.Lib;
 import haxe.Timer;
 import haxe.ui.util.Color;
 import haxe.ui.behaviours.Behaviour;
@@ -19,7 +20,7 @@ enum AxisTypes {
 
 @:composite(AxisBuilder, Layout)
 class Axis extends Absolute {
-	@:clonable @:behaviour(DefaultBehaviour, 10) public var tickMargin:Null<Float>;
+	@:clonable @:behaviour(DefaultBehaviour, 50) public var tickMargin:Null<Float>;
 
 	@:call(SetTicks) public function setTicks(data:TickInfo):Void;
 
@@ -116,6 +117,7 @@ class Axis extends Absolute {
 		this.color = Color.fromString(color);
 		this.tickInfo = tickInfo;
 		id = idName;
+		startPoint = start;
 	}
 
 	override function onResized() {
@@ -124,6 +126,39 @@ class Axis extends Absolute {
 			axisLength = height * 0.9;
 		}
 		super.onResized();
+	}
+
+	/**
+	 * Only needed at the beginning of creating the chart, to correctly center the startpoint.
+	 */
+	public function centerStartPoint(alternateWidth:Float = 0, alternateHeight:Float = 0) {
+		var marginLeft = (width - axisLength) / 2;
+		var marginTop = (height - axisLength) / 2;
+
+		if (width == 0) {
+			marginLeft = (alternateWidth - axisLength) / 2;
+		}
+		if (height == 0) {
+			marginTop = (alternateHeight - axisLength) / 2;
+		}
+		if (linkedAxes != null) {
+			var lengthPerRotation:Float = 0;
+			if (rotation == 270) {
+				lengthPerRotation = axisLength;
+			}
+			for (key in linkedAxes.keys()) {
+				var linkedAxis = linkedAxes.get(key);
+				switch (key) {
+					case "y":
+						startPoint = new Point(lengthPerRotation + marginLeft, linkedAxis.ticks[linkedAxis.tickInfo.zeroIndex].top);
+					case "x":
+						startPoint = new Point(linkedAxis.ticks[linkedAxis.tickInfo.zeroIndex].left, lengthPerRotation + marginTop);
+					case "both":
+					default:
+						startPoint = new Point(40, 40);
+				}
+			}
+		}
 	}
 }
 
@@ -343,84 +378,32 @@ private class AxisBuilder extends CompositeBuilder {
 		_tickLabelLayer.percentWidth = 100;
 		_tickCanvasLayer.percentHeight = 100;
 		_tickLabelLayer.percentHeight = 100;
-		var axis = _axis;
-		var canvas = _tickCanvasLayer;
-		if (canvas != null) {
-			canvas.componentGraphics.strokeStyle(axis.color);
-			canvas.componentGraphics.moveTo(axis.startPoint.x, axis.startPoint.y);
-			if (axis.endPoint == null) {
-				axis.endPoint = AxisTools.positionEndpoint(axis.startPoint, axis.rotation, axis.axisLength);
-			}
-			canvas.componentGraphics.lineTo(axis.endPoint.x, axis.endPoint.y);
-			for (tick in axis.ticks) {
-				var tickLength = tick.tickLength;
-				var middlePoint = new Point(tick.left, tick.top);
-				var start = AxisTools.positionEndpoint(middlePoint, tick.rotation, tickLength / 2);
-				var end = AxisTools.positionEndpoint(middlePoint, tick.rotation + 180, tickLength / 2);
-				canvas.componentGraphics.moveTo(start.x, start.y);
-				canvas.componentGraphics.lineTo(end.x, end.y);
-			}
-			for (tick in axis.sub_ticks) {
-				tick.showLabel = false;
-				var tickLength = tick.subTickLength;
-				var middlePoint = new Point(tick.left, tick.top);
-				var start = AxisTools.positionEndpoint(middlePoint, tick.rotation, tickLength / 2);
-				var end = AxisTools.positionEndpoint(middlePoint, tick.rotation + 180, tickLength / 2);
-				canvas.componentGraphics.moveTo(start.x, start.y);
-				canvas.componentGraphics.lineTo(end.x, end.y);
-			}
-		}
+		drawAxis();
 	}
 
 	override function validateComponentLayout():Bool {
 		_tickCanvasLayer.componentGraphics.clear();
-		// _tickLabelLayer.removeAllComponents();
-
 		if (_axis.startPoint == null) {
 			_axis.startPoint = new Point(40, 40);
 		}
-		if (_axis.linkedAxes != null) {
-			var lengthPerRotation:Float = 0;
-			if (_axis.rotation == 270) {
-				lengthPerRotation = _axis.axisLength;
-			}
-			for (key in _axis.linkedAxes.keys()) {
-				var linkedAxis = _axis.linkedAxes.get(key);
-				switch (key) {
-					case "y":
-						_axis.startPoint = new Point(lengthPerRotation, linkedAxis.ticks[linkedAxis.tickInfo.zeroIndex].top);
-					case "x":
-						_axis.startPoint = new Point(linkedAxis.ticks[linkedAxis.tickInfo.zeroIndex].left, lengthPerRotation);
-					case "both":
-					default:
-						_axis.startPoint = new Point(40, 40);
-				}
-			}
-		}
 
+		_axis.centerStartPoint();
 		_axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.rotation, _axis.axisLength);
 		_axis.updateTicks(_axis.tickInfo);
+		drawAxis();
+		return super.validateComponentLayout();
+	}
+
+	function drawAxis() {
 		var axis = _axis;
 		var canvas = _tickCanvasLayer;
-
-		// if (axis.rotation == 0) {
-		// 	trace("Axis");
-
-		// 	trace(axis.ticks[axis.tickInfo.zeroIndex].left);
-		// }
-		// if (axis.rotation == 270) {
-		// 	trace(axis.startPoint.x);
-		// }
 		if (canvas != null) {
 			canvas.componentGraphics.strokeStyle(axis.color);
 			canvas.componentGraphics.moveTo(axis.startPoint.x, axis.startPoint.y);
-			// trace(axis.startPoint.x, axis.startPoint.y);
 			if (axis.endPoint == null) {
-				// trace("change end");
 				axis.endPoint = AxisTools.positionEndpoint(axis.startPoint, axis.rotation, axis.axisLength);
 			}
 			canvas.componentGraphics.lineTo(axis.endPoint.x, axis.endPoint.y);
-			// trace(axis.endPoint.x, axis.endPoint.y);
 			for (tick in axis.ticks) {
 				var tickLength = tick.tickLength;
 				var middlePoint = new Point(tick.left, tick.top);
@@ -439,6 +422,5 @@ private class AxisBuilder extends CompositeBuilder {
 				canvas.componentGraphics.lineTo(end.x, end.y);
 			}
 		}
-		return super.validateComponentLayout();
 	}
 }

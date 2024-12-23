@@ -198,8 +198,4 @@ class Builder extends CompositeBuilder {
 		}
 		return true;
 	}
-
-	// override function validateComponentData() {
-	// 	super.validateComponentData();
-	// }
 }
