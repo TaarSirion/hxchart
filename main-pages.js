@@ -170,8 +170,10 @@ MainPages.main = function() {
 	scatterStack.addComponent(simpleScatterScroll);
 	var hbox = new haxe_ui_containers_HBox();
 	hbox.set_percentWidth(100);
-	var simpleScatterInfo = { data : { xValues : [0,1,2], yValues : [0,1,2]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.linear},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.scatter};
-	var scatterPlot = new hxchart_basics_plot_Plot(simpleScatterInfo,haxe_ui_core_Screen.get_instance().get_width(),500);
+	var simpleScatterInfo = hxchart_basics_colors_ColorPalettes.green(1);
+	var simpleScatterInfo1 = { data : { xValues : [0,1,2], yValues : [0,1,2]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.linear},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.scatter, style : { colorPalette : simpleScatterInfo}};
+	haxe_Log.trace("INFO",{ fileName : "local/MainPages.hx", lineNumber : 70, className : "MainPages", methodName : "main", customParams : [simpleScatterInfo1]});
+	var scatterPlot = new hxchart_basics_plot_Plot(simpleScatterInfo1,haxe_ui_core_Screen.get_instance().get_width(),500);
 	scatterPlot.set_left(0);
 	scatterPlot.set_top(0);
 	scatterPlot.set_percentWidth(45);
@@ -35277,6 +35279,7 @@ hxchart_basics_plot_Plot.prototype = $extend(haxe_ui_containers_Absolute.prototy
 				break;
 			}
 		}
+		var colors = [];
 		var _g_current = 0;
 		var _g_array = this.trailInfos;
 		while(_g_current < _g_array.length) {
@@ -35317,8 +35320,13 @@ hxchart_basics_plot_Plot.prototype = $extend(haxe_ui_containers_Absolute.prototy
 					this.groupNumber++;
 				}
 			}
+			if(info.style != null) {
+				colors = colors.concat(info.style.colorPalette);
+			}
 		}
-		var colors = hxchart_basics_colors_ColorPalettes.defaultColors(this.groupNumber);
+		if(colors.length < this.groupNumber) {
+			colors = colors.concat(hxchart_basics_colors_ColorPalettes.defaultColors(this.groupNumber - colors.length));
+		}
 		var groupIterationIndex = 0;
 		var h = this.groups.h;
 		var group_h = h;
@@ -36172,6 +36180,7 @@ hxchart_basics_trails_Scatter.prototype = {
 	,setData: function(newData,style) {
 		this.data = [];
 		this.colors = [];
+		haxe_Log.trace(style,{ fileName : "hxchart/basics/trails/Scatter.hx", lineNumber : 62, className : "hxchart.basics.trails.Scatter", methodName : "setData"});
 		var groupsArr = newData.groups;
 		if(groupsArr == null) {
 			groupsArr = [];
@@ -36187,6 +36196,7 @@ hxchart_basics_trails_Scatter.prototype = {
 		while(_g < _g1) {
 			var i = _g++;
 			var group = groupsArr[i];
+			haxe_Log.trace(style.groups.h[group],{ fileName : "hxchart/basics/trails/Scatter.hx", lineNumber : 72, className : "hxchart.basics.trails.Scatter", methodName : "setData", customParams : [style.colorPalette[style.groups.h[group]]]});
 			var point = new hxchart_basics_data_Data2D(newData.xValues[i],newData.yValues[i],style.groups.h[group]);
 			this.colors.push(style.colorPalette[style.groups.h[group]]);
 			this.data.push(point);

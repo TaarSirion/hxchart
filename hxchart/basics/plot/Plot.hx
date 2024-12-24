@@ -183,7 +183,7 @@ class Plot extends Absolute {
 				case pie:
 			}
 		}
-
+		var colors = [];
 		for (i => info in trailInfos) {
 			if (info.data.groups == null) {
 				info.data.groups = [];
@@ -201,8 +201,13 @@ class Plot extends Absolute {
 					groupNumber++;
 				}
 			}
+			if (info.style != null) {
+				colors = colors.concat(info.style.colorPalette);
+			}
 		}
-		var colors = ColorPalettes.defaultColors(groupNumber);
+		if (colors.length < groupNumber) {
+			colors = colors.concat(ColorPalettes.defaultColors(groupNumber - colors.length));
+		}
 		var groupIterationIndex = 0;
 		for (group in groups.keys()) {
 			if (legend.childNodes.contains(group)) {
