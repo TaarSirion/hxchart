@@ -93,6 +93,19 @@ class NumericTickInfo implements TickInfo {
 			pow = Math.floor(Math.log(Math.abs(min) - 1) / Math.log(10));
 		}
 		power = Math.pow(10, pow);
+		var diff = Math.abs(max) + Math.abs(min);
+		if (Math.floor(diff / power) > 16) {
+			for (val in [2, 5, 10]) {
+				var newPower = power * val;
+				if (Math.floor(diff / newPower) <= 16) {
+					power = newPower;
+					if (val == 10) {
+						pow++;
+					}
+					break;
+				}
+			}
+		}
 		precision = power < 1 ? -1 * pow : pow;
 	}
 
@@ -105,13 +118,7 @@ class NumericTickInfo implements TickInfo {
 		max = maxRound;
 		min = minRound;
 		var dist = Math.abs(minRound) + maxRound;
-		tickNum = Math.round(dist * Math.pow(10, -precision));
-		if (power < 1) {
-			tickNum = Math.round(dist * Math.pow(10, precision));
-		}
-		if (tickNum > 20) {
-			tickNum = 20;
-		}
+		tickNum = Math.round(dist / power);
 
 		// Add extra tickNum for 0
 		tickNum++;
