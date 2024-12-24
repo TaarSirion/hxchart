@@ -172,7 +172,6 @@ MainPages.main = function() {
 	hbox.set_percentWidth(100);
 	var simpleScatterInfo = hxchart_basics_colors_ColorPalettes.green(1);
 	var simpleScatterInfo1 = { data : { xValues : [0,1,2], yValues : [0,1,2]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.linear},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.scatter, style : { colorPalette : simpleScatterInfo}};
-	haxe_Log.trace("INFO",{ fileName : "local/MainPages.hx", lineNumber : 70, className : "MainPages", methodName : "main", customParams : [simpleScatterInfo1]});
 	var scatterPlot = new hxchart_basics_plot_Plot(simpleScatterInfo1,haxe_ui_core_Screen.get_instance().get_width(),500);
 	scatterPlot.set_left(0);
 	scatterPlot.set_top(0);
@@ -36180,7 +36179,6 @@ hxchart_basics_trails_Scatter.prototype = {
 	,setData: function(newData,style) {
 		this.data = [];
 		this.colors = [];
-		haxe_Log.trace(style,{ fileName : "hxchart/basics/trails/Scatter.hx", lineNumber : 62, className : "hxchart.basics.trails.Scatter", methodName : "setData"});
 		var groupsArr = newData.groups;
 		if(groupsArr == null) {
 			groupsArr = [];
@@ -36196,7 +36194,6 @@ hxchart_basics_trails_Scatter.prototype = {
 		while(_g < _g1) {
 			var i = _g++;
 			var group = groupsArr[i];
-			haxe_Log.trace(style.groups.h[group],{ fileName : "hxchart/basics/trails/Scatter.hx", lineNumber : 72, className : "hxchart.basics.trails.Scatter", methodName : "setData", customParams : [style.colorPalette[style.groups.h[group]]]});
 			var point = new hxchart_basics_data_Data2D(newData.xValues[i],newData.yValues[i],style.groups.h[group]);
 			this.colors.push(style.colorPalette[style.groups.h[group]]);
 			this.data.push(point);
@@ -36375,10 +36372,11 @@ hxchart_basics_trails_Scatter.prototype = {
 			var x = this.calcXCoord(dataPoint.xValue,this.axes[0].ticks,this.axes[0].ticks[this.axes[0].tickInfo.zeroIndex].get_left(),x_dist);
 			var y = this.calcYCoord(dataPoint.yValue,this.axes[1].ticks,this.axes[1].ticks[this.axes[1].tickInfo.zeroIndex].get_top(),y_dist);
 			this.dataCanvas.componentGraphics.strokeStyle(this.colors[i],1);
+			this.dataCanvas.componentGraphics.fillStyle(this.colors[i],1);
 			if(x == null || y == null) {
 				continue;
 			}
-			this.dataCanvas.componentGraphics.circle(x,y,1);
+			this.dataCanvas.componentGraphics.circle(x,y,2);
 		}
 		var canvasComponent = this.parent.findComponent(this.id);
 		if(canvasComponent == null) {

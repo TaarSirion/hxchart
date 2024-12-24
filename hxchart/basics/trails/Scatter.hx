@@ -220,10 +220,11 @@ class Scatter implements AxisLayer implements DataLayer {
 			var x = calcXCoord(dataPoint.xValue, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, x_dist);
 			var y = calcYCoord(dataPoint.yValue, axes[1].ticks, axes[1].ticks[axes[1].tickInfo.zeroIndex].top, y_dist);
 			dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
+			dataCanvas.componentGraphics.fillStyle(colors[i], 1);
 			if (x == null || y == null) {
 				continue;
 			}
-			dataCanvas.componentGraphics.circle(x, y, 1);
+			dataCanvas.componentGraphics.circle(x, y, 2);
 		}
 		var canvasComponent = parent.findComponent(id);
 		if (canvasComponent == null) {
