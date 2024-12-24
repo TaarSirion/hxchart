@@ -259,6 +259,16 @@ MainPages.main = function() {
 	scatterPlot.set_percentWidth(45);
 	scatterPlot.set_height(500);
 	hbox.addComponent(scatterPlot);
+	var hbox = new haxe_ui_containers_HBox();
+	hbox.set_percentWidth(100);
+	dataDiscrepancyScatterScroll.addComponent(hbox);
+	var dataScatterInfo = { data : { xValues : ["A","A","A","B","B","B"], yValues : [-3000,-20,0,1,2,100]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.categorical},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.scatter};
+	var scatterPlot = new hxchart_basics_plot_Plot(dataScatterInfo,haxe_ui_core_Screen.get_instance().get_width(),500);
+	scatterPlot.set_left(0);
+	scatterPlot.set_top(0);
+	scatterPlot.set_percentWidth(45);
+	scatterPlot.set_height(500);
+	hbox.addComponent(scatterPlot);
 	scatterBox.addComponent(scatterListView);
 	scatterBox.addComponent(scatterStack);
 	tabs.addComponent(scatterBox);
@@ -34366,38 +34376,33 @@ hxchart_basics_axis_NumericTickInfo.prototype = {
 		this.set_power(Math.pow(10,pow));
 		var diff = Math.abs(this.max) + Math.abs(this.min);
 		if(Math.floor(diff / this.power) > 16) {
-			var _g = 0;
-			var _g1 = [2,5,10];
-			while(_g < _g1.length) {
-				var val = _g1[_g];
-				++_g;
-				var newPower = this.power * val;
-				if(Math.floor(diff / newPower) <= 16) {
-					this.set_power(newPower);
-					if(val == 10) {
-						++pow;
-					}
-					break;
-				}
+			var rawStep = diff / 16;
+			var step = Math.floor(rawStep);
+			if(rawStep < 1) {
+				step = rawStep;
 			}
+			pow = Math.floor(Math.log(step) / Math.log(10));
+			this.set_power(Math.pow(10,pow));
+			if(this.power >= step) {
+				step = this.power;
+			} else if(this.power * 2 >= step) {
+				step = this.power * 2;
+			} else if(this.power * 5 >= step) {
+				step = this.power * 5;
+			} else {
+				step = this.power * 10;
+			}
+			this.set_power(step);
 		}
 		this.set_precision(this.power < 1 ? -1 * pow : pow);
 	}
 	,calcTickNum: function() {
 		var maxRound = this.max < 0 ? 0 : hxchart_Utils.roundToPrec(this.max,this.precision);
-		haxe_Log.trace(this.max,{ fileName : "hxchart/basics/axis/NumericTickInfo.hx", lineNumber : 118, className : "hxchart.basics.axis.NumericTickInfo", methodName : "calcTickNum", customParams : [maxRound,this.precision]});
 		var minRound = this.min < 0 ? hxchart_Utils.roundToPrec(this.min,this.precision) : 0;
 		this.set_max(maxRound);
 		this.set_min(minRound);
 		var dist = Math.abs(minRound) + maxRound;
-		this.tickNum = Math.round(dist * Math.pow(10,-this.precision));
-		if(this.power < 1) {
-			this.tickNum = Math.round(dist * Math.pow(10,this.precision));
-		}
 		this.tickNum = Math.round(dist / this.power);
-		if(this.tickNum > 16) {
-			this.tickNum = 16;
-		}
 		this.tickNum++;
 		if(this.useSubTicks) {
 			var tickSpaces = this.tickNum - 1;

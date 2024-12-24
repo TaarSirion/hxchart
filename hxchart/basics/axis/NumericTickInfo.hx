@@ -94,17 +94,25 @@ class NumericTickInfo implements TickInfo {
 		}
 		power = Math.pow(10, pow);
 		var diff = Math.abs(max) + Math.abs(min);
+		// In case the current calculation is not able to envelope all values in 16 ticks, we need to do a different calculation.
 		if (Math.floor(diff / power) > 16) {
-			for (val in [2, 5, 10]) {
-				var newPower = power * val;
-				if (Math.floor(diff / newPower) <= 16) {
-					power = newPower;
-					if (val == 10) {
-						pow++;
-					}
-					break;
-				}
+			var rawStep = diff / 16;
+			var step:Float = Math.floor(rawStep);
+			if (rawStep < 1) {
+				step = rawStep;
 			}
+			pow = Math.floor(Math.log(step) / Math.log(10));
+			power = Math.pow(10, pow);
+			if (power >= step) {
+				step = power;
+			} else if (power * 2 >= step) {
+				step = power * 2;
+			} else if (power * 5 >= step) {
+				step = power * 5;
+			} else {
+				step = power * 10;
+			}
+			power = step;
 		}
 		precision = power < 1 ? -1 * pow : pow;
 	}
@@ -119,7 +127,6 @@ class NumericTickInfo implements TickInfo {
 		min = minRound;
 		var dist = Math.abs(minRound) + maxRound;
 		tickNum = Math.round(dist / power);
-
 		// Add extra tickNum for 0
 		tickNum++;
 		if (useSubTicks) {

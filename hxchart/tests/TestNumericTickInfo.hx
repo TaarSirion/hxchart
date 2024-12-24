@@ -65,6 +65,10 @@ class TestNumericTickInfo extends utest.Test {
 		var tickInfo = new NumericTickInfo(-0.6, 0.7);
 		tickInfo.calcTickNum();
 		Assert.equals(14, tickInfo.tickNum);
+
+		var tickInfo = new NumericTickInfo(-3000, 100);
+		tickInfo.calcTickNum();
+		Assert.equals(17, tickInfo.tickNum);
 	}
 
 	@:depends(testTickNum)

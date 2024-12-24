@@ -85,17 +85,17 @@ class TestScatter extends Test {
 	@:depends(testSetData, testSetTickInfo)
 	function testPositionAxes() {
 		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
-		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.data);
+		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.data, {});
 		Assert.equals(2, scatter.axes.length);
-		Assert.equals(100, scatter.axes[0].axisLength);
-		Assert.equals(0, scatter.axes[0].startPoint.x);
-		Assert.equals(90, scatter.axes[0].startPoint.y);
+		Assert.equals(90, scatter.axes[0].axisLength);
+		Assert.equals(5, scatter.axes[0].startPoint.x);
+		Assert.equals(-10, scatter.axes[0].startPoint.y);
 	}
 
 	@:depends(testPositionAxes)
 	function testPositionData() {
 		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
-		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.data);
+		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.data, {});
 		scatter.positionData({
 			colorPalette: ColorPalettes.defaultColors(1),
 			groups: ["1" => 0]
