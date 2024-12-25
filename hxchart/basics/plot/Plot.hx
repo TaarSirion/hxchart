@@ -25,6 +25,11 @@ enum TrailTypes {
 	pie;
 }
 
+enum PositionOption {
+	layered;
+	stacked;
+}
+
 /**
  * Axis information. Usually used in the first trail.
  * 
@@ -52,8 +57,7 @@ typedef AxisInfo = {
 typedef TrailStyle = {
 	?colorPalette:Array<Int>,
 	?groups:Map<String, Int>,
-	?layered:Bool,
-	?stacked:Bool
+	?positionOption:PositionOption
 }
 
 /**

@@ -1,5 +1,6 @@
 package hxchart.basics.trails;
 
+import hxchart.basics.plot.Plot.PositionOption;
 import hxchart.basics.ticks.Ticks;
 import hxchart.basics.utils.ChartTools;
 import hxchart.basics.ticks.Ticks.CompassOrientation;
@@ -113,7 +114,7 @@ class Bar implements AxisLayer implements DataLayer {
 		} else {
 			valueGroups = yValues.unique();
 		}
-		if (style.stacked) {
+		if (style.positionOption == PositionOption.stacked) {
 			if (isXCategoric) {
 				for (v in valueGroups) {
 					var indexes = xValues.position(v);
@@ -205,14 +206,14 @@ class Bar implements AxisLayer implements DataLayer {
 				return null;
 			}
 			var spacePerTick = (dist.pos_dist / (ticks.length - 1)) * 2 / 3;
-			if (style.stacked) {
+			if (style.positionOption == PositionOption.stacked) {
 				var pos = (isY ? ticksFiltered[0].top : ticksFiltered[0].left) - (spacePerTick / 2);
 				return [pos, spacePerTick];
 			}
 			var spacePerGroup = spacePerTick / groupNum;
 
 			var overlapEffect = 2.0; // This means basically no effect, everything smaller will make the bars overlap
-			if (style.layered) {
+			if (style.positionOption == PositionOption.layered) {
 				overlapEffect = 1.3;
 			}
 
@@ -225,7 +226,7 @@ class Bar implements AxisLayer implements DataLayer {
 		var ratio = value < 0 ? value / min : value / max;
 		var pos = zeroPos + (isY ? -1 : 1) * (value < 0 ? -1 * dist.neg_dist : dist.pos_dist) * ratio;
 		var finalPos = pos;
-		if (style.stacked) {
+		if (style.positionOption == PositionOption.stacked) {
 			if (isY) {
 				finalPos = previousPosition - dist.pos_dist * ratio;
 			} else {
