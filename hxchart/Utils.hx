@@ -52,9 +52,9 @@ class Utils {
 
 		if (n > -1 && n < 1) {
 			if (n > 0) {
-				return (Math.floor(n * Math.pow(10, prec)) / Math.pow(10, prec));
+				return (Math.ceil(n * Math.pow(10, prec)) / Math.pow(10, prec));
 			}
-			return (Math.ceil(n * Math.pow(10, prec)) / Math.pow(10, prec));
+			return (Math.floor(n * Math.pow(10, prec)) / Math.pow(10, prec));
 		}
 		if (n > 0) {
 			return Math.round((n + Math.pow(10, prec) / 2) / Math.pow(10, prec)) * Math.pow(10, prec);

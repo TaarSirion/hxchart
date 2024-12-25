@@ -1,0 +1,5 @@
+<module>
+    <components>
+        <component class="hxchart.basics.plot.Plot" />
+    </components>
+</module>
