@@ -1,11 +1,7 @@
 package hxchart.basics.plot;
 
-import haxe.ui.geom.Point;
 import hxchart.basics.trails.Bar;
-import haxe.ui.core.Component;
-import haxe.ui.geom.Size;
 import haxe.ui.layouts.DefaultLayout;
-import haxe.ui.events.UIEvent;
 import hxchart.basics.colors.ColorPalettes;
 import haxe.ui.util.Variant;
 import haxe.ui.behaviours.Behaviour;
@@ -15,7 +11,6 @@ import hxchart.basics.data.DataLayer.TrailData;
 import haxe.ui.core.CompositeBuilder;
 import haxe.Exception;
 import hxchart.basics.axis.Axis.AxisTypes;
-import hxchart.basics.data.Data2D;
 import hxchart.basics.legend.Legend;
 import haxe.ui.containers.Absolute;
 
