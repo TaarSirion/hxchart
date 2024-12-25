@@ -53,6 +53,7 @@ typedef AxisInfo = {
  * Styling of a trail
  * @param colorPalette Color values in integer form. The length should be equal or greater than the length of `groups`. 
  * @param groups Mapping of groups from the data, 
+ * @param positionOption Option on how to position data
  */
 typedef TrailStyle = {
 	?colorPalette:Array<Int>,
@@ -116,11 +117,9 @@ class Plot extends Absolute {
 	public var axes:Map<String, Array<Axis>>;
 	public var legend:Legend;
 
-	public function new(chartInfo:TrailInfo, width:Float, height:Float, ?legendInfo:LegendInfo) {
+	public function new(chartInfo:TrailInfo, ?legendInfo:LegendInfo) {
 		super();
 		trailInfos = [];
-		this.width = width;
-		this.height = height;
 		axes = new Map();
 		groups = new Map();
 		groupNumber = 0;
