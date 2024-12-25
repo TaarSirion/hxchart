@@ -577,6 +577,128 @@ MainPages.main = function() {
 	scatterBox.addComponent(scatterStack);
 	tabs.addComponent(scatterBox);
 	tabs.set_percentWidth(100);
+	var barBox = new haxe_ui_containers_HBox();
+	barBox.set_text("Bar Charts");
+	barBox.set_percentWidth(100);
+	barBox.set_height(600);
+	var barStack = new haxe_ui_containers_Stack();
+	barStack.set_percentWidth(80);
+	barStack.set_percentHeight(100);
+	var barListView = new haxe_ui_containers_ListView();
+	barListView.set_percentWidth(20);
+	barListView.get_dataSource().add("Simple bar chart");
+	barListView.set_selectedIndex(0);
+	barListView.set_onChange(function(e) {
+		barStack.set_selectedIndex(barListView.get_selectedIndex());
+	});
+	var barScroll = new haxe_ui_containers_ScrollView();
+	barScroll.set_percentWidth(100);
+	barScroll.set_percentHeight(100);
+	barScroll.get_contents().set_percentWidth(100);
+	barStack.addComponent(barScroll);
+	var hbox = new haxe_ui_containers_HBox();
+	hbox.set_percentWidth(100);
+	barScroll.addComponent(hbox);
+	var barInfo = new haxe_ui_containers_VBox();
+	barInfo.set_percentWidth(45);
+	var title = new haxe_ui_components_Label();
+	title.set_text("Simple bar chart");
+	title.get_customStyle().fontSize = 15;
+	barInfo.addComponent(title);
+	var info = new haxe_ui_components_Label();
+	info.set_text("");
+	info.get_customStyle().fontSize = 10;
+	barInfo.addComponent(info);
+	hbox.addComponent(barInfo);
+	var barInfo = hxchart_basics_colors_ColorPalettes.blue(2);
+	var barInfo1 = { data : { xValues : ["A","B"], yValues : [10,3]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.categorical},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.bar, style : { colorPalette : barInfo}};
+	var barPlot = new hxchart_basics_plot_Plot(barInfo1,haxe_ui_core_Screen.get_instance().get_width(),500);
+	barPlot.set_left(0);
+	barPlot.set_top(0);
+	barPlot.set_percentWidth(50);
+	barPlot.set_height(500);
+	hbox.addComponent(barPlot);
+	var hbox = new haxe_ui_containers_HBox();
+	hbox.set_percentWidth(100);
+	barScroll.addComponent(hbox);
+	var barInfo = new haxe_ui_containers_VBox();
+	barInfo.set_percentWidth(45);
+	var title = new haxe_ui_components_Label();
+	title.set_text("Simple bar chart with groups");
+	title.get_customStyle().fontSize = 15;
+	barInfo.addComponent(title);
+	var info = new haxe_ui_components_Label();
+	info.set_text("");
+	info.get_customStyle().fontSize = 10;
+	barInfo.addComponent(info);
+	hbox.addComponent(barInfo);
+	var barInfo = hxchart_basics_colors_ColorPalettes.blue(2);
+	var barInfo1 = { data : { xValues : ["A","B","A","B"], yValues : [10,3,5,4], groups : ["1","1","2","2"]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.categorical},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.bar, style : { colorPalette : barInfo}};
+	var barPlot = new hxchart_basics_plot_Plot(barInfo1,haxe_ui_core_Screen.get_instance().get_width(),500);
+	barPlot.set_left(0);
+	barPlot.set_top(0);
+	barPlot.set_percentWidth(50);
+	barPlot.set_height(500);
+	hbox.addComponent(barPlot);
+	barListView.get_dataSource().add("Stacked bar chart");
+	var barScroll = new haxe_ui_containers_ScrollView();
+	barScroll.set_percentWidth(100);
+	barScroll.set_percentHeight(100);
+	barScroll.get_contents().set_percentWidth(100);
+	barStack.addComponent(barScroll);
+	var hbox = new haxe_ui_containers_HBox();
+	hbox.set_percentWidth(100);
+	barScroll.addComponent(hbox);
+	var barInfo = new haxe_ui_containers_VBox();
+	barInfo.set_percentWidth(45);
+	var title = new haxe_ui_components_Label();
+	title.set_text("Stacked bar chart");
+	title.get_customStyle().fontSize = 15;
+	barInfo.addComponent(title);
+	var info = new haxe_ui_components_Label();
+	info.set_text("");
+	info.get_customStyle().fontSize = 10;
+	barInfo.addComponent(info);
+	hbox.addComponent(barInfo);
+	var barInfo = hxchart_basics_colors_ColorPalettes.green(2);
+	var barInfo1 = { data : { xValues : ["A","B","A","B"], yValues : [10,3,5,4], groups : ["1","1","2","2"]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.categorical},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.bar, style : { colorPalette : barInfo, stacked : true}};
+	var barPlot = new hxchart_basics_plot_Plot(barInfo1,haxe_ui_core_Screen.get_instance().get_width(),500);
+	barPlot.set_left(0);
+	barPlot.set_top(0);
+	barPlot.set_percentWidth(50);
+	barPlot.set_height(500);
+	hbox.addComponent(barPlot);
+	barListView.get_dataSource().add("Layered bar chart");
+	var barScroll = new haxe_ui_containers_ScrollView();
+	barScroll.set_percentWidth(100);
+	barScroll.set_percentHeight(100);
+	barScroll.get_contents().set_percentWidth(100);
+	barStack.addComponent(barScroll);
+	var hbox = new haxe_ui_containers_HBox();
+	hbox.set_percentWidth(100);
+	barScroll.addComponent(hbox);
+	var barInfo = new haxe_ui_containers_VBox();
+	barInfo.set_percentWidth(45);
+	var title = new haxe_ui_components_Label();
+	title.set_text("Layered bar chart");
+	title.get_customStyle().fontSize = 15;
+	barInfo.addComponent(title);
+	var info = new haxe_ui_components_Label();
+	info.set_text("");
+	info.get_customStyle().fontSize = 10;
+	barInfo.addComponent(info);
+	hbox.addComponent(barInfo);
+	var barInfo = hxchart_basics_colors_ColorPalettes.green(2);
+	var barInfo1 = { data : { xValues : ["A","B","A","B"], yValues : [10,3,5,4], groups : ["1","1","2","2"]}, axisInfo : [{ type : hxchart_basics_axis_AxisTypes.categorical},{ type : hxchart_basics_axis_AxisTypes.linear}], type : hxchart_basics_plot_TrailTypes.bar, style : { colorPalette : barInfo, layered : true}};
+	var barPlot = new hxchart_basics_plot_Plot(barInfo1,haxe_ui_core_Screen.get_instance().get_width(),500);
+	barPlot.set_left(0);
+	barPlot.set_top(0);
+	barPlot.set_percentWidth(50);
+	barPlot.set_height(500);
+	hbox.addComponent(barPlot);
+	barBox.addComponent(barListView);
+	barBox.addComponent(barStack);
+	tabs.addComponent(barBox);
 	var box = new haxe_ui_containers_Stack();
 	box.set_percentWidth(100);
 	box.set_height(200);
@@ -36380,14 +36502,8 @@ hxchart_basics_trails_Bar.prototype = {
 			hxchart_basics_axis_AxisTools.addAxisToParent(this.axes[1],this.parent);
 			return;
 		}
-		var yAxisLength = this.parent.get_height() - this.parent.get_paddingTop() - this.parent.get_paddingBottom();
-		var xAxisLength = this.parent.get_width() - this.parent.get_paddingLeft() - this.parent.get_paddingRight();
-		if(this.minY >= 0) {
-			yAxisLength = this.parent.get_height() - this.parent.get_paddingTop() - this.parent.get_paddingBottom() - 20;
-		}
-		if(this.minX >= 0) {
-			xAxisLength = this.parent.get_width() - this.parent.get_paddingLeft() - this.parent.get_paddingRight();
-		}
+		var yAxisLength = this.parent.get_height() * 0.9;
+		var xAxisLength = this.parent.get_width() * 0.9;
 		var isPreviousXAxis = false;
 		var isPreviousYAxis = false;
 		if(this.axes[0] == null) {
@@ -36424,19 +36540,12 @@ hxchart_basics_trails_Bar.prototype = {
 		this.axes[0].set_percentHeight(100);
 		this.axes[1].set_percentWidth(100);
 		this.axes[1].set_percentHeight(100);
-		if(this.isXCategoric) {
-			this.axes[0].set_startPoint(new haxe_ui_geom_Point(0,40));
-		} else {
-			this.axes[0].set_startPoint(new haxe_ui_geom_Point(20,40));
-		}
-		this.axes[1].set_startPoint(new haxe_ui_geom_Point(40,yAxisLength));
-		if(this.isXCategoric) {
-			this.axes[0].set_startPoint(new haxe_ui_geom_Point(0,this.axes[1].ticks[this.axes[1].tickInfo.zeroIndex].get_top()));
-			this.axes[1].set_startPoint(new haxe_ui_geom_Point(this.axes[0].ticks[this.axes[0].tickInfo.zeroIndex].get_left(),yAxisLength));
-		} else {
-			this.axes[0].set_startPoint(new haxe_ui_geom_Point(20,this.axes[1].ticks[this.axes[1].tickInfo.zeroIndex].get_top()));
-			this.axes[1].set_startPoint(new haxe_ui_geom_Point(this.axes[0].ticks[this.axes[0].tickInfo.zeroIndex].get_left(),yAxisLength));
-		}
+		this.axes[0].set_linkedAxes(new haxe_ds_StringMap());
+		this.axes[0].linkedAxes.h["y"] = this.axes[1];
+		this.axes[1].set_linkedAxes(new haxe_ds_StringMap());
+		this.axes[1].linkedAxes.h["x"] = this.axes[0];
+		this.axes[0].centerStartPoint(this.parent.get_width(),this.parent.get_height());
+		this.axes[1].centerStartPoint(this.parent.get_width(),this.parent.get_height());
 		this.axes[1].set_showZeroTick(false);
 		this.axes[0].set_zeroTickPosition(hxchart_basics_ticks_CompassOrientation.SW);
 		if(isPreviousXAxis) {

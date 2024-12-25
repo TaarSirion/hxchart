@@ -277,15 +277,8 @@ class Bar implements AxisLayer implements DataLayer {
 			return;
 		}
 
-		var yAxisLength = parent.height - parent.paddingTop - parent.paddingBottom;
-		var xAxisLength = parent.width - parent.paddingLeft - parent.paddingRight;
-		if (minY >= 0) {
-			yAxisLength = parent.height - parent.paddingTop - parent.paddingBottom - 20; // Additional 20 added to height, so it shows ticks correctly
-		}
-		if (minX >= 0) {
-			xAxisLength = parent.width - parent.paddingLeft - parent.paddingRight;
-		}
-
+		var yAxisLength = parent.height * 0.9;
+		var xAxisLength = parent.width * 0.9;
 		var isPreviousXAxis = false;
 		var isPreviousYAxis = false;
 		if (axes[0] == null) {
@@ -309,22 +302,14 @@ class Bar implements AxisLayer implements DataLayer {
 		axes[0].percentHeight = 100;
 		axes[1].percentWidth = 100;
 		axes[1].percentHeight = 100;
-		// This is necessary to allow the ticks to be calculated
-		if (isXCategoric) {
-			axes[0].startPoint = new Point(0, 40);
-		} else {
-			axes[0].startPoint = new Point(20, 40);
-		}
-		axes[1].startPoint = new Point(40, yAxisLength);
-		// Real positioning
 
-		if (isXCategoric) {
-			axes[0].startPoint = new Point(0, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
-			axes[1].startPoint = new Point(axes[0].ticks[axes[0].tickInfo.zeroIndex].left, yAxisLength);
-		} else {
-			axes[0].startPoint = new Point(20, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
-			axes[1].startPoint = new Point(axes[0].ticks[axes[0].tickInfo.zeroIndex].left, yAxisLength);
-		}
+		axes[0].linkedAxes = new Map();
+		axes[0].linkedAxes.set("y", axes[1]);
+		axes[1].linkedAxes = new Map();
+		axes[1].linkedAxes.set("x", axes[0]);
+
+		axes[0].centerStartPoint(parent.width, parent.height);
+		axes[1].centerStartPoint(parent.width, parent.height);
 
 		axes[1].showZeroTick = false;
 		axes[0].zeroTickPosition = CompassOrientation.SW;
