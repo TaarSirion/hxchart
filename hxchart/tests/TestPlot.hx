@@ -13,7 +13,7 @@ class TestPlot extends Test {
 				yValues: [1]
 			},
 			type: scatter
-		}, 100, 100);
+		});
 		Assert.equals(1, plot.trailInfos[0].data.xValues[0]);
 		Assert.equals(scatter, plot.trailInfos[0].type);
 	}
@@ -25,7 +25,7 @@ class TestPlot extends Test {
 				yValues: [1]
 			},
 			type: scatter
-		}, 100, 100, {
+		}, {
 			title: "Title",
 			useLegend: true,
 			nodeFontSize: 5
@@ -41,7 +41,7 @@ class TestPlot extends Test {
 					values: ["x" => [1, 2], "y" => [3, 4]]
 				},
 				type: scatter
-			}, 100, 100);
+			});
 		});
 
 		Assert.raises(function() {
@@ -51,7 +51,7 @@ class TestPlot extends Test {
 				},
 				x: "x",
 				type: scatter
-			}, 100, 100);
+			});
 		});
 
 		Assert.raises(function() {
@@ -61,7 +61,7 @@ class TestPlot extends Test {
 				},
 				y: "y",
 				type: scatter
-			}, 100, 100);
+			});
 		});
 
 		Assert.raises(function() {
@@ -71,7 +71,7 @@ class TestPlot extends Test {
 					xValues: [1, 2]
 				},
 				type: scatter
-			}, 100, 100);
+			});
 		});
 
 		Assert.raises(function() {
@@ -81,7 +81,7 @@ class TestPlot extends Test {
 					yValues: [1, 2]
 				},
 				type: scatter
-			}, 100, 100);
+			});
 		});
 
 		var plot = new Plot({
@@ -91,7 +91,7 @@ class TestPlot extends Test {
 			x: "x",
 			y: "y",
 			type: scatter
-		}, 100, 100);
+		});
 		Assert.same({
 			values: ["x" => [1, 2], "y" => [3, 4]],
 			xValues: [1, 2],
@@ -108,7 +108,7 @@ class TestPlot extends Test {
 			x: "x",
 			y: "y",
 			type: scatter
-		}, 100, 100);
+		});
 		Assert.same({
 			values: ["x" => [1, 2], "y" => [3, 4]],
 			xValues: [3, 4],
@@ -125,7 +125,7 @@ class TestPlot extends Test {
 				xValues: [3, 4]
 			},
 			type: scatter
-		}, 100, 100);
+		});
 		Assert.isTrue(plot.groups.exists("A"));
 		Assert.equals(2, plot.groupNumber);
 
@@ -136,7 +136,7 @@ class TestPlot extends Test {
 				xValues: [3, 4]
 			},
 			type: scatter
-		}, 100, 100);
+		});
 		Assert.isTrue(plot.groups.exists("A"));
 		Assert.equals(2, plot.groupNumber);
 
@@ -146,7 +146,7 @@ class TestPlot extends Test {
 				xValues: [3, 4]
 			},
 			type: scatter
-		}, 100, 100);
+		});
 		Assert.isTrue(plot.groups.exists("1"));
 		Assert.equals(1, plot.groupNumber);
 	}
@@ -158,7 +158,7 @@ class TestPlot extends Test {
 				xValues: [3, 4]
 			},
 			type: scatter
-		}, 100, 100);
+		});
 		Assert.contains(Color.fromString("black").toInt(), plot.trailInfos[0].style.colorPalette);
 
 		var plot = new Plot({
@@ -168,7 +168,7 @@ class TestPlot extends Test {
 				xValues: [3, 4]
 			},
 			type: scatter
-		}, 100, 100);
+		});
 		Assert.contains(Color.fromString("orange").toInt(), plot.trailInfos[0].style.colorPalette);
 	}
 }

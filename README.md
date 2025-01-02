@@ -52,6 +52,7 @@ public static function main() {
 
 ### TrailInfo
 The TrailInfo Object contains these subfields
+```
 - data:TrailData 
     - xValues:Array<Dynamic>
     - yValues:Array<Dynamic>
@@ -64,7 +65,7 @@ The TrailInfo Object contains these subfields
 - ?style 
     - ?colorPalette:Array<Int> Colors to use for the trail. For simpler usage, use `ColorPalettes`.
 	- ?positionOption:PositionOption 
-
+```
 
 # Roadmap for features
 - Add grouping for values and a legend displaying the grouping. 
