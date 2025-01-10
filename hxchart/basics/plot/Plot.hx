@@ -56,6 +56,27 @@ typedef TrailStyle = {
 	?positionOption:PositionOption
 }
 
+enum OptimizationType {
+	optimGrid;
+	quadTree;
+}
+
+/**
+ * Options for optimizing the rendering process.
+ * 
+ * Only use when you know what you are doing, as this might result in a different looking plot.
+ * 
+ * *OptimizationTypes:*
+ * - `optimGrid` Create an underlying grid, that hinders drawing multiple points over each other, or too close to each other. Use together with `gridStep` to set the size of each cell.
+ * - `quadTree` Use a quadtree to optimize the drawing of data. Only use this for semi large data (i.e. less than 100'000 points)
+ * @param reduceVia Optional. *OptimizationType* to use, options are `optimGrid`, `quadTree`
+ * @param gridStep Optional. Use together with `optimGrid`. Defines the size of each cell. Larger values result in less points being drawn!
+ */
+typedef OptimizationInfo = {
+	?reduceVia:OptimizationType,
+	?gridStep:Float
+}
+
 /**
  * Information about a trail.
  * 
@@ -68,6 +89,7 @@ typedef TrailStyle = {
  * @param y Optional. Key of the y values. This is necessary for `type = scatter` when only `data.values` is set.
  * @param style Optional. Style of the trail. Beware, this will reset if an additional trail is added to the plot, to keep styling consistent.
  * @param axisInfo Optional. Information about the axes. Technically it is possible to give every trail their own axes, resulting in multiple sub-plots (currently not implemented).
+ * @param optimizationInfo Optional. Drawing large amounts of data might need some kind of optimization, which can be set through this info. Be careful with the usage, as some options might result in a different looking plot/chart.
  */
 typedef TrailInfo = {
 	data:TrailData,
@@ -75,7 +97,8 @@ typedef TrailInfo = {
 	?x:String,
 	?y:String,
 	?style:TrailStyle,
-	?axisInfo:Array<AxisInfo>
+	?axisInfo:Array<AxisInfo>,
+	?optimizationInfo:OptimizationInfo
 }
 
 /**

@@ -1,5 +1,8 @@
 package hxchart.basics.trails;
 
+import hxchart.basics.plot.Plot.OptimizationType;
+import hxchart.basics.quadtree.OptimGrid;
+import hxchart.basics.quadtree.Quadtree;
 import hxchart.basics.axis.AxisTools;
 import hxchart.basics.utils.ChartTools;
 import haxe.Timer;
@@ -32,6 +35,10 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var dataLayer:Absolute;
 	public var dataCanvas:Canvas;
 
+	var optimGrid:OptimGrid;
+	var gridStep:Float = 1;
+	var useOptimization:Bool;
+
 	@:allow(hxchart.tests)
 	private var chartInfo:TrailInfo;
 
@@ -48,6 +55,13 @@ class Scatter implements AxisLayer implements DataLayer {
 		this.id = id;
 		this.axisID = axisID;
 		this.chartInfo = chartInfo;
+		if (chartInfo.optimizationInfo != null && chartInfo.optimizationInfo.reduceVia != null) {
+			useOptimization = true;
+			if (chartInfo.optimizationInfo.reduceVia == OptimizationType.optimGrid) {
+				gridStep = chartInfo.optimizationInfo.gridStep;
+				optimGrid = new OptimGrid(parent.width, parent.height, gridStep);
+			}
+		}
 	}
 
 	public function validateChart() {
@@ -215,16 +229,48 @@ class Scatter implements AxisLayer implements DataLayer {
 			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
 		}
 		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, ratio);
-		dataCanvas.componentGraphics.clear();
+		if (x_dist.pos_dist < 0 || y_dist.pos_dist < 0) {
+			return;
+		}
+		var xCoords:Array<Float> = [];
+		xCoords.resize(data.length);
+		var yCoords:Array<Float> = [];
+		yCoords.resize(data.length);
+		var allowedIndeces = [];
 		for (i => dataPoint in data) {
 			var x = calcXCoord(dataPoint.xValue, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, x_dist);
 			var y = calcYCoord(dataPoint.yValue, axes[1].ticks, axes[1].ticks[axes[1].tickInfo.zeroIndex].top, y_dist);
-			dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
-			dataCanvas.componentGraphics.fillStyle(colors[i], 1);
 			if (x == null || y == null) {
 				continue;
 			}
-			dataCanvas.componentGraphics.circle(x, y, 2);
+			xCoords[i] = x;
+			yCoords[i] = y;
+		}
+		if (useOptimization && chartInfo.optimizationInfo.reduceVia == OptimizationType.optimGrid) {
+			for (i => coord in xCoords) {
+				var xRound = Math.round(xCoords[i] * 1 / gridStep);
+				var yRound = Math.round(yCoords[i] * 1 / gridStep);
+				if (xRound < optimGrid.grid.length) {
+					if (yRound < optimGrid.grid[xRound].length) {
+						if (!optimGrid.grid[xRound][yRound]) {
+							optimGrid.grid[xRound][yRound] = true;
+							allowedIndeces.push(i);
+						}
+					}
+				}
+			}
+		} else {
+			for (i => coord in xCoords) {
+				allowedIndeces.push(i);
+			}
+		}
+
+		dataCanvas.componentGraphics.clear();
+		for (i in allowedIndeces) {
+			dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
+			dataCanvas.componentGraphics.fillStyle(colors[i], 1);
+
+			dataCanvas.componentGraphics.circle(xCoords[i], yCoords[i], 2);
 		}
 		var canvasComponent = parent.findComponent(id);
 		if (canvasComponent == null) {
