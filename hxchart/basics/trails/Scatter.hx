@@ -35,6 +35,7 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var dataLayer:Absolute;
 	public var dataCanvas:Canvas;
 
+	var quadTree:Quadtree;
 	var optimGrid:OptimGrid;
 	var gridStep:Float = 1;
 	var useOptimization:Bool;
@@ -57,9 +58,14 @@ class Scatter implements AxisLayer implements DataLayer {
 		this.chartInfo = chartInfo;
 		if (chartInfo.optimizationInfo != null && chartInfo.optimizationInfo.reduceVia != null) {
 			useOptimization = true;
-			if (chartInfo.optimizationInfo.reduceVia == OptimizationType.optimGrid) {
-				gridStep = chartInfo.optimizationInfo.gridStep;
-				optimGrid = new OptimGrid(parent.width, parent.height, gridStep);
+			switch (chartInfo.optimizationInfo.reduceVia) {
+				case OptimizationType.optimGrid:
+					if (chartInfo.optimizationInfo.gridStep != null) {
+						gridStep = chartInfo.optimizationInfo.gridStep;
+					}
+					optimGrid = new OptimGrid(parent.width, parent.height, gridStep);
+				case OptimizationType.quadTree:
+					quadTree = new Quadtree(new Region(0, parent.width, 0, parent.height));
 			}
 		}
 	}
@@ -246,18 +252,28 @@ class Scatter implements AxisLayer implements DataLayer {
 			xCoords[i] = x;
 			yCoords[i] = y;
 		}
-		if (useOptimization && chartInfo.optimizationInfo.reduceVia == OptimizationType.optimGrid) {
-			for (i => coord in xCoords) {
-				var xRound = Math.round(xCoords[i] * 1 / gridStep);
-				var yRound = Math.round(yCoords[i] * 1 / gridStep);
-				if (xRound < optimGrid.grid.length) {
-					if (yRound < optimGrid.grid[xRound].length) {
-						if (!optimGrid.grid[xRound][yRound]) {
-							optimGrid.grid[xRound][yRound] = true;
+		if (useOptimization) {
+			switch (chartInfo.optimizationInfo.reduceVia) {
+				case OptimizationType.optimGrid:
+					for (i => coord in xCoords) {
+						var xRound = Math.round(xCoords[i] * 1 / gridStep);
+						var yRound = Math.round(yCoords[i] * 1 / gridStep);
+						if (xRound < optimGrid.grid.length) {
+							if (yRound < optimGrid.grid[xRound].length) {
+								if (!optimGrid.grid[xRound][yRound]) {
+									optimGrid.grid[xRound][yRound] = true;
+									allowedIndeces.push(i);
+								}
+							}
+						}
+					}
+				case OptimizationType.quadTree:
+					for (i => coord in xCoords) {
+						if (quadTree.search(new Region(xCoords[i] - 2, xCoords[i] + 2, yCoords[i] - 2, yCoords[i] + 2), []).length == 0) {
+							quadTree.addPoint(new Point(xCoords[i], yCoords[i]));
 							allowedIndeces.push(i);
 						}
 					}
-				}
 			}
 		} else {
 			for (i => coord in xCoords) {
