@@ -59,7 +59,6 @@ class Bar implements AxisLayer implements DataLayer {
 	public function validateChart() {
 		setData(trailInfo.data, trailInfo.style);
 		positionAxes(trailInfo.axisInfo, data, trailInfo.style);
-		positionData(trailInfo.style);
 	}
 
 	public function setData(newData:TrailData, style:TrailStyle) {
@@ -314,6 +313,8 @@ class Bar implements AxisLayer implements DataLayer {
 
 		axes[1].showZeroTick = false;
 		axes[0].zeroTickPosition = CompassOrientation.SW;
+		// Positioning data before axes, so that axes are drawn on top of data.
+		positionData(trailInfo.style);
 		if (isPreviousXAxis) {
 			AxisTools.addAxisToParent(axes[0], parent);
 		} else {

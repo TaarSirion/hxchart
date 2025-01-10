@@ -73,7 +73,6 @@ class Scatter implements AxisLayer implements DataLayer {
 	public function validateChart() {
 		setData(chartInfo.data, chartInfo.style);
 		positionAxes(chartInfo.axisInfo, data, chartInfo.style);
-		positionData(chartInfo.style);
 	}
 
 	public function setData(newData:TrailData, style:TrailStyle) {
@@ -200,6 +199,8 @@ class Scatter implements AxisLayer implements DataLayer {
 		axes[1].centerStartPoint(parent.width, parent.height);
 		axes[1].showZeroTick = false;
 		axes[0].zeroTickPosition = CompassOrientation.SW;
+		// Positioning data before axes, so that axes are drawn on top of data.
+		positionData(chartInfo.style);
 		if (isPreviousXAxis) {
 			AxisTools.addAxisToParent(axes[0], parent);
 		} else {
