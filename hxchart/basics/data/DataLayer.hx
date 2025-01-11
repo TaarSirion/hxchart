@@ -1,6 +1,6 @@
 package hxchart.basics.data;
 
-import hxchart.basics.plot.Plot.TrailStyle;
+import hxchart.basics.plot.Chart.TrailStyle;
 import haxe.ui.util.Color;
 import haxe.ui.components.Canvas;
 import haxe.ui.containers.Absolute;

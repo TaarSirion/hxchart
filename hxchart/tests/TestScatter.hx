@@ -7,7 +7,7 @@ import hxchart.basics.axis.StringTickInfo;
 import hxchart.basics.axis.TickInfo;
 import hxchart.basics.axis.NumericTickInfo;
 import hxchart.basics.axis.Axis.AxisTypes;
-import hxchart.basics.plot.Plot.TrailTypes;
+import hxchart.basics.plot.Chart.TrailTypes;
 import utest.Assert;
 import haxe.ui.containers.Absolute;
 import hxchart.basics.trails.Scatter;

@@ -1,12 +1,12 @@
 package hxchart.basics.trails;
 
-import hxchart.basics.plot.Plot.OptimizationType;
+import hxchart.basics.plot.Chart.OptimizationType;
 import hxchart.basics.quadtree.OptimGrid;
 import hxchart.basics.quadtree.Quadtree;
 import hxchart.basics.axis.AxisTools;
 import hxchart.basics.utils.ChartTools;
 import haxe.Timer;
-import hxchart.basics.plot.Plot.TrailStyle;
+import hxchart.basics.plot.Chart.TrailStyle;
 import hxchart.basics.ticks.Ticks;
 import haxe.Exception;
 import hxchart.basics.ticks.Ticks.CompassOrientation;
@@ -19,8 +19,8 @@ import haxe.ui.containers.Absolute;
 import hxchart.basics.axis.NumericTickInfo;
 import haxe.ui.util.Color;
 import hxchart.basics.data.Data2D;
-import hxchart.basics.plot.Plot.AxisInfo;
-import hxchart.basics.plot.Plot.TrailInfo;
+import hxchart.basics.plot.Chart.AxisInfo;
+import hxchart.basics.plot.Chart.TrailInfo;
 import hxchart.basics.data.DataLayer;
 import hxchart.basics.axis.AxisLayer;
 

@@ -45,15 +45,34 @@ typedef AxisInfo = {
 }
 
 /**
+ * Styling of a border
+ * 
+ * @param thickness Optional. Thickness of the border.
+ * @param alpha Optional. Alpha value of the color.
+ * @param color Optional. Color
+ */
+typedef BorderStyle = {
+	?thickness:Float,
+	?alpha:Float,
+	?color:Int
+}
+
+/**
  * Styling of a trail
  * @param colorPalette Color values in integer form. The length should be equal or greater than the length of `groups`. 
  * @param groups Mapping of groups from the data, 
  * @param positionOption Option on how to position data
+ * @param size Optional. Set the size of points, pies etc.
+ * @param alpha Optional. Alpha value of the color.
+ * @param borderStyle Optional. Set this to use a border
  */
 typedef TrailStyle = {
 	?colorPalette:Array<Int>,
 	?groups:Map<String, Int>,
-	?positionOption:PositionOption
+	?positionOption:PositionOption,
+	?size:Any,
+	?alpha:Float,
+	?borderStyle:BorderStyle
 }
 
 enum OptimizationType {
@@ -125,11 +144,11 @@ typedef LegendInfo = {
  * Beware that trails in the same plot share the same underlying coordinates (i.e. axes, or something similar) and styling. This may have unintended consequences, when the types don't mix well.
  */
 @:composite(Builder)
-class Plot extends Absolute {
+class Chart extends Absolute {
 	public var trailInfos:Array<TrailInfo>;
 	public var legendInfo:LegendInfo;
 
-	public var plotBody:Absolute;
+	public var chartBody:Absolute;
 	public var groups:Map<String, Int>;
 	public var groupNumber:Int;
 	public var axes:Map<String, Array<Axis>>;
@@ -259,64 +278,64 @@ class Plot extends Absolute {
 }
 
 @:dox(hide) @:noCompletion
-class PlotLayout extends DefaultLayout {}
+class ChartLayout extends DefaultLayout {}
 
 @:dox(hide) @:noCompletion
 private class AddChart extends Behaviour {
 	public override function call(param:Any = null):Variant {
-		var plot = cast(_component, Plot);
+		var chart = cast(_component, Chart);
 		var chartInfo:TrailInfo = param;
-		plot.trailInfos.push(chartInfo);
-		plot.setData(true);
+		chart.trailInfos.push(chartInfo);
+		chart.setData(true);
 		return null;
 	}
 }
 
-enum PlotStatus {
+enum ChartStatus {
 	start;
 	redraw;
 }
 
 class Builder extends CompositeBuilder {
-	var _plot:Plot;
+	var _chart:Chart;
 
-	public function new(plot:Plot) {
-		super(plot);
-		_plot = plot;
-		_plot.plotBody = new Absolute();
-		_plot.plotBody.percentWidth = 100;
-		_plot.plotBody.percentHeight = 100;
+	public function new(chart:Chart) {
+		super(chart);
+		_chart = chart;
+		_chart.chartBody = new Absolute();
+		_chart.chartBody.percentWidth = 100;
+		_chart.chartBody.percentHeight = 100;
 		// _plot.plotBody.padding = 10; //Setting padding fucks with the inital positioning (redraw works fine)
-		_plot.addComponent(_plot.plotBody);
+		_chart.addComponent(_chart.chartBody);
 	}
 
 	override function validateComponentData() {
 		super.validateComponentData();
-		validateCharts(PlotStatus.start);
+		validateCharts(ChartStatus.start);
 	}
 
 	override function validateComponentLayout():Bool {
-		_plot.left = _plot.marginLeft;
-		_plot.top = _plot.marginTop;
-		_plot.width -= _plot.marginLeft + _plot.marginRight;
-		_plot.height -= _plot.marginTop + _plot.marginBottom;
+		_chart.left = _chart.marginLeft;
+		_chart.top = _chart.marginTop;
+		_chart.width -= _chart.marginLeft + _chart.marginRight;
+		_chart.height -= _chart.marginTop + _chart.marginBottom;
 
-		if (_plot.legend != null) {
-			_plot.plotBody.percentWidth = 80;
-			_plot.legend.percentWidth = 20;
-			_plot.legend.left = _plot.plotBody.width + _plot.legend.marginLeft;
+		if (_chart.legend != null) {
+			_chart.chartBody.percentWidth = 80;
+			_chart.legend.percentWidth = 20;
+			_chart.legend.left = _chart.chartBody.width + _chart.legend.marginLeft;
 		}
-		validateCharts(PlotStatus.redraw);
+		validateCharts(ChartStatus.redraw);
 		return super.validateComponentLayout();
 	}
 
-	function validateCharts(status:PlotStatus) {
-		if (status == PlotStatus.start) {
-			_plot.axes = new Map();
+	function validateCharts(status:ChartStatus) {
+		if (status == ChartStatus.start) {
+			_chart.axes = new Map();
 		}
 		var axisID = "axis_0";
-		for (i => chartInfo in _plot.trailInfos) {
-			var chartInfo = Reflect.copy(_plot.trailInfos[i]);
+		for (i => chartInfo in _chart.trailInfos) {
+			var chartInfo = Reflect.copy(_chart.trailInfos[i]);
 			var chartID = "chart_" + i;
 			if (chartInfo.axisInfo != null) {
 				axisID = "axis_" + i;
@@ -326,43 +345,43 @@ class Builder extends CompositeBuilder {
 					if (chartInfo.axisInfo != null && chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
-					if (_plot.axes.exists(axisID)) {
+					if (_chart.axes.exists(axisID)) {
 						chartInfo.axisInfo = [
 							{
 								type: linear,
-								axis: _plot.axes.get(axisID)[0]
+								axis: _chart.axes.get(axisID)[0]
 							},
 							{
 								type: linear,
-								axis: _plot.axes.get(axisID)[1]
+								axis: _chart.axes.get(axisID)[1]
 							}
 						];
 					}
-					var scatter = new Scatter(chartInfo, _plot.plotBody, chartID, axisID);
+					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID);
 					scatter.validateChart();
-					if (!_plot.axes.exists(axisID)) {
-						_plot.axes.set(axisID, scatter.axes);
+					if (!_chart.axes.exists(axisID)) {
+						_chart.axes.set(axisID, scatter.axes);
 					}
 				case bar:
 					if (chartInfo.axisInfo != null && chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for bar-chart!");
 					}
-					if (_plot.axes.exists(axisID)) {
+					if (_chart.axes.exists(axisID)) {
 						chartInfo.axisInfo = [
 							{
 								type: categorical,
-								axis: _plot.axes.get(axisID)[0]
+								axis: _chart.axes.get(axisID)[0]
 							},
 							{
 								type: linear,
-								axis: _plot.axes.get(axisID)[1]
+								axis: _chart.axes.get(axisID)[1]
 							}
 						];
 					}
-					var bar = new Bar(chartInfo, _plot.plotBody, chartID, axisID);
+					var bar = new Bar(chartInfo, _chart.chartBody, chartID, axisID);
 					bar.validateChart();
-					if (!_plot.axes.exists(axisID)) {
-						_plot.axes.set(axisID, bar.axes);
+					if (!_chart.axes.exists(axisID)) {
+						_chart.axes.set(axisID, bar.axes);
 					}
 				case pie:
 					return;

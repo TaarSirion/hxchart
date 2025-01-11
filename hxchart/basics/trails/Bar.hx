@@ -1,6 +1,6 @@
 package hxchart.basics.trails;
 
-import hxchart.basics.plot.Plot.PositionOption;
+import hxchart.basics.plot.Chart.PositionOption;
 import hxchart.basics.ticks.Ticks;
 import hxchart.basics.utils.ChartTools;
 import hxchart.basics.ticks.Ticks.CompassOrientation;
@@ -10,14 +10,14 @@ import hxchart.basics.axis.StringTickInfo;
 import hxchart.basics.axis.NumericTickInfo;
 import hxchart.basics.axis.TickInfo;
 import haxe.Exception;
-import hxchart.basics.plot.Plot.AxisInfo;
-import hxchart.basics.plot.Plot.TrailStyle;
+import hxchart.basics.plot.Chart.AxisInfo;
+import hxchart.basics.plot.Chart.TrailStyle;
 import hxchart.basics.axis.Axis;
 import haxe.ui.util.Color;
 import haxe.ui.components.Canvas;
 import hxchart.basics.data.Data2D;
 import haxe.ui.containers.Absolute;
-import hxchart.basics.plot.Plot.TrailInfo;
+import hxchart.basics.plot.Chart.TrailInfo;
 import hxchart.basics.data.DataLayer;
 import hxchart.basics.axis.AxisLayer;
 

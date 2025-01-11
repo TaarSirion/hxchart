@@ -1,7 +1,7 @@
 package hxchart.basics.axis;
 
-import hxchart.basics.plot.Plot.TrailStyle;
-import hxchart.basics.plot.Plot.AxisInfo;
+import hxchart.basics.plot.Chart.TrailStyle;
+import hxchart.basics.plot.Chart.AxisInfo;
 import hxchart.basics.data.Data2D;
 import haxe.ui.containers.Absolute;
 
