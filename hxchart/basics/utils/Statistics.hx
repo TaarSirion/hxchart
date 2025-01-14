@@ -37,4 +37,13 @@ class Statistics {
 		}
 		return indexes;
 	}
+
+	public static function repeat<T>(value:T, n:Int) {
+		var values = [];
+		values.resize(n);
+		for (i in 0...n) {
+			values[i] = value;
+		}
+		return values;
+	}
 }

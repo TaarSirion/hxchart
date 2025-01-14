@@ -63,10 +63,12 @@ class Bar implements AxisLayer implements DataLayer {
 	public function setData(newData:TrailData, style:TrailStyle) {
 		data = [];
 		colors = [];
-		var groupsArr = newData.groups;
-		for (i in 0...newData.xValues.length) {
+		var x = newData.values.get("x");
+		var y = newData.values.get("y");
+		var groupsArr = newData.values.get("groups");
+		for (i in 0...x.length) {
 			var group = groupsArr[i];
-			var point = new Data2D(newData.xValues[i], newData.yValues[i], style.groups.get(group));
+			var point = new Data2D(x[i], y[i], style.groups.get(group));
 			colors.push(style.colorPalette[style.groups.get(group)]);
 			data.push(point);
 		}

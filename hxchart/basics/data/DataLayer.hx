@@ -1,5 +1,7 @@
 package hxchart.basics.data;
 
+import hxchart.basics.utils.Statistics;
+import hxchart.basics.plot.Chart.TrailTypes;
 import hxchart.basics.plot.Chart.TrailStyle;
 import haxe.ui.util.Color;
 import haxe.ui.components.Canvas;
@@ -17,10 +19,21 @@ import haxe.ui.containers.Absolute;
  * @param values A map of data values. This is a map, because the keys can be used as information in the charts. Basically this mimics a table with named columns.
  */
 @:structInit class TrailData {
-	@:optional public var xValues:Array<Dynamic>;
-	@:optional public var yValues:Array<Dynamic>;
-	@:optional public var groups:Array<String>;
-	@:optional public var values:Map<String, Array<Dynamic>>;
+	public var values:Map<String, Array<Any>>;
+
+	public function setGroups(type:TrailTypes, group:String) {
+		if (!values.exists("groups")) {
+			switch (type) {
+				case scatter:
+					var x = values.get("x");
+					values.set("groups", Statistics.repeat(group, x.length));
+				case bar:
+					var x = values.get("x");
+					values.set("groups", Statistics.repeat(group, x.length));
+				case pie:
+			}
+		}
+	}
 }
 
 interface DataLayer {

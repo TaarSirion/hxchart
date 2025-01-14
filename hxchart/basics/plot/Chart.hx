@@ -101,12 +101,18 @@ enum OptimizationType {
 	public function validate() {
 		switch (type) {
 			case scatter:
-				if (data.values == null && data.xValues == null && data.yValues == null) {
-					throw new Exception("No data available. Please set some data in chartInfo.data.values or chartInfo.data.xValues");
+				if (data.values == null) {
+					throw new Exception("No data available. Please set some data in trailInfo.data.values");
+				}
+				if (!data.values.exists("x") || !data.values.exists("y")) {
+					throw new Exception("No data available. Please set 'x' and 'y' as keys in trailInfo.data.values.");
 				}
 			case bar:
-				if (data.values == null && data.xValues == null && data.yValues == null) {
-					throw new Exception("No data available. Please set some data in chartInfo.data.values or chartInfo.data.xValues");
+				if (data.values == null) {
+					throw new Exception("No data available. Please set some data in trailInfo.data.values");
+				}
+				if (!data.values.exists("x") || !data.values.exists("y")) {
+					throw new Exception("No data available. Please set 'x' and 'y' as keys in trailInfo.data.values.");
 				}
 			case pie:
 		}
@@ -174,19 +180,14 @@ class Chart extends Absolute {
 		}
 		var colors = [];
 		for (i => info in trailInfos) {
-			if (info.data.groups == null) {
-				info.data.groups = [];
-				if (info.data.values != null && info.data.values.exists("groups")) {
-					info.data.groups = info.data.values.get("groups").map(x -> Std.string(x));
-				} else {
-					for (j in 0...info.data.xValues.length) {
-						info.data.groups.push(Std.string(i + 1));
-					}
+			info.data.setGroups(info.type, Std.string(i + 1));
+
+			for (j => group in info.data.values.get("groups")) {
+				if (!(group is String)) {
+					continue;
 				}
-			}
-			for (j => group in info.data.groups) {
-				if (!groups.exists(group)) {
-					groups.set(group, groupNumber);
+				if (!groups.exists((group : String))) {
+					groups.set((group : String), groupNumber);
 					groupNumber++;
 				}
 			}
