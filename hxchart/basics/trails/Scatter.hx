@@ -19,7 +19,6 @@ import haxe.ui.containers.Absolute;
 import hxchart.basics.axis.NumericTickInfo;
 import haxe.ui.util.Color;
 import hxchart.basics.data.Data2D;
-import hxchart.basics.plot.Chart.AxisInfo;
 import hxchart.basics.plot.Chart.TrailInfo;
 import hxchart.basics.data.DataLayer;
 import hxchart.basics.axis.AxisLayer;

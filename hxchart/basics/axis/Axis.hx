@@ -18,6 +18,25 @@ enum AxisTypes {
 	categorical;
 }
 
+/**
+ * Axis information. Usually used in the first trail.
+ * 
+ * When only `type` is set, the corresponding trail will calculate its own axis.
+ * 
+ * When supplying `values` beware of these differences based on `type`:
+ * - linear: Only the first two values in the array will be used, the represent the min and max values of the axis.
+ * - categorical: All values will be used.
+ * 
+ * @param type Type of axis. The positioning of data depends on this. 
+ * @param axis Optional. A full axis object. If this is supplied, the trail will use this axis instead trying to generate its own.
+ * @param values Optional. Values the axis should have. Depending on the type, this will work differently.
+ */
+@:structInit class AxisInfo {
+	@:optional public var type:AxisTypes;
+	@:optional public var axis:Axis;
+	@:optional public var values:Array<Dynamic>;
+}
+
 @:composite(AxisBuilder, Layout)
 class Axis extends Absolute {
 	@:clonable @:behaviour(DefaultBehaviour, 10) public var tickMargin:Null<Float>;

@@ -16,11 +16,11 @@ import haxe.ui.containers.Absolute;
  * @param groups Group values. When this is not set it tries to get values from `values` via the key `groups`. If neither are set, it automaticall sets every entry to `"1"`.
  * @param values A map of data values. This is a map, because the keys can be used as information in the charts. Basically this mimics a table with named columns.
  */
-typedef TrailData = {
-	?xValues:Array<Dynamic>,
-	?yValues:Array<Dynamic>,
-	?groups:Array<String>,
-	?values:Map<String, Array<Dynamic>>
+@:structInit class TrailData {
+	@:optional public var xValues:Array<Dynamic>;
+	@:optional public var yValues:Array<Dynamic>;
+	@:optional public var groups:Array<String>;
+	@:optional public var values:Map<String, Array<Dynamic>>;
 }
 
 interface DataLayer {

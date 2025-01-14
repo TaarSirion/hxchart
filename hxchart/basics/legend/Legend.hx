@@ -20,6 +20,20 @@ enum LegendSymbols {
 	line;
 }
 
+/**
+ * Information about a plot legend.
+ * 
+ * Legends are always plot specific and not trail specific. Meaning multiple trails in a plot share the same legend.
+ * @param title Optional. Title displayed on top of the legend. Will default to `"Legend"`.
+ * @param nodeFontSize Optional. Fontsize for all legend nodes.
+ * @param useLegend Optional. If a legend should be used. Per default a legend will be used.
+ */
+@:structInit class LegendInfo {
+	@:optional public var title:String;
+	@:optional public var nodeFontSize:Int;
+	@:optional public var useLegend:Bool;
+}
+
 @:composite(Builder, LegendLayout)
 class Legend extends VBox {
 	/**

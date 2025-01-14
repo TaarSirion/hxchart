@@ -10,7 +10,6 @@ import hxchart.basics.axis.StringTickInfo;
 import hxchart.basics.axis.NumericTickInfo;
 import hxchart.basics.axis.TickInfo;
 import haxe.Exception;
-import hxchart.basics.plot.Chart.AxisInfo;
 import hxchart.basics.plot.Chart.TrailStyle;
 import hxchart.basics.axis.Axis;
 import haxe.ui.util.Color;

@@ -26,25 +26,6 @@ enum PositionOption {
 }
 
 /**
- * Axis information. Usually used in the first trail.
- * 
- * When only `type` is set, the corresponding trail will calculate its own axis.
- * 
- * When supplying `values` beware of these differences based on `type`:
- * - linear: Only the first two values in the array will be used, the represent the min and max values of the axis.
- * - categorical: All values will be used.
- * 
- * @param type Type of axis. The positioning of data depends on this. 
- * @param axis Optional. A full axis object. If this is supplied, the trail will use this axis instead trying to generate its own.
- * @param values Optional. Values the axis should have. Depending on the type, this will work differently.
- */
-typedef AxisInfo = {
-	type:AxisTypes,
-	?axis:Axis,
-	?values:Array<Dynamic>
-}
-
-/**
  * Styling of a border
  * 
  * @param thickness Optional. Thickness of the border.
@@ -66,13 +47,13 @@ typedef BorderStyle = {
  * @param alpha Optional. Alpha value of the color.
  * @param borderStyle Optional. Set this to use a border
  */
-typedef TrailStyle = {
-	?colorPalette:Array<Int>,
-	?groups:Map<String, Int>,
-	?positionOption:PositionOption,
-	?size:Any,
-	?alpha:Float,
-	?borderStyle:BorderStyle
+@:structInit class TrailStyle {
+	@:optional public var colorPalette:Array<Int>;
+	@:optional public var groups:Map<String, Int>;
+	@:optional public var positionOption:PositionOption;
+	@:optional public var size:Any;
+	@:optional public var alpha:Float;
+	@:optional public var borderStyle:BorderStyle;
 }
 
 enum OptimizationType {
@@ -91,9 +72,9 @@ enum OptimizationType {
  * @param reduceVia Optional. *OptimizationType* to use, options are `optimGrid`, `quadTree`
  * @param gridStep Optional. Use together with `optimGrid`. Defines the size of each cell. Larger values result in less points being drawn!
  */
-typedef OptimizationInfo = {
-	?reduceVia:OptimizationType,
-	?gridStep:Float
+@:structInit class OptimizationInfo {
+	@:optional public var reduceVia:OptimizationType;
+	@:optional public var gridStep:Float;
 }
 
 /**
@@ -110,28 +91,26 @@ typedef OptimizationInfo = {
  * @param axisInfo Optional. Information about the axes. Technically it is possible to give every trail their own axes, resulting in multiple sub-plots (currently not implemented).
  * @param optimizationInfo Optional. Drawing large amounts of data might need some kind of optimization, which can be set through this info. Be careful with the usage, as some options might result in a different looking plot/chart.
  */
-typedef TrailInfo = {
-	data:TrailData,
-	type:TrailTypes,
-	?x:String,
-	?y:String,
-	?style:TrailStyle,
-	?axisInfo:Array<AxisInfo>,
-	?optimizationInfo:OptimizationInfo
-}
+@:structInit class TrailInfo {
+	public var data:TrailData;
+	public final type:TrailTypes;
+	public var style:TrailStyle;
+	public var axisInfo:Array<AxisInfo>;
+	public var optimizationInfo:OptimizationInfo;
 
-/**
- * Information about a plot legend.
- * 
- * Legends are always plot specific and not trail specific. Meaning multiple trails in a plot share the same legend.
- * @param title Optional. Title displayed on top of the legend. Will default to `"Legend"`.
- * @param nodeFontSize Optional. Fontsize for all legend nodes.
- * @param useLegend Optional. If a legend should be used. Per default a legend will be used.
- */
-typedef LegendInfo = {
-	?title:String,
-	?nodeFontSize:Int,
-	?useLegend:Bool
+	public function validate() {
+		switch (type) {
+			case scatter:
+				if (data.values == null && data.xValues == null && data.yValues == null) {
+					throw new Exception("No data available. Please set some data in chartInfo.data.values or chartInfo.data.xValues");
+				}
+			case bar:
+				if (data.values == null && data.xValues == null && data.yValues == null) {
+					throw new Exception("No data available. Please set some data in chartInfo.data.values or chartInfo.data.xValues");
+				}
+			case pie:
+		}
+	}
 }
 
 /**
@@ -191,37 +170,7 @@ class Chart extends Absolute {
 			legend.childNodes = [];
 		}
 		for (info in trailInfos) {
-			switch (info.type) {
-				case scatter:
-					if (info.data.values == null && info.data.xValues == null && info.data.yValues == null) {
-						throw new Exception("No data available. Please set some data in chartInfo.data.values or chartInfo.data.xValues");
-					}
-					if (info.x == null && info.data.xValues == null) {
-						throw new Exception("Not possible to discern the values for x-axis. Please set chartInfo.x or chartInfo.data.xValues");
-					} else if (info.data.xValues == null) {
-						info.data.xValues = info.data.values.get(info.x);
-					}
-					if (info.y == null && info.data.yValues == null) {
-						throw new Exception("Not possible to discern the values for y-axis. Please set chartInfo.y or chartInfo.data.yValues");
-					} else if (info.data.yValues == null) {
-						info.data.yValues = info.data.values.get(info.y);
-					}
-				case bar:
-					if (info.data.values == null && info.data.xValues == null && info.data.yValues == null) {
-						throw new Exception("No data available. Please set some data in chartInfo.data.values or chartInfo.data.xValues");
-					}
-					if (info.x == null && info.data.xValues == null) {
-						throw new Exception("Not possible to discern the values for x-axis. Please set chartInfo.x or chartInfo.data.xValues");
-					} else if (info.data.xValues == null) {
-						info.data.xValues = info.data.values.get(info.x);
-					}
-					if (info.y == null && info.data.yValues == null) {
-						throw new Exception("Not possible to discern the values for y-axis. Please set chartInfo.y or chartInfo.data.yValues");
-					} else if (info.data.yValues == null) {
-						info.data.yValues = info.data.values.get(info.y);
-					}
-				case pie:
-			}
+			info.validate();
 		}
 		var colors = [];
 		for (i => info in trailInfos) {
