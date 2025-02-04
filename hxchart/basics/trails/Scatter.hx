@@ -281,6 +281,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 
 		dataCanvas.componentGraphics.clear();
+
 		var sizes:Array<Float> = [];
 		sizes.resize(data.length);
 		if (style.size is Float || style.size is Int) {
@@ -290,9 +291,19 @@ class Scatter implements AxisLayer implements DataLayer {
 		} else if (style.size is Array) {
 			sizes = style.size;
 		}
+
+		var alphas:Array<Float> = [];
+		alphas.resize(data.length);
+		if (style.alpha is Float || style.alpha is Int) {
+			for (i in 1...data.length) {
+				alphas[i] = style.alpha;
+			}
+		} else if (style.alpha is Array) {
+			alphas = style.alpha;
+		}
 		for (i in allowedIndeces) {
 			dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
-			dataCanvas.componentGraphics.fillStyle(colors[i], style.alpha);
+			dataCanvas.componentGraphics.fillStyle(colors[i], alphas[i]);
 
 			dataCanvas.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
 		}
