@@ -52,7 +52,17 @@ typedef BorderStyle = {
 	@:optional public var groups:Map<String, Int>;
 	@:optional public var positionOption:PositionOption;
 	@:optional public var size:Any;
-	@:optional public var alpha:Float;
+	@:optional public var alpha(default, set):Float;
+
+	function set_alpha(alpha:Float) {
+		if (alpha > 1) {
+			return this.alpha = 1;
+		} else if (alpha < 0) {
+			return this.alpha = 0;
+		}
+		return this.alpha = alpha;
+	}
+
 	@:optional public var borderStyle:BorderStyle;
 }
 

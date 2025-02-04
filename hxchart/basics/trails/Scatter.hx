@@ -281,12 +281,23 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 
 		dataCanvas.componentGraphics.clear();
-		for (i in allowedIndeces) {
-			dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
-			dataCanvas.componentGraphics.fillStyle(colors[i], 1);
+		if (style.size is Float || style.size is Int) {
+			for (i in allowedIndeces) {
+				dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
+				dataCanvas.componentGraphics.fillStyle(colors[i], style.alpha);
 
-			dataCanvas.componentGraphics.circle(xCoords[i], yCoords[i], 2);
+				dataCanvas.componentGraphics.circle(xCoords[i], yCoords[i], style.size);
+			}
+		} else if (style.size is Array) {
+			var sizes:Array<Float> = style.size;
+			for (i in allowedIndeces) {
+				dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
+				dataCanvas.componentGraphics.fillStyle(colors[i], style.alpha);
+
+				dataCanvas.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
+			}
 		}
+
 		var canvasComponent = parent.findComponent(id);
 		if (canvasComponent == null) {
 			parent.addComponent(dataCanvas);
