@@ -70,6 +70,10 @@ class Scatter implements AxisLayer implements DataLayer {
 	}
 
 	public function validateChart() {
+		var canvasComponent = parent.findComponent(id);
+		if (canvasComponent != null) {
+			dataCanvas = canvasComponent;
+		}
 		setData(chartInfo.data, chartInfo.style);
 		positionAxes(chartInfo.axisInfo, data, chartInfo.style);
 	}
@@ -155,8 +159,7 @@ class Scatter implements AxisLayer implements DataLayer {
 			axes[1] = axisInfo[1].axis;
 		}
 		if (axes[0] != null && axes[1] != null) {
-			AxisTools.addAxisToParent(axes[0], parent);
-			AxisTools.addAxisToParent(axes[1], parent);
+			positionData(style);
 			return;
 		}
 
@@ -286,9 +289,6 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 		var canvasComponent = parent.findComponent(id);
 		if (canvasComponent == null) {
-			parent.addComponent(dataCanvas);
-		} else {
-			parent.removeComponent(canvasComponent);
 			parent.addComponent(dataCanvas);
 		}
 	}
