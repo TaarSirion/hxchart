@@ -1,5 +1,6 @@
 package hxchart.basics.trails;
 
+import hxchart.basics.utils.Statistics;
 import hxchart.basics.plot.Chart.OptimizationType;
 import hxchart.basics.quadtree.OptimGrid;
 import hxchart.basics.quadtree.Quadtree;
@@ -28,9 +29,15 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var axisID:String;
 	public var axes:Array<Axis>;
 
-	public var data:Array<Data2D>;
+	public var data:Array<Data2D> = [];
 	public var groups:Map<String, Int>;
-	public var colors:Array<Color>;
+	public var colors:Array<Color> = [];
+	public var alphas:Array<Float> = [];
+	public var sizes:Array<Float> = [];
+	public var borderAlphas:Array<Float> = [];
+	public var borderThickness:Array<Float> = [];
+	public var borderColors:Array<Color> = [];
+
 	public var dataLayer:Absolute;
 	public var dataCanvas:Canvas;
 
@@ -79,16 +86,94 @@ class Scatter implements AxisLayer implements DataLayer {
 	}
 
 	public function setData(newData:TrailData, style:TrailStyle) {
-		data = [];
-		colors = [];
 		var x = newData.values.get("x");
 		var y = newData.values.get("y");
 		var groupsArr = newData.values.get("groups");
+		var uniqueGroupsNum = 0;
+		for (key in style.groups.keys()) {
+			uniqueGroupsNum++;
+		}
+
+		data.resize(x.length);
+		colors.resize(x.length);
+		sizes.resize(x.length);
+		alphas.resize(x.length);
+		borderColors.resize(x.length);
+		borderAlphas.resize(x.length);
+		borderThickness.resize(x.length);
+
 		for (i in 0...x.length) {
 			var group = groupsArr[i];
 			var point = new Data2D(x[i], y[i], style.groups.get(group));
-			colors.push(style.colorPalette[style.groups.get(group)]);
-			data.push(point);
+			colors[i] = style.colorPalette[style.groups.get(group)];
+			borderColors[i] = colors[i];
+			data[i] = point;
+		}
+
+		if (style.size is Float || style.size is Int) {
+			var size = cast(style.size, Float);
+			sizes = Statistics.repeat(size, sizes.length);
+		} else if (style.size is Array) {
+			var size:Array<Float> = style.size;
+			sizes = size.copy();
+			if (size.length == uniqueGroupsNum) {
+				for (i in 0...groupsArr.length) {
+					sizes[i] = size[style.groups.get(groupsArr[i])];
+				}
+			}
+		}
+		if (style.alpha is Float || style.alpha is Int) {
+			var alpha = cast(style.alpha, Float);
+			alphas = Statistics.repeat(alpha, alphas.length);
+		} else if (style.alpha is Array) {
+			var alpha:Array<Float> = style.alpha;
+			alphas = alpha.copy();
+			if (alpha.length == uniqueGroupsNum) {
+				for (i in 0...groupsArr.length) {
+					alphas[i] = alpha[style.groups.get(groupsArr[i])];
+				}
+			}
+		}
+
+		if (style.borderStyle.color != null) {
+			if (style.borderStyle.color is Int) {
+				var color = cast(style.borderStyle.color, Int);
+				borderColors = Statistics.repeat(color, borderColors.length);
+			} else if (style.borderStyle.color is Array) {
+				var color:Array<Int> = style.borderStyle.color;
+				borderColors = color.copy();
+				if (color.length == uniqueGroupsNum) {
+					for (i in 0...groupsArr.length) {
+						borderColors[i] = color[style.groups.get(groupsArr[i])];
+					}
+				}
+			}
+		}
+
+		if (style.borderStyle.alpha is Float || style.borderStyle.alpha is Int) {
+			var alpha = cast(style.borderStyle.alpha, Float);
+			borderAlphas = Statistics.repeat(alpha, borderAlphas.length);
+		} else if (style.borderStyle.alpha is Array) {
+			var alpha:Array<Float> = style.borderStyle.alpha;
+			borderAlphas = alpha.copy();
+			if (alpha.length == uniqueGroupsNum) {
+				for (i in 0...groupsArr.length) {
+					borderAlphas[i] = alpha[style.groups.get(groupsArr[i])];
+				}
+			}
+		}
+
+		if (style.borderStyle.thickness is Float || style.borderStyle.thickness is Int) {
+			var thickness = cast(style.borderStyle.thickness, Float);
+			borderThickness = Statistics.repeat(thickness, borderThickness.length);
+		} else if (style.borderStyle.thickness is Array) {
+			var thickness:Array<Float> = style.borderStyle.thickness;
+			borderThickness = thickness.copy();
+			if (thickness.length == uniqueGroupsNum) {
+				for (i in 0...groupsArr.length) {
+					borderThickness[i] = thickness[style.groups.get(groupsArr[i])];
+				}
+			}
 		}
 		sortData();
 	}
@@ -285,62 +370,6 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 
 		dataCanvas.componentGraphics.clear();
-
-		// Styling
-		var sizes:Array<Float> = [];
-		sizes.resize(data.length);
-		if (style.size is Float || style.size is Int) {
-			for (i in 1...data.length) {
-				sizes[i] = style.size;
-			}
-		} else if (style.size is Array) {
-			sizes = style.size;
-		}
-
-		var alphas:Array<Float> = [];
-		alphas.resize(data.length);
-		if (style.alpha is Float || style.alpha is Int) {
-			for (i in 1...data.length) {
-				alphas[i] = style.alpha;
-			}
-		} else if (style.alpha is Array) {
-			alphas = style.alpha;
-		}
-
-		var borderColors:Array<Color> = [];
-		borderColors.resize(data.length);
-		for (i in 1...data.length) {
-			borderColors[i] = colors[i];
-		}
-		if (style.borderStyle.color != null) {
-			if (style.borderStyle.color is Int) {
-				for (i in 1...data.length) {
-					borderColors[i] = style.borderStyle.color;
-				}
-			} else if (style.borderStyle.color is Array) {
-				borderColors = style.borderStyle.color;
-			}
-		}
-
-		var borderAlphas:Array<Float> = [];
-		borderAlphas.resize(data.length);
-		if (style.borderStyle.alpha is Float || style.borderStyle.alpha is Int) {
-			for (i in 1...data.length) {
-				borderAlphas[i] = style.borderStyle.alpha;
-			}
-		} else if (style.borderStyle.alpha is Array) {
-			borderAlphas = style.borderStyle.alpha;
-		}
-
-		var borderThickness:Array<Float> = [];
-		borderThickness.resize(data.length);
-		if (style.borderStyle.thickness is Float || style.borderStyle.thickness is Int) {
-			for (i in 1...data.length) {
-				borderThickness[i] = style.borderStyle.thickness;
-			}
-		} else if (style.borderStyle.thickness is Array) {
-			borderThickness = style.borderStyle.thickness;
-		}
 
 		// Drawing
 		for (i in allowedIndeces) {
