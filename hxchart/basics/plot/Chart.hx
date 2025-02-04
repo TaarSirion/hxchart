@@ -32,10 +32,10 @@ enum PositionOption {
  * @param alpha Optional. Alpha value of the color.
  * @param color Optional. Color
  */
-typedef BorderStyle = {
-	?thickness:Float,
-	?alpha:Float,
-	?color:Int
+@:structInit class BorderStyle {
+	@:optional public var thickness:Any = 1;
+	@:optional public var alpha:Any = 1;
+	@:optional public var color:Any;
 }
 
 /**
@@ -52,7 +52,7 @@ typedef BorderStyle = {
 	@:optional public var groups:Map<String, Int>;
 	@:optional public var positionOption:PositionOption;
 	@:optional public var size:Any;
-	@:optional public var alpha:Any;
+	@:optional public var alpha:Any = 1;
 	@:optional public var borderStyle:BorderStyle;
 }
 

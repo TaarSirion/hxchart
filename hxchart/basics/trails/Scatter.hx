@@ -237,6 +237,8 @@ class Scatter implements AxisLayer implements DataLayer {
 		if (x_dist.pos_dist < 0 || y_dist.pos_dist < 0) {
 			return;
 		}
+
+		// Coordinates calculation
 		var xCoords:Array<Float> = [];
 		xCoords.resize(data.length);
 		var yCoords:Array<Float> = [];
@@ -251,6 +253,8 @@ class Scatter implements AxisLayer implements DataLayer {
 			xCoords[i] = x;
 			yCoords[i] = y;
 		}
+
+		// Optimization
 		if (useOptimization) {
 			switch (chartInfo.optimizationInfo.reduceVia) {
 				case OptimizationType.optimGrid:
@@ -282,6 +286,7 @@ class Scatter implements AxisLayer implements DataLayer {
 
 		dataCanvas.componentGraphics.clear();
 
+		// Styling
 		var sizes:Array<Float> = [];
 		sizes.resize(data.length);
 		if (style.size is Float || style.size is Int) {
@@ -301,8 +306,45 @@ class Scatter implements AxisLayer implements DataLayer {
 		} else if (style.alpha is Array) {
 			alphas = style.alpha;
 		}
+
+		var borderColors:Array<Color> = [];
+		borderColors.resize(data.length);
+		for (i in 1...data.length) {
+			borderColors[i] = colors[i];
+		}
+		if (style.borderStyle.color != null) {
+			if (style.borderStyle.color is Int) {
+				for (i in 1...data.length) {
+					borderColors[i] = style.borderStyle.color;
+				}
+			} else if (style.borderStyle.color is Array) {
+				borderColors = style.borderStyle.color;
+			}
+		}
+
+		var borderAlphas:Array<Float> = [];
+		borderAlphas.resize(data.length);
+		if (style.borderStyle.alpha is Float || style.borderStyle.alpha is Int) {
+			for (i in 1...data.length) {
+				borderAlphas[i] = style.borderStyle.alpha;
+			}
+		} else if (style.borderStyle.alpha is Array) {
+			borderAlphas = style.borderStyle.alpha;
+		}
+
+		var borderThickness:Array<Float> = [];
+		borderThickness.resize(data.length);
+		if (style.borderStyle.thickness is Float || style.borderStyle.thickness is Int) {
+			for (i in 1...data.length) {
+				borderThickness[i] = style.borderStyle.thickness;
+			}
+		} else if (style.borderStyle.thickness is Array) {
+			borderThickness = style.borderStyle.thickness;
+		}
+
+		// Drawing
 		for (i in allowedIndeces) {
-			dataCanvas.componentGraphics.strokeStyle(colors[i], 1);
+			dataCanvas.componentGraphics.strokeStyle(borderColors[i], borderThickness[i], borderAlphas[i]);
 			dataCanvas.componentGraphics.fillStyle(colors[i], alphas[i]);
 
 			dataCanvas.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
