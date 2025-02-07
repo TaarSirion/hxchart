@@ -299,7 +299,21 @@ class Builder extends CompositeBuilder {
 			}
 			switch (chartInfo.type) {
 				case scatter:
-					if (chartInfo.axisInfo != null && chartInfo.axisInfo.length > 2) {
+					if (chartInfo.axisInfo == null) {
+						chartInfo.axisInfo = [{}, {}];
+						var x = chartInfo.data.values.get("x")[0];
+						if (x is Int || x is Float) {
+							chartInfo.axisInfo[0].type = linear;
+						} else if (x is String) {
+							chartInfo.axisInfo[0].type = categorical;
+						}
+						var y = chartInfo.data.values.get("y")[0];
+						if (y is Int || y is Float) {
+							chartInfo.axisInfo[1].type = linear;
+						} else if (y is String) {
+							chartInfo.axisInfo[1].type = categorical;
+						}
+					} else if (chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
 					if (_chart.axes.exists(axisID)) {
