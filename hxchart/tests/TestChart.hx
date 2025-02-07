@@ -9,20 +9,18 @@ class TestChart extends Test {
 	function testSimpleChart() {
 		var chart = new Chart({
 			data: {
-				xValues: [1],
-				yValues: [1]
+				values: ["x" => [1], "y" => [1]]
 			},
 			type: scatter
 		});
-		Assert.equals(1, chart.trailInfos[0].data.xValues[0]);
+		Assert.equals(1, chart.trailInfos[0].data.values.get("x")[0]);
 		Assert.equals(scatter, chart.trailInfos[0].type);
 	}
 
 	function testChartWithLegend() {
 		var chart = new Chart({
 			data: {
-				xValues: [1],
-				yValues: [1]
+				values: ["x" => [1], "y" => [1]]
 			},
 			type: scatter
 		}, {
@@ -38,7 +36,7 @@ class TestChart extends Test {
 		Assert.raises(function() {
 			new Chart({
 				data: {
-					values: ["x" => [1, 2], "y" => [3, 4]]
+					values: []
 				},
 				type: scatter
 			});
@@ -47,28 +45,7 @@ class TestChart extends Test {
 		Assert.raises(function() {
 			new Chart({
 				data: {
-					values: ["x" => [1, 2], "y" => [3, 4]]
-				},
-				x: "x",
-				type: scatter
-			});
-		});
-
-		Assert.raises(function() {
-			new Chart({
-				data: {
-					values: ["x" => [1, 2], "y" => [3, 4]]
-				},
-				y: "y",
-				type: scatter
-			});
-		});
-
-		Assert.raises(function() {
-			new Chart({
-				data: {
-					values: ["y" => [3, 4]],
-					xValues: [1, 2]
+					values: ["y" => [3, 4]]
 				},
 				type: scatter
 			});
@@ -77,52 +54,17 @@ class TestChart extends Test {
 		Assert.raises(function() {
 			new Chart({
 				data: {
-					values: ["x" => [3, 4]],
-					yValues: [1, 2]
+					values: ["x" => [1, 2]]
 				},
 				type: scatter
 			});
 		});
-
-		var chart = new Chart({
-			data: {
-				values: ["x" => [1, 2], "y" => [3, 4]]
-			},
-			x: "x",
-			y: "y",
-			type: scatter
-		});
-		Assert.same({
-			values: ["x" => [1, 2], "y" => [3, 4]],
-			xValues: [1, 2],
-			yValues: [3, 4],
-			groups: ["1", "1"]
-		}, chart.trailInfos[0].data);
-
-		var chart = new Chart({
-			data: {
-				values: ["x" => [1, 2], "y" => [3, 4]],
-				yValues: [1, 2],
-				xValues: [3, 4]
-			},
-			x: "x",
-			y: "y",
-			type: scatter
-		});
-		Assert.same({
-			values: ["x" => [1, 2], "y" => [3, 4]],
-			xValues: [3, 4],
-			yValues: [1, 2],
-			groups: ["1", "1"]
-		}, chart.trailInfos[0].data);
 	}
 
 	function testChartGroups() {
 		var chart = new Chart({
 			data: {
-				groups: ["A", "B"],
-				yValues: [1, 2],
-				xValues: [3, 4]
+				values: ["groups" => ["A", "B"], "y" => [1, 2], "x" => [3, 4]]
 			},
 			type: scatter
 		});
@@ -131,19 +73,7 @@ class TestChart extends Test {
 
 		var chart = new Chart({
 			data: {
-				values: ["groups" => ["A", "B"]],
-				yValues: [1, 2],
-				xValues: [3, 4]
-			},
-			type: scatter
-		});
-		Assert.isTrue(chart.groups.exists("A"));
-		Assert.equals(2, chart.groupNumber);
-
-		var chart = new Chart({
-			data: {
-				yValues: [1, 2],
-				xValues: [3, 4]
+				values: ["y" => [1, 2], "x" => [3, 4]]
 			},
 			type: scatter
 		});
@@ -154,8 +84,7 @@ class TestChart extends Test {
 	function testStyle() {
 		var chart = new Chart({
 			data: {
-				yValues: [1, 2],
-				xValues: [3, 4]
+				values: ["y" => [1, 2], "x" => [3, 4]]
 			},
 			type: scatter
 		});
@@ -163,9 +92,7 @@ class TestChart extends Test {
 
 		var chart = new Chart({
 			data: {
-				values: ["groups" => ["A", "B"]],
-				yValues: [1, 2],
-				xValues: [3, 4]
+				values: ["groups" => ["A", "B"], "y" => [1, 2], "x" => [3, 4]]
 			},
 			type: scatter
 		});

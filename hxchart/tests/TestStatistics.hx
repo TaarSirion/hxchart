@@ -29,4 +29,11 @@ class TestStatistics extends Test {
 		Assert.equals(3, x.position(1)[1]);
 		Assert.equals(2, x.position(1).length);
 	}
+
+	function testRepeat() {
+		Assert.equals(1, 1.repeat(2)[1]);
+		Assert.equals(2, 1.repeat(2).length);
+		Assert.equals("a", "a".repeat(3)[2]);
+		Assert.equals(3, "a".repeat(3).length);
+	}
 }

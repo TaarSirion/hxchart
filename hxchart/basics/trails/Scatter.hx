@@ -31,11 +31,17 @@ class Scatter implements AxisLayer implements DataLayer {
 
 	public var data:Array<Data2D> = [];
 	public var groups:Map<String, Int>;
+	@:allow(hxchart.tests)
 	public var colors:Array<Color> = [];
+	@:allow(hxchart.tests)
 	public var alphas:Array<Float> = [];
+	@:allow(hxchart.tests)
 	public var sizes:Array<Float> = [];
+	@:allow(hxchart.tests)
 	public var borderAlphas:Array<Float> = [];
+	@:allow(hxchart.tests)
 	public var borderThickness:Array<Float> = [];
+	@:allow(hxchart.tests)
 	public var borderColors:Array<Color> = [];
 
 	public var dataLayer:Absolute;
@@ -108,6 +114,10 @@ class Scatter implements AxisLayer implements DataLayer {
 			colors[i] = style.colorPalette[style.groups.get(group)];
 			borderColors[i] = colors[i];
 			data[i] = point;
+			sizes[i] = 2;
+			alphas[i] = 1;
+			borderAlphas[i] = 1;
+			borderThickness[i] = 1;
 		}
 
 		if (style.size is Float || style.size is Int) {
@@ -122,6 +132,7 @@ class Scatter implements AxisLayer implements DataLayer {
 				}
 			}
 		}
+
 		if (style.alpha is Float || style.alpha is Int) {
 			var alpha = cast(style.alpha, Float);
 			alphas = Statistics.repeat(alpha, alphas.length);
@@ -135,43 +146,45 @@ class Scatter implements AxisLayer implements DataLayer {
 			}
 		}
 
-		if (style.borderStyle.color != null) {
-			if (style.borderStyle.color is Int) {
-				var color = cast(style.borderStyle.color, Int);
-				borderColors = Statistics.repeat(color, borderColors.length);
-			} else if (style.borderStyle.color is Array) {
-				var color:Array<Int> = style.borderStyle.color;
-				borderColors = color.copy();
-				if (color.length == uniqueGroupsNum) {
-					for (i in 0...groupsArr.length) {
-						borderColors[i] = color[style.groups.get(groupsArr[i])];
+		if (style.borderStyle != null) {
+			if (style.borderStyle.color != null) {
+				if (style.borderStyle.color is Int) {
+					var color = cast(style.borderStyle.color, Int);
+					borderColors = Statistics.repeat(color, borderColors.length);
+				} else if (style.borderStyle.color is Array) {
+					var color:Array<Int> = style.borderStyle.color;
+					borderColors = color.copy();
+					if (color.length == uniqueGroupsNum) {
+						for (i in 0...groupsArr.length) {
+							borderColors[i] = color[style.groups.get(groupsArr[i])];
+						}
 					}
 				}
 			}
-		}
 
-		if (style.borderStyle.alpha is Float || style.borderStyle.alpha is Int) {
-			var alpha = cast(style.borderStyle.alpha, Float);
-			borderAlphas = Statistics.repeat(alpha, borderAlphas.length);
-		} else if (style.borderStyle.alpha is Array) {
-			var alpha:Array<Float> = style.borderStyle.alpha;
-			borderAlphas = alpha.copy();
-			if (alpha.length == uniqueGroupsNum) {
-				for (i in 0...groupsArr.length) {
-					borderAlphas[i] = alpha[style.groups.get(groupsArr[i])];
+			if (style.borderStyle.alpha is Float || style.borderStyle.alpha is Int) {
+				var alpha = cast(style.borderStyle.alpha, Float);
+				borderAlphas = Statistics.repeat(alpha, borderAlphas.length);
+			} else if (style.borderStyle.alpha is Array) {
+				var alpha:Array<Float> = style.borderStyle.alpha;
+				borderAlphas = alpha.copy();
+				if (alpha.length == uniqueGroupsNum) {
+					for (i in 0...groupsArr.length) {
+						borderAlphas[i] = alpha[style.groups.get(groupsArr[i])];
+					}
 				}
 			}
-		}
 
-		if (style.borderStyle.thickness is Float || style.borderStyle.thickness is Int) {
-			var thickness = cast(style.borderStyle.thickness, Float);
-			borderThickness = Statistics.repeat(thickness, borderThickness.length);
-		} else if (style.borderStyle.thickness is Array) {
-			var thickness:Array<Float> = style.borderStyle.thickness;
-			borderThickness = thickness.copy();
-			if (thickness.length == uniqueGroupsNum) {
-				for (i in 0...groupsArr.length) {
-					borderThickness[i] = thickness[style.groups.get(groupsArr[i])];
+			if (style.borderStyle.thickness is Float || style.borderStyle.thickness is Int) {
+				var thickness = cast(style.borderStyle.thickness, Float);
+				borderThickness = Statistics.repeat(thickness, borderThickness.length);
+			} else if (style.borderStyle.thickness is Array) {
+				var thickness:Array<Float> = style.borderStyle.thickness;
+				borderThickness = thickness.copy();
+				if (thickness.length == uniqueGroupsNum) {
+					for (i in 0...groupsArr.length) {
+						borderThickness[i] = thickness[style.groups.get(groupsArr[i])];
+					}
 				}
 			}
 		}

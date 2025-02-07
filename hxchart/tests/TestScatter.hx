@@ -23,8 +23,7 @@ class TestScatter extends Test {
 		parent.height = 100;
 		scatter = new Scatter({
 			data: {
-				xValues: [2, 0, 1],
-				yValues: [1, 2, 3]
+				values: ["x" => [2, 0, 1], "y" => [1, 2, 3], "groups" => ["1", "1", "1"]]
 			},
 			axisInfo: [
 				{
@@ -44,9 +43,37 @@ class TestScatter extends Test {
 
 	function testSetData() {
 		scatter.setData({
-			xValues: [1, 2],
-			yValues: [1, 2]
+			values: ["x" => [1, 2], "y" => [1, 2], "groups" => ["1", "1"]]
 		}, {
+			colorPalette: ColorPalettes.defaultColors(1),
+			groups: ["1" => 0]
+		});
+		Assert.equals(2, scatter.sizes[0]);
+		Assert.equals(1, scatter.alphas[0]);
+		Assert.equals(1, scatter.borderAlphas[0]);
+		Assert.equals(1, scatter.borderThickness[0]);
+
+		scatter.setData({
+			values: ["x" => [1, 2], "y" => [1, 2], "groups" => ["1", "1"]]
+		}, {
+			colorPalette: ColorPalettes.defaultColors(1),
+			size: 3,
+			alpha: 0.5,
+			borderStyle: {
+				thickness: 2,
+				alpha: 0.3
+			},
+			groups: ["1" => 0]
+		});
+		Assert.equals(3, scatter.sizes[0]);
+		Assert.equals(0.5, scatter.alphas[0]);
+		Assert.equals(0.3, scatter.borderAlphas[0]);
+		Assert.equals(2, scatter.borderThickness[0]);
+
+		scatter.setData({
+			values: ["x" => [1, 2], "y" => [1, 2], "groups" => ["1", "1"]]
+		}, {
+			size: 2,
 			colorPalette: ColorPalettes.defaultColors(1),
 			groups: ["1" => 0]
 		});

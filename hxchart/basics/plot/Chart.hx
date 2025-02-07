@@ -94,9 +94,9 @@ enum OptimizationType {
 @:structInit class TrailInfo {
 	public var data:TrailData;
 	public final type:TrailTypes;
-	public var style:TrailStyle;
-	public var axisInfo:Array<AxisInfo>;
-	public var optimizationInfo:OptimizationInfo;
+	@:optional public var style:TrailStyle;
+	@:optional public var axisInfo:Array<AxisInfo>;
+	@:optional public var optimizationInfo:OptimizationInfo;
 
 	public function validate() {
 		switch (type) {
@@ -215,7 +215,14 @@ class Chart extends Absolute {
 				info.style = null;
 			}
 			if (info.style == null) {
-				info.style = {};
+				info.style = {
+					size: 2,
+					alpha: 1,
+					borderStyle: {
+						thickness: 1,
+						alpha: 1
+					}
+				};
 			}
 			if (info.style.groups == null) {
 				info.style.groups = groups;
