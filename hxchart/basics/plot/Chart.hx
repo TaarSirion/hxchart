@@ -1,5 +1,6 @@
 package hxchart.basics.plot;
 
+import haxe.ui.events.MouseEvent;
 import hxchart.basics.trails.Bar;
 import haxe.ui.layouts.DefaultLayout;
 import hxchart.basics.colors.ColorPalettes;
@@ -255,15 +256,21 @@ enum ChartStatus {
 
 class Builder extends CompositeBuilder {
 	var _chart:Chart;
+	var eventHandler:Array<MouseEvent->Void>;
 
 	public function new(chart:Chart) {
 		super(chart);
 		_chart = chart;
+		eventHandler = [];
 		_chart.chartBody = new Absolute();
 		_chart.chartBody.percentWidth = 100;
 		_chart.chartBody.percentHeight = 100;
-		// _plot.plotBody.padding = 10; //Setting padding fucks with the inital positioning (redraw works fine)
 		_chart.addComponent(_chart.chartBody);
+		_chart.registerEvent(MouseEvent.MOUSE_MOVE, function(e) {
+			for (handler in eventHandler) {
+				handler(e);
+			}
+		});
 	}
 
 	override function validateComponentData() {
@@ -287,6 +294,7 @@ class Builder extends CompositeBuilder {
 	}
 
 	function validateCharts(status:ChartStatus) {
+		eventHandler = [];
 		if (status == ChartStatus.start) {
 			_chart.axes = new Map();
 		}
@@ -328,7 +336,7 @@ class Builder extends CompositeBuilder {
 							}
 						];
 					}
-					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID);
+					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID, eventHandler);
 					scatter.validateChart();
 					if (!_chart.axes.exists(axisID)) {
 						_chart.axes.set(axisID, scatter.axes);

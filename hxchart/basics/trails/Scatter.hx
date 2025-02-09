@@ -1,5 +1,7 @@
 package hxchart.basics.trails;
 
+import haxe.ui.events.MouseEvent;
+import haxe.ui.events.Events;
 import hxchart.basics.utils.Statistics;
 import hxchart.basics.plot.Chart.OptimizationType;
 import hxchart.basics.quadtree.OptimGrid;
@@ -58,9 +60,16 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var colorPalette:Array<Int>;
 
 	public var parent:Absolute;
+	public var eventHandler:Array<MouseEvent->Void>;
+	public var hoverLayer:Canvas;
 
-	public function new(chartInfo:TrailInfo, parent:Absolute, id:String, axisID:String) {
+	public function new(chartInfo:TrailInfo, parent:Absolute, id:String, axisID:String, eventHandler:Array<MouseEvent->Void>) {
 		this.parent = parent;
+		this.eventHandler = eventHandler;
+		hoverLayer = new Canvas();
+		hoverLayer.id = id + "_hover";
+		hoverLayer.percentHeight = 100;
+		hoverLayer.percentWidth = 100;
 		dataCanvas = new Canvas();
 		dataCanvas.id = id;
 		dataCanvas.percentHeight = 100;
@@ -86,6 +95,10 @@ class Scatter implements AxisLayer implements DataLayer {
 		var canvasComponent = parent.findComponent(id);
 		if (canvasComponent != null) {
 			dataCanvas = canvasComponent;
+		}
+		var canvasComponent = parent.findComponent(id + "_hover");
+		if (canvasComponent != null) {
+			hoverLayer = canvasComponent;
 		}
 		setData(chartInfo.data, chartInfo.style);
 		positionAxes(chartInfo.axisInfo, data, chartInfo.style);
@@ -383,18 +396,27 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 
 		dataCanvas.componentGraphics.clear();
+		eventHandler.push(function(e) {
+			hoverLayer.componentGraphics.clear();
+			for (i in allowedIndeces) {
+				if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
+					hoverLayer.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
+					hoverLayer.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
+				}
+			}
+		});
 
 		// Drawing
 		for (i in allowedIndeces) {
 			dataCanvas.componentGraphics.strokeStyle(borderColors[i], borderThickness[i], borderAlphas[i]);
 			dataCanvas.componentGraphics.fillStyle(colors[i], alphas[i]);
-
 			dataCanvas.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
 		}
 
 		var canvasComponent = parent.findComponent(id);
 		if (canvasComponent == null) {
 			parent.addComponent(dataCanvas);
+			parent.addComponent(hoverLayer);
 		}
 	}
 
@@ -444,5 +466,10 @@ class Scatter implements AxisLayer implements DataLayer {
 			y = zeroPos + yDist.neg_dist * y_ratio;
 		}
 		return y;
+	}
+
+	private function inPointRadius(mouseCoords:Point, pointCenter:Point, size:Float) {
+		var dist = Math.pow(pointCenter.x - mouseCoords.x, 2) + Math.pow(pointCenter.y - mouseCoords.y, 2);
+		return dist <= Math.pow(size, 2);
 	}
 }
