@@ -237,7 +237,7 @@ class Bar implements AxisLayer implements DataLayer {
 	}
 
 	@:allow(hxchart.tests)
-	function setTickInfo(type:AxisTypes, infoValues:Array<Dynamic>, dataValues:Array<Dynamic>, dataMin:Float, dataMax:Float) {
+	function setTickInfo(type:AxisTypes, infoValues:Array<Any>, dataValues:Array<Any>, dataMin:Float, dataMax:Float) {
 		var tickInfo:TickInfo = null;
 		switch (type) {
 			case linear:

@@ -34,7 +34,7 @@ enum AxisTypes {
 @:structInit class AxisInfo {
 	@:optional public var type:AxisTypes;
 	@:optional public var axis:Axis;
-	@:optional public var values:Array<Dynamic>;
+	@:optional public var values:Array<Any>;
 }
 
 @:composite(AxisBuilder, Layout)
