@@ -38,7 +38,7 @@ class TestScatter extends Test {
 				colorPalette: ColorPalettes.defaultColors(1),
 				groups: ["1" => 0]
 			}
-		}, parent, "chart", "axis");
+		}, parent, "chart", "axis", {});
 	}
 
 	function testSetData() {

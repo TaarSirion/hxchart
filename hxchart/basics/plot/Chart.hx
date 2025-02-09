@@ -1,5 +1,6 @@
 package hxchart.basics.plot;
 
+import hxchart.basics.events.EventLayer.EventHandler;
 import haxe.ui.events.MouseEvent;
 import hxchart.basics.trails.Bar;
 import haxe.ui.layouts.DefaultLayout;
@@ -256,18 +257,18 @@ enum ChartStatus {
 
 class Builder extends CompositeBuilder {
 	var _chart:Chart;
-	var eventHandler:Array<MouseEvent->Void>;
+	var eventHandler:EventHandler;
 
 	public function new(chart:Chart) {
 		super(chart);
 		_chart = chart;
-		eventHandler = [];
+		eventHandler = {};
 		_chart.chartBody = new Absolute();
 		_chart.chartBody.percentWidth = 100;
 		_chart.chartBody.percentHeight = 100;
 		_chart.addComponent(_chart.chartBody);
 		_chart.registerEvent(MouseEvent.MOUSE_MOVE, function(e) {
-			for (handler in eventHandler) {
+			for (handler in eventHandler.hoverHandlers) {
 				handler(e);
 			}
 		});
@@ -294,7 +295,7 @@ class Builder extends CompositeBuilder {
 	}
 
 	function validateCharts(status:ChartStatus) {
-		eventHandler = [];
+		eventHandler = {};
 		if (status == ChartStatus.start) {
 			_chart.axes = new Map();
 		}

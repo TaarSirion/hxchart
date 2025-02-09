@@ -1,5 +1,6 @@
 package hxchart.basics.trails;
 
+import hxchart.basics.events.EventLayer.EventHandler;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.events.Events;
 import hxchart.basics.utils.Statistics;
@@ -60,10 +61,10 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var colorPalette:Array<Int>;
 
 	public var parent:Absolute;
-	public var eventHandler:Array<MouseEvent->Void>;
+	public var eventHandler:EventHandler;
 	public var hoverLayer:Canvas;
 
-	public function new(chartInfo:TrailInfo, parent:Absolute, id:String, axisID:String, eventHandler:Array<MouseEvent->Void>) {
+	public function new(chartInfo:TrailInfo, parent:Absolute, id:String, axisID:String, eventHandler:EventHandler) {
 		this.parent = parent;
 		this.eventHandler = eventHandler;
 		hoverLayer = new Canvas();
@@ -395,8 +396,8 @@ class Scatter implements AxisLayer implements DataLayer {
 			}
 		}
 
-		dataCanvas.componentGraphics.clear();
-		eventHandler.push(function(e) {
+		// Hover event handling
+		eventHandler.hoverHandlers.push(function(e) {
 			hoverLayer.componentGraphics.clear();
 			for (i in allowedIndeces) {
 				if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
@@ -406,7 +407,19 @@ class Scatter implements AxisLayer implements DataLayer {
 			}
 		});
 
+		// Click event handling
+		eventHandler.clickHandlers.push(function(e) {
+			hoverLayer.componentGraphics.clear();
+			for (i in allowedIndeces) {
+				if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
+					hoverLayer.componentGraphics.fillStyle(Color.fromString("#000000"), 0.5);
+					hoverLayer.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
+				}
+			}
+		});
+
 		// Drawing
+		dataCanvas.componentGraphics.clear();
 		for (i in allowedIndeces) {
 			dataCanvas.componentGraphics.strokeStyle(borderColors[i], borderThickness[i], borderAlphas[i]);
 			dataCanvas.componentGraphics.fillStyle(colors[i], alphas[i]);
