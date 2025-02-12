@@ -63,6 +63,7 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var parent:Absolute;
 	public var eventHandler:EventHandler;
 	public var hoverLayer:Canvas;
+	public var clickLayer:Canvas;
 
 	public function new(chartInfo:TrailInfo, parent:Absolute, id:String, axisID:String, eventHandler:EventHandler) {
 		this.parent = parent;
@@ -71,6 +72,10 @@ class Scatter implements AxisLayer implements DataLayer {
 		hoverLayer.id = id + "_hover";
 		hoverLayer.percentHeight = 100;
 		hoverLayer.percentWidth = 100;
+		clickLayer = new Canvas();
+		clickLayer.id = id + "_click";
+		clickLayer.percentHeight = 100;
+		clickLayer.percentWidth = 100;
 		dataCanvas = new Canvas();
 		dataCanvas.id = id;
 		dataCanvas.percentHeight = 100;
@@ -100,6 +105,10 @@ class Scatter implements AxisLayer implements DataLayer {
 		var canvasComponent = parent.findComponent(id + "_hover");
 		if (canvasComponent != null) {
 			hoverLayer = canvasComponent;
+		}
+		var canvasComponent = parent.findComponent(id + "_click");
+		if (canvasComponent != null) {
+			clickLayer = canvasComponent;
 		}
 		setData(chartInfo.data, chartInfo.style);
 		positionAxes(chartInfo.axisInfo, data, chartInfo.style);
@@ -399,6 +408,27 @@ class Scatter implements AxisLayer implements DataLayer {
 		// Hover event handling
 		eventHandler.hoverHandlers.push(function(e) {
 			hoverLayer.componentGraphics.clear();
+			if (chartInfo.events != null && chartInfo.events.onHandle != null) {
+				for (i in allowedIndeces) {
+					if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
+						var selectInfo = chartInfo.events.onHandle({
+							coords: [new Point(xCoords[i], yCoords[i])],
+							border: {
+								thickness: borderThickness[i],
+								color: borderColors[i],
+								alpha: borderAlphas[i]
+							},
+							alpha: alphas[i],
+							color: colors[i],
+							size: sizes[i]
+						});
+						hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
+						hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
+						hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
+					}
+				}
+				return;
+			}
 			for (i in allowedIndeces) {
 				if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
 					hoverLayer.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
@@ -409,11 +439,32 @@ class Scatter implements AxisLayer implements DataLayer {
 
 		// Click event handling
 		eventHandler.clickHandlers.push(function(e) {
-			hoverLayer.componentGraphics.clear();
+			clickLayer.componentGraphics.clear();
+			if (chartInfo.events != null && chartInfo.events.onClick != null) {
+				for (i in allowedIndeces) {
+					if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
+						var selectInfo = chartInfo.events.onClick({
+							coords: [new Point(xCoords[i], yCoords[i])],
+							border: {
+								thickness: borderThickness[i],
+								color: borderColors[i],
+								alpha: borderAlphas[i]
+							},
+							alpha: alphas[i],
+							color: colors[i],
+							size: sizes[i]
+						});
+						clickLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
+						clickLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
+						clickLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
+					}
+				}
+				return;
+			}
 			for (i in allowedIndeces) {
 				if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
-					hoverLayer.componentGraphics.fillStyle(Color.fromString("#000000"), 0.5);
-					hoverLayer.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
+					clickLayer.componentGraphics.fillStyle(Color.fromString("#000000"), 0.5);
+					clickLayer.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
 				}
 			}
 		});
@@ -430,6 +481,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		if (canvasComponent == null) {
 			parent.addComponent(dataCanvas);
 			parent.addComponent(hoverLayer);
+			parent.addComponent(clickLayer);
 		}
 	}
 

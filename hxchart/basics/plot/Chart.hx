@@ -1,5 +1,6 @@
 package hxchart.basics.plot;
 
+import hxchart.basics.events.EventLayer.EventInfo;
 import hxchart.basics.events.EventLayer.EventHandler;
 import haxe.ui.events.MouseEvent;
 import hxchart.basics.trails.Bar;
@@ -99,6 +100,7 @@ enum OptimizationType {
 	@:optional public var style:TrailStyle;
 	@:optional public var axisInfo:Array<AxisInfo>;
 	@:optional public var optimizationInfo:OptimizationInfo;
+	@:optional public var events:EventInfo;
 
 	public function validate() {
 		switch (type) {
@@ -269,6 +271,11 @@ class Builder extends CompositeBuilder {
 		_chart.addComponent(_chart.chartBody);
 		_chart.registerEvent(MouseEvent.MOUSE_MOVE, function(e) {
 			for (handler in eventHandler.hoverHandlers) {
+				handler(e);
+			}
+		});
+		_chart.registerEvent(MouseEvent.CLICK, function(e) {
+			for (handler in eventHandler.clickHandlers) {
 				handler(e);
 			}
 		});
