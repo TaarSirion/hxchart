@@ -203,7 +203,7 @@ class Chart extends Absolute {
 					groupNumber++;
 				}
 			}
-			if (info.style != null) {
+			if (info.style.colorPalette != null) {
 				colors = colors.concat(info.style.colorPalette);
 			}
 		}
@@ -226,15 +226,21 @@ class Chart extends Absolute {
 			if (reset) {
 				info.style = null;
 			}
-			if (info.style == null) {
-				info.style = {
-					size: 2,
-					alpha: 1,
-					borderStyle: {
-						thickness: 1,
-						alpha: 1
-					}
-				};
+			if (info.style.colorPalette == null) {
+				trace("COLORS", colors);
+				info.style.colorPalette = colors;
+			}
+			if (info.style.alpha == null) {
+				info.style.alpha = 1;
+			}
+			if (info.style.size == null) {
+				info.style.size = 2;
+			}
+			if (info.style.borderStyle == null) {
+				info.style.borderStyle = {
+					thickness: 1,
+					alpha: 1
+				}
 			}
 			if (info.style.groups == null) {
 				info.style.groups = groups;

@@ -475,6 +475,7 @@ class Scatter implements AxisLayer implements DataLayer {
 			var lastGroupPoint:Map<Int, Point> = [];
 			for (i in allowedIndeces) {
 				var currentGroup = data[i].group;
+				trace(colors[i], sizes[i], alphas[i]);
 				dataCanvas.componentGraphics.strokeStyle(colors[i], sizes[i], alphas[i]);
 				dataCanvas.componentGraphics.moveTo(xCoords[i], yCoords[i]);
 				if (lastGroupPoint.exists(currentGroup)) {
