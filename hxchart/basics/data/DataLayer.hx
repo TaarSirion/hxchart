@@ -27,6 +27,9 @@ import haxe.ui.containers.Absolute;
 				case scatter:
 					var x = values.get("x");
 					values.set("groups", Statistics.repeat(group, x.length));
+				case line:
+					var x = values.get("x");
+					values.set("groups", Statistics.repeat(group, x.length));
 				case bar:
 					var x = values.get("x");
 					values.set("groups", Statistics.repeat(group, x.length));

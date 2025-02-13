@@ -471,10 +471,25 @@ class Scatter implements AxisLayer implements DataLayer {
 
 		// Drawing
 		dataCanvas.componentGraphics.clear();
-		for (i in allowedIndeces) {
-			dataCanvas.componentGraphics.strokeStyle(borderColors[i], borderThickness[i], borderAlphas[i]);
-			dataCanvas.componentGraphics.fillStyle(colors[i], alphas[i]);
-			dataCanvas.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
+		if (chartInfo.type == line) {
+			var lastGroupPoint:Map<Int, Point> = [];
+			for (i in allowedIndeces) {
+				var currentGroup = data[i].group;
+				dataCanvas.componentGraphics.strokeStyle(colors[i], sizes[i], alphas[i]);
+				dataCanvas.componentGraphics.moveTo(xCoords[i], yCoords[i]);
+				if (lastGroupPoint.exists(currentGroup)) {
+					var p = lastGroupPoint.get(currentGroup);
+					dataCanvas.componentGraphics.moveTo(p.x, p.y);
+				}
+				dataCanvas.componentGraphics.lineTo(xCoords[i], yCoords[i]);
+				lastGroupPoint.set(currentGroup, new Point(xCoords[i], yCoords[i]));
+			}
+		} else {
+			for (i in allowedIndeces) {
+				dataCanvas.componentGraphics.strokeStyle(borderColors[i], borderThickness[i], borderAlphas[i]);
+				dataCanvas.componentGraphics.fillStyle(colors[i], alphas[i]);
+				dataCanvas.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
+			}
 		}
 
 		var canvasComponent = parent.findComponent(id);
