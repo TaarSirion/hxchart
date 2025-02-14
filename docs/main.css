@@ -1,3 +1,7 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 .menu {
     list-style-type: none;
     margin: 0;
@@ -51,6 +55,7 @@
 
 .reference-body {
     width: 100%;
+    height: 100%;
     display: flex;
 }
 
@@ -61,4 +66,61 @@
 
 .code-normal {
     background-color: #f5f5f5;
+}
+
+.sidebar {
+    width: 20%;
+    overflow-x: hidden;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    width: 100%;
+}
+
+.sidebar li {
+    margin: 5px 0px;
+}
+
+.sidebar li:hover {
+    cursor: pointer
+}
+
+/* Style the caret/arrow */
+.caret {
+    cursor: pointer;
+    user-select: none;
+    /* Prevent text selection */
+}
+
+/* Create the caret/arrow with a unicode, and style it */
+.caret::before {
+    content: "\25B6";
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+/* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+.caret-down::before {
+    transform: rotate(90deg);
+}
+
+/* Hide the nested list */
+.nested {
+    display: none;
+}
+
+/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+.active {
+    display: block;
+}
+
+.info-body {
+    width: 80%;
+
+}
+
+.horizontal {
+    display: flex;
 }

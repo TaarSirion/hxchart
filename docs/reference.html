@@ -15,13 +15,124 @@
         <li><a href="reference.html">Reference</a></li>
         <li><a href="">Try it out</a></li>
     </ul>
-    <div class="content-body">
-        <div>
-            <div id="reference-body"></div>
+    <div class="content-body horizontal">
+        <div class="sidebar">
+            <h2>TrailInfo</h2>
+            <ul style="margin: 0; padding: 0;">
+                <li><span class="item">type</span></li>
+                <li><span class="caret item" data-info="">data</span>
+                    <ul class="nested">
+                        <li><span class="item">values</span></li>
+                    </ul>
+                </li>
+                <li><span class="caret item">style</span>
+                    <ul class="nested">
+                        <li><span class="item">size</span></li>
+                        <li><span class="item">colorPalette</span></li>
+                        <li><span class="item">alpha</span></li>
+                        <li><span class="item">groups</span></li>
+                        <li><span class="caret item">borderStyle</span>
+                            <ul class="nested">
+                                <li><span class="item">color</span></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </div>
-
+        <div class="info-body">
+            <div class="item-body" style="display: none;">
+                <h1>Type</h1>
+                <p>The type attribute is one of two mandatory attributes to be set for a chart to work.</p>
+                <p>Possible values for type are</p>
+                <ul>
+                    <li>scatter</li>
+                    <li>line</li>
+                    <li>bar</li>
+                </ul>
+            </div>
+            <div class="item-body" style="display: none;">
+                <h1>Data</h1>
+                <p>The data attribute is one of two mandatory attributes to be set for a chart to work.</p>
+            </div>
+            <div class="item-body" style="display: none;">
+                <h1>Data.values</h1>
+                <p>data.values is a Map that can contain technically contain any kind of information, but needs certain
+                    keys depending on the chart.</p>
+                <h3>Scatter</h3>
+                <h4>Mandatory</h4>
+                <ul>
+                    <li>x:Any</li>
+                    <li>y:Any</li>
+                </ul>
+                <h4>Optional</h4>
+                <ul>
+                    <li>groups:String</li>
+                </ul>
+                <p>Sidenote: It is technically possible to set both <code>x</code> and <code>y</code> as String, but
+                    that will result in a stupid chart, so don't do that.</p>
+                <hr>
+                <h3>Line</h3>
+                <h4>Mandatory</h4>
+                <ul>
+                    <li>x:Any</li>
+                    <li>y:Any</li>
+                </ul>
+                <h4>Optional</h4>
+                <ul>
+                    <li>groups:String</li>
+                </ul>
+                <p>Sidenote: It is technically possible to set both <code>x</code> and <code>y</code> as String, but
+                    that will result in a stupid chart, so don't do that.</p>
+                <hr>
+                <h3>Bar</h3>
+                <h4>Mandatory</h4>
+                <ul>
+                    <li>x:Any</li>
+                    <li>y:Any</li>
+                </ul>
+                <h4>Optional</h4>
+                <ul>
+                    <li>groups:String</li>
+                </ul>
+                <p>Sidenote: It is technically possible to set both <code>x</code> and <code>y</code> as String, but
+                    that will result in a stupid chart, so don't do that.</p>
+            </div>
+            <div class="item-body" style="display:none;">
+                <h1>Style</h1>
+                <p>style is an optional attribute.</p>
+            </div>
+            <div class="item-body" style="display:none;">
+                <h1>Style.size</h1>
+                <p>style.size is an optional attribute.</p>
+            </div>
+        </div>
     </div>
-    <script src="reference.js"></script>
+    <script>
+        var toggler = document.getElementsByClassName("caret");
+        var i;
+
+        for (i = 0; i < toggler.length; i++) {
+            toggler[i].addEventListener("click", function () {
+                this.parentElement.querySelector(".nested").classList.toggle("active");
+                this.classList.toggle("caret-down");
+            });
+        }
+        const lis = document.getElementsByClassName("item");
+        const itemBodies = document.getElementsByClassName("item-body");
+        for (let index = 0; index < lis.length; index++) {
+            lis[index].addEventListener("click", function () {
+                itemBodies[index].style.setProperty("display", "block");
+                for (let j = 0; j < itemBodies.length; j++) {
+                    if (j == index) {
+                        continue;
+                    }
+                    itemBodies[j].style.setProperty("display", "none");
+                }
+            });
+        }
+    </script>
+    <!-- <script src="reference.js"></script> -->
 </body>
 
 </html>
