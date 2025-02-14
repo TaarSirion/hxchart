@@ -1,0 +1,7 @@
+-cp docs
+-main docs.Reference
+
+-lib haxeui-core
+-lib haxeui-html5
+
+-js docs/reference.js

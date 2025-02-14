@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="prism.css">
+</head>
+
+<body>
+    <ul class="menu">
+        <li id="logo-list"><a href="index.html"><img id="logo" src="haxelogo.png" alt=""></a></li>
+        <li><a href="index.html">Get Started</a></li>
+        <li><a href="">Try it out</a></li>
+    </ul>
+    <!-- <script src="main-pages.js"></script> -->
+    <div class="content-body">
+        <p>This package allows you to create charts with Haxe.</p>
+        <h1>How to install</h1>
+        <p>Stable Version</p>
+        <pre class="code-normal">
+            <code>
+                haxelib install hxchart
+            </code>
+        </pre>
+        <p>Dev Version</p>
+        <pre class="code-normal">
+            <code>
+                haxelib install hxchart https://github.com/TaarSirion/hxchart
+            </code>
+        </pre>
+        <h1>How to create your first chart</h1>
+        <p>As hxchart uses haxeui as its base, you first have to make sure to select the backend you want to work with.
+            If you have never worked with haxeui see <a
+                href="https://haxeui.org/api/getting-started/welcome.html">here</a> on how to use it.</p>
+        <p>For convenience sake you should use html-5 as backend.</p>
+        <p> Creating a chart is a straightforward process. First we
+            create a trailinfo, an object containing all the information needed for the chart. Then we create the chart
+            with the trailinfo. And lastly we will add the chart to the app.</p>
+        <pre class="code-normal">
+            <code class="language-haxe">
+                var trailinfo = {
+                    data: {
+                        values: ["x" => [1, 2], "y" => [1, 2]]
+                    },
+                    type: scatter
+                }
+                var chart = new Chart(trailinfo);
+                app.ready(function() {
+                    app.addComponent(chart);
+                });
+            </code>
+        </pre>
+        <p>This is the most basic you are able to create a chart. There are a lot of different options to set, see <a
+                href="reference.html">reference</a> for more information</p>
+        <h1>Notes on Performance</h1>
+        <p>Please beware that the charts may differ in performance, depending on the chosen haxeui backend. As html-5 is
+            the backend I usually test on, I make you aware that drawing scatter plots with more than 10k points will
+            result in significant lag.
+            That is because this library will draw the chart in svg in html, which can not be handled in large
+            quantities in the browser. This means even having too many charts may result in problems, though I haven't
+            tested that yet.
+            There are already ways to increase performance for scatter charts, but here is also a small tip: <br>
+            Always think about the necessity of drawing so many points.
+            Usually it is not helpful from an analysis perspective, to have a cluster of 10k points sitting all on top
+            of each other.</p>
+    </div>
+    <script src="prism.js"></script>
+</body>
+
+</html>
