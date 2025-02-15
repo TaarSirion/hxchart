@@ -112,6 +112,9 @@ enum OptimizationType {
 				if (!data.values.exists("x") || !data.values.exists("y")) {
 					throw new Exception("No data available. Please set 'x' and 'y' as keys in trailInfo.data.values.");
 				}
+				if (data.values.get("x").length != data.values.get("y").length) {
+					throw new Exception("'x' and 'y' need to be the same length.");
+				}
 			case line:
 				if (data.values == null) {
 					throw new Exception("No data available. Please set some data in trailInfo.data.values");
@@ -119,12 +122,18 @@ enum OptimizationType {
 				if (!data.values.exists("x") || !data.values.exists("y")) {
 					throw new Exception("No data available. Please set 'x' and 'y' as keys in trailInfo.data.values.");
 				}
+				if (data.values.get("x").length != data.values.get("y").length) {
+					throw new Exception("'x' and 'y' need to be the same length.");
+				}
 			case bar:
 				if (data.values == null) {
 					throw new Exception("No data available. Please set some data in trailInfo.data.values");
 				}
 				if (!data.values.exists("x") || !data.values.exists("y")) {
 					throw new Exception("No data available. Please set 'x' and 'y' as keys in trailInfo.data.values.");
+				}
+				if (data.values.get("x").length != data.values.get("y").length) {
+					throw new Exception("'x' and 'y' need to be the same length.");
 				}
 			case pie:
 		}
@@ -203,7 +212,7 @@ class Chart extends Absolute {
 					groupNumber++;
 				}
 			}
-			if (info.style.colorPalette != null) {
+			if (info.style != null && info.style.colorPalette != null) {
 				colors = colors.concat(info.style.colorPalette);
 			}
 		}
@@ -226,8 +235,10 @@ class Chart extends Absolute {
 			if (reset) {
 				info.style = null;
 			}
+			if (info.style == null) {
+				info.style = {};
+			}
 			if (info.style.colorPalette == null) {
-				trace("COLORS", colors);
 				info.style.colorPalette = colors;
 			}
 			if (info.style.alpha == null) {
