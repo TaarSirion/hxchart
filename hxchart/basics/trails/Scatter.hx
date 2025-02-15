@@ -27,11 +27,25 @@ import hxchart.basics.plot.Chart.TrailInfo;
 import hxchart.basics.data.DataLayer;
 import hxchart.basics.axis.AxisLayer;
 
+typedef ScatterDataPoint = {
+	coord:Point,
+	values:{
+		x:Any, y:Any
+	},
+	size:Float,
+	alpha:Float,
+	color:Color,
+	borderAlpha:Float,
+	borderColor:Color,
+	borderThickness:Float
+}
+
 class Scatter implements AxisLayer implements DataLayer {
 	public var id:String;
 	public var axisID:String;
 	public var axes:Array<Axis>;
 
+	public var dataByGroup:Array<Array<ScatterDataPoint>> = [];
 	public var data:Array<Data2D> = [];
 	public var groups:Map<String, Int>;
 	@:allow(hxchart.tests)
@@ -121,6 +135,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		var uniqueGroupsNum = 0;
 		for (key in style.groups.keys()) {
 			uniqueGroupsNum++;
+			dataByGroup.push([]);
 		}
 
 		data.resize(x.length);
@@ -133,7 +148,22 @@ class Scatter implements AxisLayer implements DataLayer {
 
 		for (i in 0...x.length) {
 			var group = groupsArr[i];
-			var point = new Data2D(x[i], y[i], style.groups.get(group));
+			var groupIndex = style.groups.get(group);
+			dataByGroup[groupIndex].push({
+				coord: new Point(0, 0),
+				values: {
+					x: x[i],
+					y: y[i]
+				},
+				size: 2,
+				color: style.colorPalette[groupIndex],
+				alpha: 1,
+				borderColor: style.colorPalette[groupIndex],
+				borderThickness: 1,
+				borderAlpha: 1
+			});
+
+			var point = new Data2D(x[i], y[i], groupIndex);
 			colors[i] = style.colorPalette[style.groups.get(group)];
 			borderColors[i] = colors[i];
 			data[i] = point;
@@ -145,11 +175,30 @@ class Scatter implements AxisLayer implements DataLayer {
 
 		if (style.size is Float || style.size is Int) {
 			var size = cast(style.size, Float);
+			for (group in dataByGroup) {
+				for (dataPoint in group) {
+					dataPoint.size = size;
+				}
+			}
 			sizes = Statistics.repeat(size, sizes.length);
 		} else if (style.size is Array) {
 			var size:Array<Float> = style.size;
-			sizes = size.copy();
-			if (size.length == uniqueGroupsNum) {
+			if (size.length == x.length) {
+				var i = 0;
+				for (group in dataByGroup) {
+					for (dataPoint in group) {
+						dataPoint.size = size[i];
+						i++;
+					}
+				}
+				sizes = size.copy();
+			} else if (size.length == uniqueGroupsNum) {
+				for (i in 0...uniqueGroupsNum) {
+					var groupSize = size[i];
+					for (dataPoint in dataByGroup[i]) {
+						dataPoint.size = groupSize;
+					}
+				}
 				for (i in 0...groupsArr.length) {
 					sizes[i] = size[style.groups.get(groupsArr[i])];
 				}
@@ -158,11 +207,30 @@ class Scatter implements AxisLayer implements DataLayer {
 
 		if (style.alpha is Float || style.alpha is Int) {
 			var alpha = cast(style.alpha, Float);
+			for (group in dataByGroup) {
+				for (dataPoint in group) {
+					dataPoint.alpha = alpha;
+				}
+			}
 			alphas = Statistics.repeat(alpha, alphas.length);
 		} else if (style.alpha is Array) {
 			var alpha:Array<Float> = style.alpha;
-			alphas = alpha.copy();
-			if (alpha.length == uniqueGroupsNum) {
+			if (alpha.length == x.length) {
+				var i = 0;
+				for (group in dataByGroup) {
+					for (dataPoint in group) {
+						dataPoint.alpha = alpha[i];
+						i++;
+					}
+				}
+				alphas = alpha.copy();
+			} else if (alpha.length == uniqueGroupsNum) {
+				for (i in 0...uniqueGroupsNum) {
+					var groupAlpha = alpha[i];
+					for (dataPoint in dataByGroup[i]) {
+						dataPoint.alpha = groupAlpha;
+					}
+				}
 				for (i in 0...groupsArr.length) {
 					alphas[i] = alpha[style.groups.get(groupsArr[i])];
 				}
@@ -173,11 +241,30 @@ class Scatter implements AxisLayer implements DataLayer {
 			if (style.borderStyle.color != null) {
 				if (style.borderStyle.color is Int) {
 					var color = cast(style.borderStyle.color, Int);
+					for (group in dataByGroup) {
+						for (dataPoint in group) {
+							dataPoint.borderColor = color;
+						}
+					}
 					borderColors = Statistics.repeat(color, borderColors.length);
 				} else if (style.borderStyle.color is Array) {
 					var color:Array<Int> = style.borderStyle.color;
-					borderColors = color.copy();
-					if (color.length == uniqueGroupsNum) {
+					if (color.length == x.length) {
+						var i = 0;
+						for (group in dataByGroup) {
+							for (dataPoint in group) {
+								dataPoint.borderColor = color[i];
+								i++;
+							}
+						}
+						borderColors = color.copy();
+					} else if (color.length == uniqueGroupsNum) {
+						for (i in 0...uniqueGroupsNum) {
+							var groupColor = color[i];
+							for (dataPoint in dataByGroup[i]) {
+								dataPoint.borderColor = groupColor;
+							}
+						}
 						for (i in 0...groupsArr.length) {
 							borderColors[i] = color[style.groups.get(groupsArr[i])];
 						}
@@ -187,11 +274,30 @@ class Scatter implements AxisLayer implements DataLayer {
 
 			if (style.borderStyle.alpha is Float || style.borderStyle.alpha is Int) {
 				var alpha = cast(style.borderStyle.alpha, Float);
+				for (group in dataByGroup) {
+					for (dataPoint in group) {
+						dataPoint.borderAlpha = alpha;
+					}
+				}
 				borderAlphas = Statistics.repeat(alpha, borderAlphas.length);
 			} else if (style.borderStyle.alpha is Array) {
 				var alpha:Array<Float> = style.borderStyle.alpha;
-				borderAlphas = alpha.copy();
-				if (alpha.length == uniqueGroupsNum) {
+				if (alpha.length == x.length) {
+					var i = 0;
+					for (group in dataByGroup) {
+						for (dataPoint in group) {
+							dataPoint.borderAlpha = alpha[i];
+							i++;
+						}
+					}
+					borderAlphas = alpha.copy();
+				} else if (alpha.length == uniqueGroupsNum) {
+					for (i in 0...uniqueGroupsNum) {
+						var groupAlpha = alpha[i];
+						for (dataPoint in dataByGroup[i]) {
+							dataPoint.borderAlpha = groupAlpha;
+						}
+					}
 					for (i in 0...groupsArr.length) {
 						borderAlphas[i] = alpha[style.groups.get(groupsArr[i])];
 					}
@@ -200,11 +306,30 @@ class Scatter implements AxisLayer implements DataLayer {
 
 			if (style.borderStyle.thickness is Float || style.borderStyle.thickness is Int) {
 				var thickness = cast(style.borderStyle.thickness, Float);
+				for (group in dataByGroup) {
+					for (dataPoint in group) {
+						dataPoint.borderThickness = thickness;
+					}
+				}
 				borderThickness = Statistics.repeat(thickness, borderThickness.length);
 			} else if (style.borderStyle.thickness is Array) {
 				var thickness:Array<Float> = style.borderStyle.thickness;
-				borderThickness = thickness.copy();
-				if (thickness.length == uniqueGroupsNum) {
+				if (thickness.length == x.length) {
+					var i = 0;
+					for (group in dataByGroup) {
+						for (dataPoint in group) {
+							dataPoint.borderThickness = thickness[i];
+							i++;
+						}
+					}
+					borderThickness = thickness.copy();
+				} else if (thickness.length == uniqueGroupsNum) {
+					for (i in 0...uniqueGroupsNum) {
+						var groupThickness = thickness[i];
+						for (dataPoint in dataByGroup[i]) {
+							dataPoint.borderThickness = groupThickness;
+						}
+					}
 					for (i in 0...groupsArr.length) {
 						borderThickness[i] = thickness[style.groups.get(groupsArr[i])];
 					}
@@ -374,6 +499,16 @@ class Scatter implements AxisLayer implements DataLayer {
 			xCoords[i] = x;
 			yCoords[i] = y;
 		}
+		for (group in dataByGroup) {
+			for (dataPoint in group) {
+				var x = calcXCoord(dataPoint.values.x, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, x_dist);
+				var y = calcYCoord(dataPoint.values.y, axes[1].ticks, axes[1].ticks[axes[1].tickInfo.zeroIndex].top, y_dist);
+				if (x == null || y == null) {
+					continue;
+				}
+				dataPoint.coord = new Point(x, y);
+			}
+		}
 
 		// Optimization
 		if (useOptimization) {
@@ -472,18 +607,18 @@ class Scatter implements AxisLayer implements DataLayer {
 		// Drawing
 		dataCanvas.componentGraphics.clear();
 		if (chartInfo.type == line) {
-			var lastGroupPoint:Map<Int, Point> = [];
-			for (i in allowedIndeces) {
-				var currentGroup = data[i].group;
-				trace(colors[i], sizes[i], alphas[i]);
-				dataCanvas.componentGraphics.strokeStyle(colors[i], sizes[i], alphas[i]);
-				dataCanvas.componentGraphics.moveTo(xCoords[i], yCoords[i]);
-				if (lastGroupPoint.exists(currentGroup)) {
-					var p = lastGroupPoint.get(currentGroup);
-					dataCanvas.componentGraphics.moveTo(p.x, p.y);
+			dataCanvas.componentGraphics.clear();
+			for (group in dataByGroup) {
+				trace("group", group);
+				var start = group[0].coord;
+				var last = start;
+				dataCanvas.componentGraphics.fillStyle(group[0].color, 0.5);
+				dataCanvas.componentGraphics.strokeStyle(group[0].color, group[0].size, group[0].size);
+				for (dataPoint in group) {
+					dataCanvas.componentGraphics.moveTo(last.x, last.y);
+					dataCanvas.componentGraphics.lineTo(dataPoint.coord.x, dataPoint.coord.y);
+					last = dataPoint.coord;
 				}
-				dataCanvas.componentGraphics.lineTo(xCoords[i], yCoords[i]);
-				lastGroupPoint.set(currentGroup, new Point(xCoords[i], yCoords[i]));
 			}
 		} else {
 			for (i in allowedIndeces) {

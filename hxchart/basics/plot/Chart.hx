@@ -27,6 +27,7 @@ enum TrailTypes {
 enum PositionOption {
 	layered;
 	stacked;
+	filled;
 }
 
 /**
