@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="prism.css">
 </head>
 
 <body>
@@ -13,7 +14,7 @@
         <li id="logo-list"><a href="index.html"><img id="logo" src="haxelogo.png" alt=""></a></li>
         <li><a href="index.html">Get Started</a></li>
         <li><a href="reference.html">Reference</a></li>
-        <li><a href="">Try it out</a></li>
+        <li><a href="tryout.html">Try it out</a></li>
     </ul>
     <div class="content-body horizontal">
         <div class="sidebar">
@@ -34,6 +35,8 @@
                         <li><span class="caret item">borderStyle</span>
                             <ul class="nested">
                                 <li><span class="item">color</span></li>
+                                <li><span class="item">alpha</span></li>
+                                <li><span class="item">thickness</span></li>
                             </ul>
                         </li>
                     </ul>
@@ -57,7 +60,8 @@
             </div>
             <div class="item-body" style="display: none;">
                 <h1>Data.values</h1>
-                <p>data.values is a Map that can contain technically contain any kind of information, but needs certain
+                <p><em>data.values</em> is a Map that can contain technically contain any kind of information, but needs
+                    certain
                     keys depending on the chart.</p>
                 <h3>Scatter</h3>
                 <h4>Mandatory</h4>
@@ -100,11 +104,100 @@
             </div>
             <div class="item-body" style="display:none;">
                 <h1>Style</h1>
-                <p>style is an optional attribute.</p>
+                <p><em>style</em> is an optional attribute. The attributes that can be set in <em>style</em> are all
+                    named in a way, so
+                    they can be reused in many different charts.</p>
+                <p>Usually you can set the <em>style</em> attributes in three ways:</p>
+                <ul>
+                    <li><strong>A single value</strong>, in all charts this will result in every manifestation having
+                        this
+                        value.</li>
+                    <li><strong>An array the size of unique groups</strong>, in case more than one group is defined,
+                        this will
+                        result in
+                        every manifestation of a group to have the same value. <p>Depending on the chart, this setting
+                            may make no sense and won't result in anything</p>
+                    </li>
+                    <li><strong>An array the size of values</strong>, this will result in every manifestation to have
+                        its own
+                        value. <p>
+                            Depending on the chart, this setting may make no sense and won't result in anything</p>
+                    </li>
+                </ul>
+                <p>As an example this may look something like this:</p>
+                <p class="attention"><img src="exclamation.svg" alt="Attention" style="width: 12px; height: 12px;">
+                    Don't
+                    use this example trailinfo for
+                    creating a plot, it
+                    won't work as type and data are missing. This should only demonstrate how the values can be set</p>
+                <pre class="code-normal">
+                    <code class="language-haxe">
+                        var trailinfo = {
+                            style: {
+                                size: 3 //Single Value
+                            }
+                        };
+                        var trailinfo = {
+                            data: {
+                                values: ["groups" => ["1", "1", "2", "2"]] // Given that we have two different groups
+                            },
+                            style: {
+                                size: [3, 4] //Array size of groups
+                            }
+                        };
+                        var trailinfo = {
+                            data: {
+                                values: ["x" => [1,2,3]] // Given that we have three values
+                            },
+                            style: {
+                                size: [3,4,1] //Array size of values
+                            }
+                        };
+                    </code>
+                </pre>
             </div>
             <div class="item-body" style="display:none;">
                 <h1>Style.size</h1>
-                <p>style.size is an optional attribute.</p>
+                <p><em>style.size</em> describes an attribute for setting sizes of different kind. Depending on the
+                    chart this varies.</p>
+                <h3>Scatter</h3>
+                <p>For scatter plots <em>style.size</em> describes the radius of the drawn points. It can be set in all
+                    three ways described in <em>style</em>.</p>
+                <hr>
+                <h3>Line</h3>
+                <p>For line plots <em>style.size</em> describes the thickness of the drawn line. It can be set as a
+                    single value or as an array of groups.</p>
+
+            </div>
+            <div class="item-body" style="display:none;">
+                <h1>Style.colorPalette</h1>
+                <p><em>style.colorPalette</em> describes the colors used in a chart.</p>
+            </div>
+            <div class="item-body" style="display:none;">
+                <h1>Style.alpha</h1>
+                <p><em>style.alpha</em> describes the alpha value used in a chart.</p>
+            </div>
+            <div class="item-body" style="display:none;">
+                <h1>Style.groups</h1>
+                <p><em>style.groups</em> describes the groups used in a chart. Don't use this, if you don't know what it
+                    does.</p>
+            </div>
+            <div class="item-body" style="display:none;">
+                <h1>Style.borderStyle</h1>
+                <p><em>style.borderStyle</em> describes the styling for the borders of a chart. Depending on the chart
+                    this may do nothing. There are three subattributes that can be set</p>
+            </div>
+            <div class="item-body" style="display:none;">
+                <h1>Style.borderStyle.color</h1>
+                <p><em>style.borderStyle.color</em> describes the color of the borders of a chart.</p>
+            </div>
+            <div class="item-body" style="display:none;">
+                <h1>Style.borderStyle.alpha</h1>
+                <p><em>style.borderStyle.alpha</em> describes the alpha value of the borders of a chart.</p>
+            </div>
+            <div class="item-body" style="display:none;">
+                <h1>Style.borderStyle.thickness</h1>
+                <p><em>style.borderStyle.thickness</em> describes the thickness of the borders of a chart.</p>
             </div>
         </div>
     </div>
@@ -132,7 +225,7 @@
             });
         }
     </script>
-    <!-- <script src="reference.js"></script> -->
+    <script src="prism.js"></script>
 </body>
 
 </html>

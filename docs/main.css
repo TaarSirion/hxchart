@@ -124,3 +124,10 @@ body {
 .horizontal {
     display: flex;
 }
+
+.attention {
+    color: #c5c5c5;
+    font-size: 10px;
+    display: flex;
+    gap: 10px;
+}
