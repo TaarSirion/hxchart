@@ -1,16 +1,11 @@
 package hxchart.basics.trails;
 
-import haxe.ui.graphics.DrawCommand;
 import hxchart.basics.events.EventLayer.EventHandler;
-import haxe.ui.events.MouseEvent;
-import haxe.ui.events.Events;
-import hxchart.basics.utils.Statistics;
 import hxchart.basics.plot.Chart.OptimizationType;
 import hxchart.basics.quadtree.OptimGrid;
 import hxchart.basics.quadtree.Quadtree;
 import hxchart.basics.axis.AxisTools;
 import hxchart.basics.utils.ChartTools;
-import haxe.Timer;
 import hxchart.basics.plot.Chart.TrailStyle;
 import hxchart.basics.ticks.Ticks;
 import haxe.Exception;
@@ -23,7 +18,6 @@ import haxe.ui.geom.Point;
 import haxe.ui.containers.Absolute;
 import hxchart.basics.axis.NumericTickInfo;
 import haxe.ui.util.Color;
-import hxchart.basics.data.Data2D;
 import hxchart.basics.plot.Chart.TrailInfo;
 import hxchart.basics.data.DataLayer;
 import hxchart.basics.axis.AxisLayer;
@@ -38,7 +32,8 @@ typedef ScatterDataPoint = {
 	color:Color,
 	borderAlpha:Float,
 	borderColor:Color,
-	borderThickness:Float
+	borderThickness:Float,
+	allowed:Bool
 }
 
 class Scatter implements AxisLayer implements DataLayer {
@@ -47,23 +42,11 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var axes:Array<Axis>;
 
 	public var dataByGroup:Array<Array<ScatterDataPoint>> = [];
-	public var data:Array<Data2D> = [];
-	public var groups:Map<String, Int>;
-	@:allow(hxchart.tests)
-	public var colors:Array<Color> = [];
-	@:allow(hxchart.tests)
-	public var alphas:Array<Float> = [];
-	@:allow(hxchart.tests)
-	public var sizes:Array<Float> = [];
-	@:allow(hxchart.tests)
-	public var borderAlphas:Array<Float> = [];
-	@:allow(hxchart.tests)
-	public var borderThickness:Array<Float> = [];
-	@:allow(hxchart.tests)
-	public var borderColors:Array<Color> = [];
-
+	public var data:Array<Any>;
 	public var dataLayer:Absolute;
 	public var dataCanvas:Canvas;
+
+	var dataSize:Int;
 
 	var quadTree:Quadtree;
 	var optimGrid:OptimGrid;
@@ -126,30 +109,37 @@ class Scatter implements AxisLayer implements DataLayer {
 			clickLayer = canvasComponent;
 		}
 		setData(chartInfo.data, chartInfo.style);
-		positionAxes(chartInfo.axisInfo, data, chartInfo.style);
+		positionAxes(chartInfo.axisInfo, dataByGroup, chartInfo.style);
 	}
+
+	@:allow(hxchart.tests)
+	var minX:Float = Math.POSITIVE_INFINITY;
+	@:allow(hxchart.tests)
+	var maxX:Float = Math.NEGATIVE_INFINITY;
+	@:allow(hxchart.tests)
+	var minY:Float = Math.POSITIVE_INFINITY;
+	@:allow(hxchart.tests)
+	var maxY:Float = Math.NEGATIVE_INFINITY;
 
 	public function setData(newData:TrailData, style:TrailStyle) {
 		var x = newData.values.get("x");
 		var y = newData.values.get("y");
+		dataSize = x.length;
 		var groupsArr = newData.values.get("groups");
 		var uniqueGroupsNum = 0;
+		dataByGroup = [];
 		for (key in style.groups.keys()) {
 			uniqueGroupsNum++;
 			dataByGroup.push([]);
 		}
 
-		data.resize(x.length);
-		colors.resize(x.length);
-		sizes.resize(x.length);
-		alphas.resize(x.length);
-		borderColors.resize(x.length);
-		borderAlphas.resize(x.length);
-		borderThickness.resize(x.length);
-
 		for (i in 0...x.length) {
 			var group = groupsArr[i];
 			var groupIndex = style.groups.get(group);
+			maxX = Math.max(maxX, x[i]);
+			minX = Math.min(minX, x[i]);
+			maxY = Math.max(maxY, y[i]);
+			minY = Math.min(minY, y[i]);
 			dataByGroup[groupIndex].push({
 				coord: new Point(0, 0),
 				values: {
@@ -161,19 +151,10 @@ class Scatter implements AxisLayer implements DataLayer {
 				alpha: 1,
 				borderColor: style.colorPalette[groupIndex],
 				borderThickness: 1,
-				borderAlpha: 1
+				borderAlpha: 1,
+				allowed: false
 			});
-
-			var point = new Data2D(x[i], y[i], groupIndex);
-			colors[i] = style.colorPalette[style.groups.get(group)];
-			borderColors[i] = colors[i];
-			data[i] = point;
-			sizes[i] = 2;
-			alphas[i] = 1;
-			borderAlphas[i] = 1;
-			borderThickness[i] = 1;
 		}
-
 		if (style.size is Float || style.size is Int) {
 			var size = cast(style.size, Float);
 			for (group in dataByGroup) {
@@ -181,7 +162,6 @@ class Scatter implements AxisLayer implements DataLayer {
 					dataPoint.size = size;
 				}
 			}
-			sizes = Statistics.repeat(size, sizes.length);
 		} else if (style.size is Array) {
 			var size:Array<Float> = style.size;
 			if (size.length == x.length) {
@@ -192,16 +172,12 @@ class Scatter implements AxisLayer implements DataLayer {
 						i++;
 					}
 				}
-				sizes = size.copy();
 			} else if (size.length == uniqueGroupsNum) {
 				for (i in 0...uniqueGroupsNum) {
 					var groupSize = size[i];
 					for (dataPoint in dataByGroup[i]) {
 						dataPoint.size = groupSize;
 					}
-				}
-				for (i in 0...groupsArr.length) {
-					sizes[i] = size[style.groups.get(groupsArr[i])];
 				}
 			}
 		}
@@ -213,7 +189,6 @@ class Scatter implements AxisLayer implements DataLayer {
 					dataPoint.alpha = alpha;
 				}
 			}
-			alphas = Statistics.repeat(alpha, alphas.length);
 		} else if (style.alpha is Array) {
 			var alpha:Array<Float> = style.alpha;
 			if (alpha.length == x.length) {
@@ -224,16 +199,12 @@ class Scatter implements AxisLayer implements DataLayer {
 						i++;
 					}
 				}
-				alphas = alpha.copy();
 			} else if (alpha.length == uniqueGroupsNum) {
 				for (i in 0...uniqueGroupsNum) {
 					var groupAlpha = alpha[i];
 					for (dataPoint in dataByGroup[i]) {
 						dataPoint.alpha = groupAlpha;
 					}
-				}
-				for (i in 0...groupsArr.length) {
-					alphas[i] = alpha[style.groups.get(groupsArr[i])];
 				}
 			}
 		}
@@ -247,7 +218,6 @@ class Scatter implements AxisLayer implements DataLayer {
 							dataPoint.borderColor = color;
 						}
 					}
-					borderColors = Statistics.repeat(color, borderColors.length);
 				} else if (style.borderStyle.color is Array) {
 					var color:Array<Int> = style.borderStyle.color;
 					if (color.length == x.length) {
@@ -258,16 +228,12 @@ class Scatter implements AxisLayer implements DataLayer {
 								i++;
 							}
 						}
-						borderColors = color.copy();
 					} else if (color.length == uniqueGroupsNum) {
 						for (i in 0...uniqueGroupsNum) {
 							var groupColor = color[i];
 							for (dataPoint in dataByGroup[i]) {
 								dataPoint.borderColor = groupColor;
 							}
-						}
-						for (i in 0...groupsArr.length) {
-							borderColors[i] = color[style.groups.get(groupsArr[i])];
 						}
 					}
 				}
@@ -280,7 +246,6 @@ class Scatter implements AxisLayer implements DataLayer {
 						dataPoint.borderAlpha = alpha;
 					}
 				}
-				borderAlphas = Statistics.repeat(alpha, borderAlphas.length);
 			} else if (style.borderStyle.alpha is Array) {
 				var alpha:Array<Float> = style.borderStyle.alpha;
 				if (alpha.length == x.length) {
@@ -291,16 +256,12 @@ class Scatter implements AxisLayer implements DataLayer {
 							i++;
 						}
 					}
-					borderAlphas = alpha.copy();
 				} else if (alpha.length == uniqueGroupsNum) {
 					for (i in 0...uniqueGroupsNum) {
 						var groupAlpha = alpha[i];
 						for (dataPoint in dataByGroup[i]) {
 							dataPoint.borderAlpha = groupAlpha;
 						}
-					}
-					for (i in 0...groupsArr.length) {
-						borderAlphas[i] = alpha[style.groups.get(groupsArr[i])];
 					}
 				}
 			}
@@ -312,7 +273,6 @@ class Scatter implements AxisLayer implements DataLayer {
 						dataPoint.borderThickness = thickness;
 					}
 				}
-				borderThickness = Statistics.repeat(thickness, borderThickness.length);
 			} else if (style.borderStyle.thickness is Array) {
 				var thickness:Array<Float> = style.borderStyle.thickness;
 				if (thickness.length == x.length) {
@@ -323,7 +283,6 @@ class Scatter implements AxisLayer implements DataLayer {
 							i++;
 						}
 					}
-					borderThickness = thickness.copy();
 				} else if (thickness.length == uniqueGroupsNum) {
 					for (i in 0...uniqueGroupsNum) {
 						var groupThickness = thickness[i];
@@ -331,41 +290,8 @@ class Scatter implements AxisLayer implements DataLayer {
 							dataPoint.borderThickness = groupThickness;
 						}
 					}
-					for (i in 0...groupsArr.length) {
-						borderThickness[i] = thickness[style.groups.get(groupsArr[i])];
-					}
 				}
 			}
-		}
-		sortData();
-	}
-
-	@:allow(hxchart.tests)
-	var minX:Float;
-	@:allow(hxchart.tests)
-	var maxX:Float;
-	@:allow(hxchart.tests)
-	var minY:Float;
-	@:allow(hxchart.tests)
-	var maxY:Float;
-
-	@:allow(hxchart.tests)
-	function sortData() {
-		var xVals = data.map(x -> {
-			return x.xValue;
-		});
-		var yVals = data.map(x -> {
-			return x.yValue;
-		});
-		if (Std.isOfType(xVals[0], Float)) {
-			xVals.sort(Reflect.compare);
-			minX = xVals[0];
-			maxX = xVals[xVals.length - 1];
-		}
-		if (Std.isOfType(yVals[0], Float)) {
-			yVals.sort(Reflect.compare);
-			minY = yVals[0];
-			maxY = yVals[yVals.length - 1];
 		}
 	}
 
@@ -397,7 +323,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		return tickInfo;
 	}
 
-	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Data2D>, style:TrailStyle) {
+	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle) {
 		axes = [null, null];
 		if (axisInfo[0].axis != null) {
 			axes[0] = axisInfo[0].axis;
@@ -415,17 +341,27 @@ class Scatter implements AxisLayer implements DataLayer {
 		var isPreviousXAxis = false;
 		var isPreviousYAxis = false;
 		if (axes[0] == null) {
-			var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, data.map(x -> {
-				return x.xValue;
-			}), minX, maxX);
+			var xValues = [];
+			for (any in data) {
+				var group:Array<ScatterDataPoint> = any;
+				xValues = xValues.concat(group.map(dataPoint -> {
+					return dataPoint.values.x;
+				}));
+			}
+			var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, xValues, minX, maxX);
 			axes[0] = new Axis(new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
 		} else {
 			isPreviousXAxis = true;
 		}
 		if (axes[1] == null) {
-			var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, data.map(x -> {
-				return x.yValue;
-			}), minY, maxY);
+			var yValues = [];
+			for (any in data) {
+				var group:Array<ScatterDataPoint> = any;
+				yValues = yValues.concat(group.map(dataPoint -> {
+					return dataPoint.values.y;
+				}));
+			}
+			var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, yValues, minY, maxY);
 			axes[1] = new Axis(new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
 		} else {
 			isPreviousYAxis = true;
@@ -486,20 +422,6 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 
 		// Coordinates calculation
-		var xCoords:Array<Float> = [];
-		xCoords.resize(data.length);
-		var yCoords:Array<Float> = [];
-		yCoords.resize(data.length);
-		var allowedIndeces = [];
-		for (i => dataPoint in data) {
-			var x = calcXCoord(dataPoint.xValue, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, x_dist);
-			var y = calcYCoord(dataPoint.yValue, axes[1].ticks, axes[1].ticks[axes[1].tickInfo.zeroIndex].top, y_dist);
-			if (x == null || y == null) {
-				continue;
-			}
-			xCoords[i] = x;
-			yCoords[i] = y;
-		}
 		for (group in dataByGroup) {
 			for (dataPoint in group) {
 				var x = calcXCoord(dataPoint.values.x, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, x_dist);
@@ -515,29 +437,37 @@ class Scatter implements AxisLayer implements DataLayer {
 		if (useOptimization) {
 			switch (chartInfo.optimizationInfo.reduceVia) {
 				case OptimizationType.optimGrid:
-					for (i => coord in xCoords) {
-						var xRound = Math.round(xCoords[i] * 1 / gridStep);
-						var yRound = Math.round(yCoords[i] * 1 / gridStep);
-						if (xRound < optimGrid.grid.length) {
-							if (yRound < optimGrid.grid[xRound].length) {
-								if (!optimGrid.grid[xRound][yRound]) {
-									optimGrid.grid[xRound][yRound] = true;
-									allowedIndeces.push(i);
+					for (group in dataByGroup) {
+						for (dataPoint in group) {
+							var xRound = Math.round(dataPoint.coord.x * 1 / gridStep);
+							var yRound = Math.round(dataPoint.coord.y * 1 / gridStep);
+							if (xRound < optimGrid.grid.length) {
+								if (yRound < optimGrid.grid[xRound].length) {
+									if (!optimGrid.grid[xRound][yRound]) {
+										optimGrid.grid[xRound][yRound] = true;
+										dataPoint.allowed = true;
+									}
 								}
 							}
 						}
 					}
 				case OptimizationType.quadTree:
-					for (i => coord in xCoords) {
-						if (quadTree.search(new Region(xCoords[i] - 2, xCoords[i] + 2, yCoords[i] - 2, yCoords[i] + 2), []).length == 0) {
-							quadTree.addPoint(new Point(xCoords[i], yCoords[i]));
-							allowedIndeces.push(i);
+					for (group in dataByGroup) {
+						for (dataPoint in group) {
+							var xCoord = dataPoint.coord.x;
+							var yCoord = dataPoint.coord.y;
+							if (quadTree.search(new Region(xCoord - 2, xCoord + 2, yCoord - 2, yCoord + 2), []).length == 0) {
+								quadTree.addPoint(new Point(xCoord, yCoord));
+								dataPoint.allowed = true;
+							}
 						}
 					}
 			}
 		} else {
-			for (i => coord in xCoords) {
-				allowedIndeces.push(i);
+			for (group in dataByGroup) {
+				for (dataPoint in group) {
+					dataPoint.allowed = true;
+				}
 			}
 		}
 
@@ -545,30 +475,42 @@ class Scatter implements AxisLayer implements DataLayer {
 		eventHandler.hoverHandlers.push(function(e) {
 			hoverLayer.componentGraphics.clear();
 			if (chartInfo.events != null && chartInfo.events.onHandle != null) {
-				for (i in allowedIndeces) {
-					if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
-						var selectInfo = chartInfo.events.onHandle({
-							coords: [new Point(xCoords[i], yCoords[i])],
-							border: {
-								thickness: borderThickness[i],
-								color: borderColors[i],
-								alpha: borderAlphas[i]
-							},
-							alpha: alphas[i],
-							color: colors[i],
-							size: sizes[i]
-						});
-						hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
-						hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
-						hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
+				for (group in dataByGroup) {
+					for (dataPoint in group) {
+						if (!dataPoint.allowed) {
+							continue;
+						}
+						if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
+							dataPoint.size + dataPoint.borderThickness)) {
+							var selectInfo = chartInfo.events.onHandle({
+								coords: [dataPoint.coord],
+								border: {
+									thickness: dataPoint.borderThickness,
+									color: dataPoint.borderColor,
+									alpha: dataPoint.borderAlpha
+								},
+								alpha: dataPoint.alpha,
+								color: dataPoint.color,
+								size: dataPoint.size
+							});
+							hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
+							hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
+							hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
+						}
 					}
 				}
 				return;
 			}
-			for (i in allowedIndeces) {
-				if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
-					hoverLayer.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
-					hoverLayer.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
+			for (group in dataByGroup) {
+				for (dataPoint in group) {
+					if (!dataPoint.allowed) {
+						continue;
+					}
+					if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
+						dataPoint.size + dataPoint.borderThickness)) {
+						hoverLayer.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
+						hoverLayer.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
+					}
 				}
 			}
 		});
@@ -577,30 +519,42 @@ class Scatter implements AxisLayer implements DataLayer {
 		eventHandler.clickHandlers.push(function(e) {
 			clickLayer.componentGraphics.clear();
 			if (chartInfo.events != null && chartInfo.events.onClick != null) {
-				for (i in allowedIndeces) {
-					if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
-						var selectInfo = chartInfo.events.onClick({
-							coords: [new Point(xCoords[i], yCoords[i])],
-							border: {
-								thickness: borderThickness[i],
-								color: borderColors[i],
-								alpha: borderAlphas[i]
-							},
-							alpha: alphas[i],
-							color: colors[i],
-							size: sizes[i]
-						});
-						clickLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
-						clickLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
-						clickLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
+				for (group in dataByGroup) {
+					for (dataPoint in group) {
+						if (!dataPoint.allowed) {
+							continue;
+						}
+						if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
+							dataPoint.size + dataPoint.borderThickness)) {
+							var selectInfo = chartInfo.events.onHandle({
+								coords: [dataPoint.coord],
+								border: {
+									thickness: dataPoint.borderThickness,
+									color: dataPoint.borderColor,
+									alpha: dataPoint.borderAlpha
+								},
+								alpha: dataPoint.alpha,
+								color: dataPoint.color,
+								size: dataPoint.size
+							});
+							hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
+							hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
+							hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
+						}
 					}
 				}
 				return;
 			}
-			for (i in allowedIndeces) {
-				if (inPointRadius(new Point(e.localX, e.localY), new Point(xCoords[i], yCoords[i]), sizes[i] + borderThickness[i])) {
-					clickLayer.componentGraphics.fillStyle(Color.fromString("#000000"), 0.5);
-					clickLayer.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
+			for (group in dataByGroup) {
+				for (dataPoint in group) {
+					if (!dataPoint.allowed) {
+						continue;
+					}
+					if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
+						dataPoint.size + dataPoint.borderThickness)) {
+						hoverLayer.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
+						hoverLayer.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
+					}
 				}
 			}
 		});
@@ -619,6 +573,10 @@ class Scatter implements AxisLayer implements DataLayer {
 				dataCanvas.componentGraphics.moveTo(last.x, last.y);
 				dataCanvas.componentGraphics.beginPath();
 				for (dataPoint in group) {
+					trace(dataPoint);
+					if (!dataPoint.allowed) {
+						continue;
+					}
 					dataCanvas.componentGraphics.lineTo(dataPoint.coord.x, dataPoint.coord.y);
 					last = dataPoint.coord;
 				}
@@ -630,10 +588,15 @@ class Scatter implements AxisLayer implements DataLayer {
 				}
 			}
 		} else {
-			for (i in allowedIndeces) {
-				dataCanvas.componentGraphics.strokeStyle(borderColors[i], borderThickness[i], borderAlphas[i]);
-				dataCanvas.componentGraphics.fillStyle(colors[i], alphas[i]);
-				dataCanvas.componentGraphics.circle(xCoords[i], yCoords[i], sizes[i]);
+			for (group in dataByGroup) {
+				for (dataPoint in group) {
+					if (!dataPoint.allowed) {
+						continue;
+					}
+					dataCanvas.componentGraphics.strokeStyle(dataPoint.borderColor, dataPoint.borderThickness, dataPoint.borderAlpha);
+					dataCanvas.componentGraphics.fillStyle(dataPoint.color, dataPoint.alpha);
+					dataCanvas.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
+				}
 			}
 		}
 

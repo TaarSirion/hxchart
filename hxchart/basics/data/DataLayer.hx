@@ -41,10 +41,9 @@ import haxe.ui.containers.Absolute;
 
 interface DataLayer {
 	public var id:String;
-	public var data:Array<Data2D>;
+	public var data:Array<Any>;
 	public var parent:Absolute;
 	public var dataCanvas:Canvas;
-	public var colors:Array<Color>;
 
 	public function setData(newData:TrailData, style:TrailStyle):Void;
 	public function positionData(style:TrailStyle):Void;

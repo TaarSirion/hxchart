@@ -48,10 +48,10 @@ class TestScatter extends Test {
 			colorPalette: ColorPalettes.defaultColors(1),
 			groups: ["1" => 0]
 		});
-		Assert.equals(2, scatter.sizes[0]);
-		Assert.equals(1, scatter.alphas[0]);
-		Assert.equals(1, scatter.borderAlphas[0]);
-		Assert.equals(1, scatter.borderThickness[0]);
+		Assert.equals(2, scatter.dataByGroup[0][0].size);
+		Assert.equals(1, scatter.dataByGroup[0][0].alpha);
+		Assert.equals(1, scatter.dataByGroup[0][0].borderAlpha);
+		Assert.equals(1, scatter.dataByGroup[0][0].borderThickness);
 
 		scatter.setData({
 			values: ["x" => [1, 2], "y" => [1, 2], "groups" => ["1", "1"]]
@@ -65,10 +65,10 @@ class TestScatter extends Test {
 			},
 			groups: ["1" => 0]
 		});
-		Assert.equals(3, scatter.sizes[0]);
-		Assert.equals(0.5, scatter.alphas[0]);
-		Assert.equals(0.3, scatter.borderAlphas[0]);
-		Assert.equals(2, scatter.borderThickness[0]);
+		Assert.equals(3, scatter.dataByGroup[0][0].size);
+		Assert.equals(0.5, scatter.dataByGroup[0][0].alpha);
+		Assert.equals(0.3, scatter.dataByGroup[0][0].borderAlpha);
+		Assert.equals(2, scatter.dataByGroup[0][0].borderThickness);
 
 		scatter.setData({
 			values: ["x" => [1, 2], "y" => [1, 2], "groups" => ["1", "1"]]
@@ -77,15 +77,14 @@ class TestScatter extends Test {
 			colorPalette: ColorPalettes.defaultColors(1),
 			groups: ["1" => 0]
 		});
-		Assert.equals(1, scatter.data[0].xValue);
-		Assert.equals(1, scatter.data[0].yValue);
+		Assert.equals(1, scatter.dataByGroup[0][0].values.x);
+		Assert.equals(1, scatter.dataByGroup[0][0].values.y);
 
 		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
-		Assert.equals(2, scatter.data[0].xValue);
-		Assert.equals(1, scatter.data[0].yValue);
-		Assert.equals(3, scatter.data.length);
-		Assert.equals(3, scatter.colors.length);
-		Assert.equals(0, scatter.colors[2]);
+		Assert.equals(2, scatter.dataByGroup[0][0].values.x);
+		Assert.equals(1, scatter.dataByGroup[0][0].values.y);
+		Assert.equals(3, scatter.dataByGroup[0].length);
+		Assert.equals(0, scatter.dataByGroup[0][2].color);
 	}
 
 	function testSortData() {
@@ -112,7 +111,7 @@ class TestScatter extends Test {
 	@:depends(testSetData, testSetTickInfo)
 	function testPositionAxes() {
 		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
-		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.data, {});
+		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.dataByGroup, {});
 		Assert.equals(2, scatter.axes.length);
 		Assert.equals(90, scatter.axes[0].axisLength);
 		Assert.equals(5, scatter.axes[0].startPoint.x);
@@ -122,7 +121,7 @@ class TestScatter extends Test {
 	@:depends(testPositionAxes)
 	function testPositionData() {
 		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
-		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.data, {});
+		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.dataByGroup, {});
 		scatter.positionData({
 			colorPalette: ColorPalettes.defaultColors(1),
 			groups: ["1" => 0]

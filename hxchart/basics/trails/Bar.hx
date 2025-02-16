@@ -24,7 +24,7 @@ using hxchart.basics.utils.Statistics;
 
 class Bar implements AxisLayer implements DataLayer {
 	public var id:String;
-	public var data:Array<Data2D>;
+	public var data:Array<Any>;
 	public var parent:Absolute;
 	public var dataCanvas:Canvas;
 	public var colors:Array<Color>;
@@ -91,10 +91,12 @@ class Bar implements AxisLayer implements DataLayer {
 
 	function sortData(style:TrailStyle) {
 		xValues = data.map(x -> {
-			return x.xValue;
+			var val:Data2D = x;
+			return val.xValue;
 		});
 		yValues = data.map(x -> {
-			return x.yValue;
+			var val:Data2D = x;
+			return val.yValue;
 		});
 
 		if (Std.isOfType(xValues[0], Float)) {
@@ -172,7 +174,7 @@ class Bar implements AxisLayer implements DataLayer {
 			}
 
 			for (i in indexes) {
-				var dataPoint = data[i];
+				var dataPoint:Data2D = data[i];
 				var x = calcCoordinate(dataPoint.xValue, dataPoint.group, axes[0].ticks, xZeroPos, xDist, style, previousValue, false);
 				var y = calcCoordinate(dataPoint.yValue, dataPoint.group, axes[1].ticks, yZeroPos, yDist, style, previousValue, true);
 				dataCanvas.componentGraphics.fillStyle(colors[i], 1);
@@ -264,7 +266,7 @@ class Bar implements AxisLayer implements DataLayer {
 		return tickInfo;
 	}
 
-	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Data2D>, style:TrailStyle):Void {
+	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle):Void {
 		axes = [null, null];
 		if (axisInfo[0].axis != null) {
 			axes[0] = axisInfo[0].axis;
@@ -284,7 +286,8 @@ class Bar implements AxisLayer implements DataLayer {
 		var isPreviousYAxis = false;
 		if (axes[0] == null) {
 			var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, data.map(x -> {
-				return x.xValue;
+				var val:Data2D = x;
+				return val.xValue;
 			}), minX, maxX);
 			axes[0] = new Axis(new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
 		} else {
@@ -292,7 +295,8 @@ class Bar implements AxisLayer implements DataLayer {
 		}
 		if (axes[1] == null) {
 			var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, data.map(x -> {
-				return x.yValue;
+				var val:Data2D = x;
+				return val.yValue;
 			}), minY, maxY);
 			axes[1] = new Axis(new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
 		} else {
