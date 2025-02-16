@@ -5,3 +5,6 @@ hl.hxml
 html.hxml
 Haxechart.hxproj
 pages.hxml
+res/
+flixel.xml
+bin/

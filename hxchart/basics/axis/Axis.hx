@@ -125,6 +125,8 @@ class Axis extends Absolute {
 		return zeroTickPosition = pos;
 	}
 
+	public var axisColor:Color;
+
 	public function new(start:Point, rotation:Int, length:Float, tickInfo:TickInfo, idName:String, color:String = "black") {
 		super();
 		top = start.y;
@@ -132,11 +134,7 @@ class Axis extends Absolute {
 		this.axisRotation = rotation;
 		axisLength = length;
 		showZeroTick = true;
-		#if !(haxeui_flixel || haxeui_heaps)
-		this.color = Color.fromString(color);
-		#else
-		backgroundColor = Color.fromString(color);
-		#end
+		axisColor = Color.fromString(color);
 		this.tickInfo = tickInfo;
 		id = idName;
 		startPoint = start;
@@ -201,11 +199,7 @@ private class Draw extends Behaviour {
 		var axis = cast(_component, Axis);
 		var canvas = _component.findComponent(null, Canvas);
 		if (canvas != null) {
-			#if !(haxeui_flixel || haxeui_heaps)
-			canvas.componentGraphics.strokeStyle(axis.color);
-			#else
-			canvas.componentGraphics.strokeStyle(axis.backgroundColor);
-			#end
+			canvas.componentGraphics.strokeStyle(axis.axisColor);
 			canvas.componentGraphics.moveTo(axis.startPoint.x, axis.startPoint.y);
 			if (axis.endPoint == null) {
 				axis.endPoint = AxisTools.positionEndpoint(axis.startPoint, axis.axisRotation, axis.axisLength);
@@ -424,11 +418,7 @@ private class AxisBuilder extends CompositeBuilder {
 		var axis = _axis;
 		var canvas = _tickCanvasLayer;
 		if (canvas != null) {
-			#if !(haxeui_flixel || haxeui_heaps)
-			canvas.componentGraphics.strokeStyle(axis.color);
-			#else
-			canvas.componentGraphics.strokeStyle(axis.backgroundColor);
-			#end
+			canvas.componentGraphics.strokeStyle(axis.axisColor);
 			canvas.componentGraphics.moveTo(axis.startPoint.x, axis.startPoint.y);
 			if (axis.endPoint == null) {
 				axis.endPoint = AxisTools.positionEndpoint(axis.startPoint, axis.axisRotation, axis.axisLength);
