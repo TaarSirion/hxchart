@@ -571,7 +571,9 @@ class Scatter implements AxisLayer implements DataLayer {
 				}
 				dataCanvas.componentGraphics.strokeStyle(group[0].color, group[0].size, group[0].size);
 				dataCanvas.componentGraphics.moveTo(last.x, last.y);
+				#if !(haxeui_heaps)
 				dataCanvas.componentGraphics.beginPath();
+				#end
 				for (dataPoint in group) {
 					trace(dataPoint);
 					if (!dataPoint.allowed) {
@@ -584,7 +586,9 @@ class Scatter implements AxisLayer implements DataLayer {
 					dataCanvas.componentGraphics.lineTo(last.x, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
 					dataCanvas.componentGraphics.lineTo(start.x, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
 					dataCanvas.componentGraphics.lineTo(start.x, start.y);
+					#if !(haxeui_heaps)
 					dataCanvas.componentGraphics.closePath();
+					#end
 				}
 			}
 		} else {

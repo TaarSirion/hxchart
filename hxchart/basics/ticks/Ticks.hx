@@ -49,10 +49,10 @@ class Ticks extends Box {
 		return is_sub;
 	}
 
-	public var rotation(default, set):Int;
+	public var tickRotation(default, set):Int;
 
-	function set_rotation(rotation:Int) {
-		return this.rotation = rotation;
+	function set_tickRotation(rotation:Int) {
+		return this.tickRotation = rotation;
 	}
 
 	public var showLabel(default, set):Bool;
@@ -70,10 +70,14 @@ class Ticks extends Box {
 	public function new(is_sub:Bool = false, rotation:Int = 0) {
 		super();
 		this.is_sub = is_sub;
-		this.rotation = rotation + 90;
+		this.tickRotation = rotation + 90;
 		showLabel = true;
 		labelPosition = S;
+		#if !(haxeui_flixel || haxeui_heaps)
 		color = Color.fromString("black");
+		#else
+		backgroundColor = Color.fromString("black");
+		#end
 	}
 }
 
@@ -129,7 +133,7 @@ class TickUtils {
 		var tickLength = is_sub ? _tick.subTickLength : _tick.tickLength;
 		var tickFontsize = is_sub ? _tick.subFontSize : _tick.fontSize;
 		var zeroPoint = new Point(0, 0);
-		var labelPoint = AxisTools.positionEndpoint(zeroPoint, _tick.rotation, tickLength / 2 + 11);
+		var labelPoint = AxisTools.positionEndpoint(zeroPoint, _tick.tickRotation, tickLength / 2 + 11);
 		_label.customStyle.fontSize = tickFontsize;
 		switch (_tick.labelPosition) {
 			case S:

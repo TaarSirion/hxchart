@@ -1,6 +1,5 @@
 package hxchart.basics.axis;
 
-import js.Lib;
 import haxe.Timer;
 import haxe.ui.util.Color;
 import haxe.ui.behaviours.Behaviour;
@@ -45,15 +44,15 @@ class Axis extends Absolute {
 
 	@:call(UpdateTicks) public function updateTicks(data:TickInfo):Void;
 
-	@:call(Draw) private function draw():Void;
+	@:call(Draw) private function drawAxis():Void;
 
 	/**
 	 * Rotation of an axis in degrees.
 	 */
-	public var rotation(default, set):Int;
+	public var axisRotation(default, set):Int;
 
-	private function set_rotation(rotation:Int) {
-		return this.rotation = rotation;
+	private function set_axisRotation(rotation:Int) {
+		return this.axisRotation = rotation;
 	}
 
 	/**
@@ -130,10 +129,14 @@ class Axis extends Absolute {
 		super();
 		top = start.y;
 		left = start.x;
-		this.rotation = rotation;
+		this.axisRotation = rotation;
 		axisLength = length;
 		showZeroTick = true;
+		#if !(haxeui_flixel || haxeui_heaps)
 		this.color = Color.fromString(color);
+		#else
+		backgroundColor = Color.fromString(color);
+		#end
 		this.tickInfo = tickInfo;
 		id = idName;
 		startPoint = start;
@@ -141,7 +144,7 @@ class Axis extends Absolute {
 
 	override function onResized() {
 		axisLength = width * 0.9;
-		if (rotation == 270) {
+		if (axisRotation == 270) {
 			axisLength = height * 0.9;
 		}
 		super.onResized();
@@ -162,7 +165,7 @@ class Axis extends Absolute {
 		}
 		if (linkedAxes != null) {
 			var lengthPerRotation:Float = 0;
-			if (rotation == 270) {
+			if (axisRotation == 270) {
 				lengthPerRotation = axisLength;
 			}
 			for (key in linkedAxes.keys()) {
@@ -198,17 +201,21 @@ private class Draw extends Behaviour {
 		var axis = cast(_component, Axis);
 		var canvas = _component.findComponent(null, Canvas);
 		if (canvas != null) {
+			#if !(haxeui_flixel || haxeui_heaps)
 			canvas.componentGraphics.strokeStyle(axis.color);
+			#else
+			canvas.componentGraphics.strokeStyle(axis.backgroundColor);
+			#end
 			canvas.componentGraphics.moveTo(axis.startPoint.x, axis.startPoint.y);
 			if (axis.endPoint == null) {
-				axis.endPoint = AxisTools.positionEndpoint(axis.startPoint, axis.rotation, axis.axisLength);
+				axis.endPoint = AxisTools.positionEndpoint(axis.startPoint, axis.axisRotation, axis.axisLength);
 			}
 			canvas.componentGraphics.lineTo(axis.endPoint.x, axis.endPoint.y);
 			for (tick in axis.ticks) {
 				var tickLength = tick.tickLength;
 				var middlePoint = new Point(tick.left, tick.top);
-				var start = AxisTools.positionEndpoint(middlePoint, tick.rotation, tickLength / 2);
-				var end = AxisTools.positionEndpoint(middlePoint, tick.rotation + 180, tickLength / 2);
+				var start = AxisTools.positionEndpoint(middlePoint, tick.tickRotation, tickLength / 2);
+				var end = AxisTools.positionEndpoint(middlePoint, tick.tickRotation + 180, tickLength / 2);
 				canvas.componentGraphics.moveTo(start.x, start.y);
 				canvas.componentGraphics.lineTo(end.x, end.y);
 			}
@@ -216,8 +223,8 @@ private class Draw extends Behaviour {
 				tick.showLabel = false;
 				var tickLength = tick.subTickLength;
 				var middlePoint = new Point(tick.left, tick.top);
-				var start = AxisTools.positionEndpoint(middlePoint, tick.rotation, tickLength / 2);
-				var end = AxisTools.positionEndpoint(middlePoint, tick.rotation + 180, tickLength / 2);
+				var start = AxisTools.positionEndpoint(middlePoint, tick.tickRotation, tickLength / 2);
+				var end = AxisTools.positionEndpoint(middlePoint, tick.tickRotation + 180, tickLength / 2);
 				canvas.componentGraphics.moveTo(start.x, start.y);
 				canvas.componentGraphics.lineTo(end.x, end.y);
 			}
@@ -267,8 +274,8 @@ private class SetTicks extends Behaviour {
 		}
 		var subIndex = 0;
 		for (i in 0...tickInfo.tickNum) {
-			var tick = new Ticks(false, axis.rotation);
-			var tickPoint = AxisTools.positionEndpoint(start, axis.rotation, axis.tickMargin + i * tickPos);
+			var tick = new Ticks(false, axis.axisRotation);
+			var tickPoint = AxisTools.positionEndpoint(start, axis.axisRotation, axis.tickMargin + i * tickPos);
 			tick.left = tickPoint.x;
 			tick.top = tickPoint.y;
 			if (tickInfo.zeroIndex == i && !axis.showZeroTick) {
@@ -284,8 +291,8 @@ private class SetTicks extends Behaviour {
 				if (i == (tickInfo.tickNum - 1)) {
 					break;
 				}
-				var tick = new Ticks(true, axis.rotation);
-				var tickPoint = AxisTools.positionEndpoint(tickPoint, axis.rotation, (j + 1) * tickPos / (subTicksPerTick + 1));
+				var tick = new Ticks(true, axis.axisRotation);
+				var tickPoint = AxisTools.positionEndpoint(tickPoint, axis.axisRotation, (j + 1) * tickPos / (subTicksPerTick + 1));
 				tick.left = tickPoint.x;
 				tick.top = tickPoint.y;
 				tick.text = tickInfo.subLabels[subIndex];
@@ -341,7 +348,7 @@ private class UpdateTicks extends Behaviour {
 		var subIndex = 0;
 		for (i in 0...tickInfo.tickNum) {
 			var tick = axis.ticks[i];
-			var tickPoint = AxisTools.positionEndpoint(start, axis.rotation, axis.tickMargin + i * tickPos);
+			var tickPoint = AxisTools.positionEndpoint(start, axis.axisRotation, axis.tickMargin + i * tickPos);
 			tick.left = tickPoint.x;
 			tick.top = tickPoint.y;
 			if (tickInfo.zeroIndex == i && !axis.showZeroTick) {
@@ -356,7 +363,7 @@ private class UpdateTicks extends Behaviour {
 					break;
 				}
 				var tick = axis.sub_ticks[j];
-				var tickPoint = AxisTools.positionEndpoint(tickPoint, axis.rotation, (j + 1) * tickPos / (subTicksPerTick + 1));
+				var tickPoint = AxisTools.positionEndpoint(tickPoint, axis.axisRotation, (j + 1) * tickPos / (subTicksPerTick + 1));
 				tick.left = tickPoint.x;
 				tick.top = tickPoint.y;
 				tick.text = tickInfo.subLabels[subIndex];
@@ -390,7 +397,7 @@ private class AxisBuilder extends CompositeBuilder {
 			_axis.startPoint = new Point(40, 40);
 		}
 
-		_axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.rotation, _axis.axisLength);
+		_axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.axisRotation, _axis.axisLength);
 		_axis.setTicks(_axis.tickInfo);
 
 		_tickCanvasLayer.percentWidth = 100;
@@ -407,7 +414,7 @@ private class AxisBuilder extends CompositeBuilder {
 		}
 
 		_axis.centerStartPoint();
-		_axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.rotation, _axis.axisLength);
+		_axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.axisRotation, _axis.axisLength);
 		_axis.updateTicks(_axis.tickInfo);
 		drawAxis();
 		return super.validateComponentLayout();
@@ -417,17 +424,21 @@ private class AxisBuilder extends CompositeBuilder {
 		var axis = _axis;
 		var canvas = _tickCanvasLayer;
 		if (canvas != null) {
+			#if !(haxeui_flixel || haxeui_heaps)
 			canvas.componentGraphics.strokeStyle(axis.color);
+			#else
+			canvas.componentGraphics.strokeStyle(axis.backgroundColor);
+			#end
 			canvas.componentGraphics.moveTo(axis.startPoint.x, axis.startPoint.y);
 			if (axis.endPoint == null) {
-				axis.endPoint = AxisTools.positionEndpoint(axis.startPoint, axis.rotation, axis.axisLength);
+				axis.endPoint = AxisTools.positionEndpoint(axis.startPoint, axis.axisRotation, axis.axisLength);
 			}
 			canvas.componentGraphics.lineTo(axis.endPoint.x, axis.endPoint.y);
 			for (tick in axis.ticks) {
 				var tickLength = tick.tickLength;
 				var middlePoint = new Point(tick.left, tick.top);
-				var start = AxisTools.positionEndpoint(middlePoint, tick.rotation, tickLength / 2);
-				var end = AxisTools.positionEndpoint(middlePoint, tick.rotation + 180, tickLength / 2);
+				var start = AxisTools.positionEndpoint(middlePoint, tick.tickRotation, tickLength / 2);
+				var end = AxisTools.positionEndpoint(middlePoint, tick.tickRotation + 180, tickLength / 2);
 				canvas.componentGraphics.moveTo(start.x, start.y);
 				canvas.componentGraphics.lineTo(end.x, end.y);
 			}
@@ -435,8 +446,8 @@ private class AxisBuilder extends CompositeBuilder {
 				tick.showLabel = false;
 				var tickLength = tick.subTickLength;
 				var middlePoint = new Point(tick.left, tick.top);
-				var start = AxisTools.positionEndpoint(middlePoint, tick.rotation, tickLength / 2);
-				var end = AxisTools.positionEndpoint(middlePoint, tick.rotation + 180, tickLength / 2);
+				var start = AxisTools.positionEndpoint(middlePoint, tick.tickRotation, tickLength / 2);
+				var end = AxisTools.positionEndpoint(middlePoint, tick.tickRotation + 180, tickLength / 2);
 				canvas.componentGraphics.moveTo(start.x, start.y);
 				canvas.componentGraphics.lineTo(end.x, end.y);
 			}

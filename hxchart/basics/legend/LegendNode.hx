@@ -50,7 +50,11 @@ class LegendNode extends HBox {
 
 	private function set_data(value:LegendNodeData):LegendNodeData {
 		text = value.text;
+		#if !(haxeui_flixel || haxeui_heaps)
 		color = value.color;
+		#else
+		backgroundColor = value.color;
+		#end
 		fontSize = value.fontSize;
 		_data = value;
 		return value;
@@ -58,7 +62,11 @@ class LegendNode extends HBox {
 
 	public function drawSymbol(symbol:String) {
 		canvas.componentGraphics.clear();
+		#if !(haxeui_flixel || haxeui_heaps)
 		canvas.componentGraphics.fillStyle(color);
+		#else
+		canvas.componentGraphics.fillStyle(backgroundColor);
+		#end
 		switch (symbol) {
 			case "point":
 				canvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);

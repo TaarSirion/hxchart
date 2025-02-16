@@ -79,7 +79,7 @@ enum OptimizationType {
  */
 @:structInit class OptimizationInfo {
 	@:optional public var reduceVia:OptimizationType;
-	@:optional public var gridStep:Float;
+	@:optional public var gridStep:Null<Float>;
 }
 
 /**

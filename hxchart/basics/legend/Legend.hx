@@ -30,8 +30,8 @@ enum LegendSymbols {
  */
 @:structInit class LegendInfo {
 	@:optional public var title:String;
-	@:optional public var nodeFontSize:Int;
-	@:optional public var useLegend:Bool;
+	@:optional public var nodeFontSize:Null<Int>;
+	@:optional public var useLegend:Null<Bool>;
 }
 
 @:composite(Builder, LegendLayout)
