@@ -1,5 +1,6 @@
 package hxchart.basics.trails;
 
+import haxe.ui.graphics.DrawCommand;
 import hxchart.basics.events.EventLayer.EventHandler;
 import haxe.ui.events.MouseEvent;
 import haxe.ui.events.Events;
@@ -609,15 +610,23 @@ class Scatter implements AxisLayer implements DataLayer {
 		if (chartInfo.type == line) {
 			dataCanvas.componentGraphics.clear();
 			for (group in dataByGroup) {
-				trace("group", group);
 				var start = group[0].coord;
 				var last = start;
-				dataCanvas.componentGraphics.fillStyle(group[0].color, 0.5);
+				if (style.positionOption == filled) {
+					dataCanvas.componentGraphics.fillStyle(group[0].color, 0.5);
+				}
 				dataCanvas.componentGraphics.strokeStyle(group[0].color, group[0].size, group[0].size);
+				dataCanvas.componentGraphics.moveTo(last.x, last.y);
+				dataCanvas.componentGraphics.beginPath();
 				for (dataPoint in group) {
-					dataCanvas.componentGraphics.moveTo(last.x, last.y);
 					dataCanvas.componentGraphics.lineTo(dataPoint.coord.x, dataPoint.coord.y);
 					last = dataPoint.coord;
+				}
+				if (style.positionOption == filled) {
+					dataCanvas.componentGraphics.lineTo(last.x, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
+					dataCanvas.componentGraphics.lineTo(start.x, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
+					dataCanvas.componentGraphics.lineTo(start.x, start.y);
+					dataCanvas.componentGraphics.closePath();
 				}
 			}
 		} else {
