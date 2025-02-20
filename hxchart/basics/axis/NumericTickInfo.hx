@@ -162,13 +162,12 @@ class NumericTickInfo implements TickInfo {
 	 * @param ratio Ratio of positive ticks.
 	 */
 	private function calcZeroIndex(ratio:Float) {
-		switch ratio {
-			case 1:
-				zeroIndex = 0;
-			case 0:
-				zeroIndex = tickNum - 1;
-			default:
-				zeroIndex = Math.round((tickNum - 1) * (1 - ratio));
+		if (ratio == 1) {
+			zeroIndex = 0;
+		} else if (ratio == 0) {
+			zeroIndex = tickNum - 1;
+		} else {
+			zeroIndex = Math.round((tickNum - 1) * (1 - ratio));
 		}
 	}
 

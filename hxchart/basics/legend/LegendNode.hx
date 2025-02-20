@@ -31,7 +31,7 @@ class LegendNode extends HBox {
 
 	@:clonable @:behaviour(TextBehaviour) public var text:String;
 
-	public var canvas:Canvas;
+	public var legendCanvas:Canvas;
 
 	private var legend:Legend;
 
@@ -61,19 +61,19 @@ class LegendNode extends HBox {
 	}
 
 	public function drawSymbol(symbol:String) {
-		canvas.componentGraphics.clear();
+		legendCanvas.componentGraphics.clear();
 		#if !(haxeui_flixel || haxeui_heaps)
-		canvas.componentGraphics.fillStyle(color);
+		legendCanvas.componentGraphics.fillStyle(color);
 		#else
-		canvas.componentGraphics.fillStyle(backgroundColor);
+		legendCanvas.componentGraphics.fillStyle(backgroundColor);
 		#end
 		switch (symbol) {
 			case "point":
-				canvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
+				legendCanvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
 			case "rectangle":
-				canvas.componentGraphics.rectangle(2, 2, 6, 6);
+				legendCanvas.componentGraphics.rectangle(2, 2, 6, 6);
 			default:
-				canvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
+				legendCanvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
 		}
 	}
 }
@@ -121,16 +121,16 @@ private class Builder extends CompositeBuilder {
 		_label.addClass("legend-text");
 		_label.text = "Legend Text";
 		_label.customStyle.textAlign = "left";
-		_legendNode.canvas = new Canvas();
-		_legendNode.canvas.addClass("legend-text-symbol");
-		_legendNode.canvas.height = _legendNode.fontSize * 1.25 + 4;
-		_legendNode.addComponent(_legendNode.canvas);
+		_legendNode.legendCanvas = new Canvas();
+		_legendNode.legendCanvas.addClass("legend-text-symbol");
+		_legendNode.legendCanvas.height = _legendNode.fontSize * 1.25 + 4;
+		_legendNode.addComponent(_legendNode.legendCanvas);
 		_legendNode.addComponent(_label);
 	}
 
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
-		_legendNode.canvas.height = _legendNode.childComponents[1].height;
+		_legendNode.legendCanvas.height = _legendNode.childComponents[1].height;
 		_legendNode.drawSymbol(_legendNode.symbol);
 	}
 

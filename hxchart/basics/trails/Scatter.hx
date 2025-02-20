@@ -575,7 +575,6 @@ class Scatter implements AxisLayer implements DataLayer {
 				dataCanvas.componentGraphics.beginPath();
 				#end
 				for (dataPoint in group) {
-					trace(dataPoint);
 					if (!dataPoint.allowed) {
 						continue;
 					}

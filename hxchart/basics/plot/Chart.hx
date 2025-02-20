@@ -100,7 +100,7 @@ enum OptimizationType {
 	public var data:TrailData;
 	public final type:TrailTypes;
 	@:optional public var style:TrailStyle;
-	@:optional public var axisInfo:Array<AxisInfo>;
+	@:optional public var axisInfo:Null<Array<AxisInfo>>;
 	@:optional public var optimizationInfo:OptimizationInfo;
 	@:optional public var events:EventInfo;
 
@@ -220,7 +220,7 @@ class Chart extends Absolute {
 		if (colors.length < groupNumber) {
 			colors = colors.concat(ColorPalettes.defaultColors(groupNumber - colors.length));
 		}
-		var groupIterationIndex = 0;
+		var groupIterationIndex:Int = 0;
 		for (group in groups.keys()) {
 			if (legend.childNodes.contains(group)) {
 				continue;
@@ -334,7 +334,11 @@ class Builder extends CompositeBuilder {
 		}
 		var axisID = "axis_0";
 		for (i => chartInfo in _chart.trailInfos) {
-			var chartInfo = Reflect.copy(_chart.trailInfos[i]);
+			// var chartInfo = Reflect.copy(_chart.trailInfos[i]);
+			if (chartInfo == null) {
+				continue;
+			}
+
 			var chartID = "chart_" + i;
 			if (chartInfo.axisInfo != null) {
 				axisID = "axis_" + i;

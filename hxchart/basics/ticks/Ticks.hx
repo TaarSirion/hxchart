@@ -75,8 +75,6 @@ class Ticks extends Box {
 		labelPosition = S;
 		#if !(haxeui_flixel || haxeui_heaps)
 		color = Color.fromString("black");
-		#else
-		backgroundColor = Color.fromString("black");
 		#end
 	}
 }
@@ -114,6 +112,9 @@ class TickBuilder extends CompositeBuilder {
 		_tick = tick;
 		var label = new Label();
 		_label = label;
+		#if (haxeui_heaps || haxeui_flixel)
+		_label.customStyle.color = Color.fromString("black");
+		#end
 		label.addClass("tick-label");
 		_tick.addComponent(label);
 		_tick.canvas = new Canvas();
