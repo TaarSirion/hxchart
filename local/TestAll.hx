@@ -1,3 +1,4 @@
+import haxe.ui.HaxeUIApp;
 import hxchart.tests.TestStatistics;
 import haxe.ui.Toolkit;
 import hxchart.tests.TestAxisTools;
@@ -13,13 +14,16 @@ class TestAll {
 	public static function main() {
 		var runner = new Runner();
 		Toolkit.init();
-		runner.addCase(new TestAxisTools());
-		runner.addCase(new TestNumericTickInfo());
-		runner.addCase(new TestScatter());
-		runner.addCase(new TestLegend());
-		runner.addCase(new TestChart());
-		runner.addCase(new TestStatistics());
-		Report.create(runner);
-		runner.run();
+		var app = new HaxeUIApp();
+		app.ready(function() {
+			runner.addCase(new TestAxisTools());
+			runner.addCase(new TestNumericTickInfo());
+			runner.addCase(new TestScatter());
+			runner.addCase(new TestLegend());
+			runner.addCase(new TestChart());
+			runner.addCase(new TestStatistics());
+			Report.create(runner);
+			runner.run();
+		});
 	}
 }

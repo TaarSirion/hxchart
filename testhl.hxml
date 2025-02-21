@@ -1,0 +1,10 @@
+-cp local
+-main TestAll
+
+-lib utest
+-lib heaps
+-lib hldx
+-lib haxeui-core
+-lib haxeui-heaps
+
+-hl Export/test-hl/main.hl
