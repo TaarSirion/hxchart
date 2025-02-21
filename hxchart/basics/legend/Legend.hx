@@ -171,7 +171,7 @@ class Builder extends CompositeBuilder {
 		_legend.styleSheet.parse("
 			.legend-class{ 
 				border: 1px solid #000000;
-				background-color: rgb(245, 245, 245);
+				background-color: #f5f5f5;
 				padding: 10px;
 				font-family: Arial;
 			}
