@@ -1,5 +1,6 @@
 package hxchart.basics.legend;
 
+import haxe.ui.components.Button;
 import haxe.ui.containers.HBox;
 import haxe.ui.util.Color;
 import haxe.ui.styles.Style;
@@ -62,7 +63,8 @@ private class LegendLayout extends DefaultLayout {}
 @:dox(hide) @:noCompletion
 private class TitleBehaviour extends DataBehaviour {
 	private override function validateData() {
-		var label = new Label();
+		trace("HERE");
+		var label = new Button();
 		label.text = _value;
 		label.addClass("legend-title");
 		var legend = cast(_component, Legend);

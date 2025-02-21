@@ -1,5 +1,8 @@
 package hxchart.tests;
 
+import hxchart.basics.legend.LegendNode;
+import haxe.Timer;
+import utest.Async;
 import haxe.ui.styles.Dimension;
 import haxe.ui.containers.HBox;
 import haxe.ui.HaxeUIApp;
@@ -11,8 +14,14 @@ import hxchart.basics.legend.Legend;
 import utest.Test;
 
 class TestLegend extends Test {
+	var legend:Legend;
+
+	function setup() {
+		legend = new Legend();
+	}
+
 	function testNewLegend() {
-		var legend = new Legend();
+		// var legend = new Legend();
 		Assert.isTrue(legend.hasClass("legend-class"));
 		Assert.equals(10, legend.marginBottom);
 		Assert.equals(10, legend.marginTop);
@@ -34,7 +43,7 @@ class TestLegend extends Test {
 	}
 
 	function testStyleSheet() {
-		var legend = new Legend();
+		// var legend = new Legend();
 
 		Assert.equals(".legend-class", legend.styleSheet.rules[0].selector.toString());
 		var legendDirectives = legend.styleSheet.rules[0].directives;
@@ -62,8 +71,9 @@ class TestLegend extends Test {
 		Assert.equals(20, fontSize.getParameters()[0]);
 	}
 
+	@:depends(testStyleSheet)
 	function testAddNode() {
-		var legend = new Legend();
+		// var legend = new Legend();
 		legend.addNode({
 			text: "test",
 			fontSize: 5,
@@ -74,5 +84,17 @@ class TestLegend extends Test {
 		Assert.equals("test", legend.childNodes[0]);
 		Assert.equals(null, legend.childComponents[0].childComponents[0].percentHeight);
 		Assert.equals(100, legend.childComponents[0].childComponents[0].percentWidth);
+		Assert.equals(10, legend.childComponents[0].childComponents[0].marginLeft);
+		Assert.equals(10, legend.childComponents[0].childComponents[0].marginRight);
+		Assert.equals(20, legend.childComponents[0].childComponents[0].childComponents[0].percentWidth);
+		Assert.equals(80, legend.childComponents[0].childComponents[0].childComponents[1].percentWidth);
+
+		var node:LegendNode = cast(legend.childComponents[0].childComponents[0], LegendNode);
+		Assert.equals(5, node.fontSize);
+		#if (haxeui_heaps || haxeui_flixel)
+		Assert.equals(Color.fromString("black"), node.customStyle.color);
+		#else
+		Assert.equals(Color.fromString("black"), node.color);
+		#end
 	}
 }

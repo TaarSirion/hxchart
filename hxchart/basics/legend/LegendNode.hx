@@ -53,7 +53,7 @@ class LegendNode extends HBox {
 		#if !(haxeui_flixel || haxeui_heaps)
 		color = value.color;
 		#else
-		backgroundColor = value.color;
+		this.customStyle.color = value.color;
 		#end
 		fontSize = value.fontSize;
 		_data = value;
@@ -65,7 +65,7 @@ class LegendNode extends HBox {
 		#if !(haxeui_flixel || haxeui_heaps)
 		legendCanvas.componentGraphics.fillStyle(color);
 		#else
-		legendCanvas.componentGraphics.fillStyle(backgroundColor);
+		legendCanvas.componentGraphics.fillStyle(this.customStyle.color);
 		#end
 		switch (symbol) {
 			case "point":

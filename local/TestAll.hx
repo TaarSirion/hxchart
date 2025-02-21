@@ -16,6 +16,7 @@ class TestAll {
 		Toolkit.init();
 		var app = new HaxeUIApp();
 		app.ready(function() {
+			app.start();
 			runner.addCase(new TestAxisTools());
 			runner.addCase(new TestNumericTickInfo());
 			runner.addCase(new TestScatter());
