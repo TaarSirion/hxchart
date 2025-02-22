@@ -17,7 +17,9 @@ class TestLegend extends Test {
 	var legend:Legend;
 
 	function setup() {
-		legend = new Legend();
+		legend = new Legend({
+			useLegend: true
+		});
 	}
 
 	function testNewLegend() {
@@ -72,8 +74,12 @@ class TestLegend extends Test {
 	function testAddNode() {
 		legend.addNode({
 			text: "test",
-			fontSize: 5,
-			color: Color.fromString("black")
+			style: {
+				symbol: rectangle,
+				textColor: 0x000000,
+				fontSize: 5,
+				symbolColor: 0xababab
+			}
 		});
 
 		Assert.equals("test", legend.childComponents[0].childComponents[0].text);
@@ -90,12 +96,43 @@ class TestLegend extends Test {
 		Assert.equals("left", node.childComponents[1].customStyle.textAlign);
 		Assert.isTrue(node.childComponents[0].hasClass("legend-text-symbol"));
 		Assert.equals(24, node.childComponents[0].height);
+		Assert.equals("rectangle", node.symbol);
+		Assert.equals(0x000000, node.textColor);
 
 		Assert.equals(5, node.fontSize);
-		#if (haxeui_heaps || haxeui_flixel)
-		Assert.equals(Color.fromString("black"), node.customStyle.color);
-		#else
-		Assert.equals(Color.fromString("black"), node.color);
-		#end
+		Assert.equals(0xababab, node.symbolColor);
+	}
+
+	function testValidation() {
+		var info:LegendInfo = {
+			useLegend: true,
+			data: [
+				{
+					text: "A",
+					style: {
+						symbolColor: 0xababab
+					}
+				},
+				{
+					text: "B",
+					style: {
+						symbol: point
+					}
+				}
+			],
+			nodeStyle: {
+				textColor: 0x000000,
+				symbol: rectangle,
+				fontSize: 16,
+				symbolColor: 0xee0000
+			}
+		}
+		info.validate();
+		Assert.equals(16, info.data[0].style.fontSize);
+		Assert.equals(0xababab, info.data[0].style.symbolColor);
+		Assert.equals(rectangle, info.data[0].style.symbol);
+		Assert.equals(16, info.data[1].style.fontSize);
+		Assert.equals(0xee0000, info.data[1].style.symbolColor);
+		Assert.equals(point, info.data[1].style.symbol);
 	}
 }

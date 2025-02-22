@@ -171,20 +171,37 @@ class Chart extends Absolute {
 		if (legendInfo == null) {
 			legendInfo = {
 				useLegend: true,
-				nodeFontSize: 12,
-				title: "Legend"
+				title: {
+					text: "Legend",
+					fontSize: 20
+				},
+				nodeStyle: {
+					fontSize: 16,
+					symbol: rectangle,
+					textColor: 0x000000
+				}
 			};
+		} else {
+			if (legendInfo.nodeStyle == null) {
+				legendInfo.nodeStyle = {
+					fontSize: 16,
+					symbol: rectangle,
+					textColor: 0x000000
+				};
+			}
+			if (legendInfo.nodeStyle.fontSize == null) {
+				legendInfo.nodeStyle.fontSize = 16;
+			}
+			if (legendInfo.nodeStyle.symbol == null) {
+				legendInfo.nodeStyle.symbol = rectangle;
+			}
+			if (legendInfo.nodeStyle.textColor == null) {
+				legendInfo.nodeStyle.textColor = 0x000000;
+			}
 		}
 
-		if (legendInfo.useLegend == null || legendInfo.useLegend) {
-			this.legend = new Legend();
-			legend.legendTitle = "Legend";
-			if (legendInfo.title != null) {
-				legend.legendTitle = legendInfo.title;
-			}
-			if (legendInfo.nodeFontSize == null) {
-				legendInfo.nodeFontSize = 12;
-			}
+		if (legendInfo.useLegend) {
+			this.legend = new Legend(legendInfo);
 			this.legendInfo = legendInfo;
 			addComponent(legend);
 		}
@@ -220,18 +237,30 @@ class Chart extends Absolute {
 		if (colors.length < groupNumber) {
 			colors = colors.concat(ColorPalettes.defaultColors(groupNumber - colors.length));
 		}
-		var groupIterationIndex:Int = 0;
-		for (group in groups.keys()) {
-			if (legend.childNodes.contains(group)) {
-				continue;
+		legendInfo.validate();
+		if (legendInfo.data != null) {
+			for (node in legendInfo.data) {
+				legend.addNode(node);
 			}
-			legend.addNode({
-				text: group,
-				fontSize: legendInfo.nodeFontSize,
-				color: colors[groupIterationIndex]
-			});
-			groupIterationIndex++;
+		} else {
+			var groupIterationIndex:Int = 0;
+			for (group in groups.keys()) {
+				if (legend.childNodes.contains(group)) {
+					continue;
+				}
+				legend.addNode({
+					style: {
+						fontSize: legendInfo.nodeStyle.fontSize,
+						textColor: legendInfo.nodeStyle.textColor,
+						symbol: legendInfo.nodeStyle.symbol,
+						symbolColor: colors[groupIterationIndex]
+					},
+					text: group
+				});
+				groupIterationIndex++;
+			}
 		}
+
 		for (info in trailInfos) {
 			if (reset) {
 				info.style = null;

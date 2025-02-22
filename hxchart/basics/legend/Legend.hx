@@ -1,5 +1,6 @@
 package hxchart.basics.legend;
 
+import hxchart.basics.legend.LegendNode.LegendNodeStyling;
 import haxe.ui.components.Button;
 import haxe.ui.containers.HBox;
 import haxe.ui.util.Color;
@@ -19,6 +20,21 @@ import haxe.ui.behaviours.DefaultBehaviour;
 enum LegendSymbols {
 	point;
 	line;
+	rectangle;
+}
+
+enum LegendPosition {
+	left;
+	right;
+	top;
+	bottom;
+	Point(x:Float, y:Float);
+}
+
+typedef LegendTitle = {
+	text:String,
+	?fontSize:Null<Int>,
+	?color:Color
 }
 
 /**
@@ -30,9 +46,49 @@ enum LegendSymbols {
  * @param useLegend Optional. If a legend should be used. Per default a legend will be used.
  */
 @:structInit class LegendInfo {
-	@:optional public var title:String;
-	@:optional public var nodeFontSize:Null<Int>;
-	@:optional public var useLegend:Null<Bool>;
+	@:optional public var title:LegendTitle;
+	@:optional public var subTitle:LegendTitle;
+	@:optional public var data:Array<LegendNodeData>;
+	@:optional public var nodeStyle:LegendNodeStyling;
+	public var useLegend:Bool;
+
+	public function validate() {
+		if (data == null) {
+			return;
+		}
+		if (nodeStyle == null) {
+			for (node in data) {
+				if (node.style.textColor == null) {
+					node.style.textColor = Color.fromString("black");
+				}
+				if (node.style.symbolColor == null) {
+					node.style.symbolColor = Color.fromString("black");
+				}
+				if (node.style.fontSize == null) {
+					node.style.fontSize = 16;
+				}
+				if (node.style.symbol == null) {
+					node.style.symbol = LegendSymbols.rectangle;
+				}
+			}
+			return;
+		}
+
+		for (node in data) {
+			if (node.style.textColor == null) {
+				node.style.textColor = nodeStyle.textColor == null ? Color.fromString("black") : nodeStyle.textColor;
+			}
+			if (node.style.symbolColor == null) {
+				node.style.symbolColor = nodeStyle.symbolColor == null ? Color.fromString("black") : nodeStyle.symbolColor;
+			}
+			if (node.style.fontSize == null) {
+				node.style.fontSize = nodeStyle.fontSize == null ? 16 : nodeStyle.fontSize;
+			}
+			if (node.style.symbol == null) {
+				node.style.symbol = nodeStyle.symbol == null ? LegendSymbols.rectangle : nodeStyle.symbol;
+			}
+		}
+	}
 }
 
 @:composite(Builder, LegendLayout)
@@ -43,17 +99,31 @@ class Legend extends VBox {
 	@:clonable @:behaviour(DefaultBehaviour, 1) public var align:Null<Int>;
 
 	@:clonable @:behaviour(DefaultBehaviour, 20) public var fontSizeTitle:Null<Int>;
-	@:clonable @:behaviour(DefaultBehaviour, 16) public var fontSizeEntry:Null<Int>;
+	@:clonable @:behaviour(DefaultBehaviour, 18) public var fontSizeSubTitle:Null<Int>;
+
+	@:clonable @:behaviour(DefaultBehaviour, 0x000000) public var colorTitle:Null<Int>;
+	@:clonable @:behaviour(DefaultBehaviour, 0x000000) public var colorSubTitle:Null<Int>;
 
 	@:clonable @:behaviour(TitleBehaviour) public var legendTitle:String;
-	@:clonable @:behaviour(TextsBehaviour) public var legendTexts:Array<String>;
+	@:clonable @:behaviour(SubTitleBehaviour) public var legendSubTitle:String;
 
 	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
 
 	public var childNodes:Array<String>;
 
-	public function new() {
+	public function new(info:LegendInfo) {
 		super();
+		if (info.title != null) {
+			fontSizeTitle = info.title.fontSize == null ? fontSizeTitle : info.title.fontSize;
+			colorTitle = info.title.color == null ? colorTitle : info.title.color;
+			legendTitle = info.title.text;
+		}
+
+		if (info.subTitle != null) {
+			fontSizeSubTitle = info.subTitle.fontSize == null ? fontSizeSubTitle : info.subTitle.fontSize;
+			colorSubTitle = info.subTitle.color == null ? colorSubTitle : info.subTitle.color;
+			legendSubTitle = info.subTitle.text;
+		}
 	}
 }
 
@@ -63,8 +133,7 @@ private class LegendLayout extends DefaultLayout {}
 @:dox(hide) @:noCompletion
 private class TitleBehaviour extends DataBehaviour {
 	private override function validateData() {
-		trace("HERE");
-		var label = new Button();
+		var label = new Label();
 		label.text = _value;
 		label.addClass("legend-title");
 		var legend = cast(_component, Legend);
@@ -85,12 +154,23 @@ private class TitleBehaviour extends DataBehaviour {
 }
 
 @:dox(hide) @:noCompletion
-private class TextsBehaviour extends DataBehaviour {
+private class SubTitleBehaviour extends DataBehaviour {
 	private override function validateData() {
+		var label = new Label();
+		label.text = _value;
+		label.addClass("legend-sub-title");
 		var legend = cast(_component, Legend);
-		if (legend != null) {
-			for (i => value in _value.toArray()) {
-				legend.addNode({text: value, color: Color.fromString("black"), fontSize: legend.fontSizeEntry});
+		if (legend.align < 2) {
+			label.percentWidth = 100;
+			var textContainer = cast(legend.childComponents[0], VBox);
+			if (textContainer != null) {
+				textContainer.addComponentAt(label, 1);
+			}
+		} else {
+			label.percentHeight = 100;
+			var textHBox = cast(legend.childComponents[1], HBox);
+			if (textHBox != null) {
+				textHBox.addComponentAt(label, 1);
 			}
 		}
 	}
@@ -182,6 +262,18 @@ class Builder extends CompositeBuilder {
 				font-size: "
 			+ _legend.fontSizeTitle
 			+ "px;
+				color: "
+			+ _legend.colorTitle
+			+ ";
+			}
+			.legend-sub-title {
+				text-align: center;
+				font-size: "
+			+ _legend.fontSizeSubTitle
+			+ "px;
+			color: "
+			+ _legend.colorSubTitle
+			+ ";
 			}
 		");
 	}

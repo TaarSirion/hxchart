@@ -24,11 +24,15 @@ class TestChart extends Test {
 			},
 			type: scatter
 		}, {
-			title: "Title",
+			title: {
+				text: "Title"
+			},
 			useLegend: true,
-			nodeFontSize: 5
+			nodeStyle: {
+				fontSize: 5
+			}
 		});
-		Assert.equals("Title", chart.legendInfo.title);
+		Assert.equals("Title", chart.legendInfo.title.text);
 		Assert.equals("Title", chart.legend.legendTitle);
 	}
 
