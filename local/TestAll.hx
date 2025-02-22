@@ -1,3 +1,4 @@
+import hxchart.tests.TestAxis;
 import hxchart.tests.TestDataLayer;
 import hxchart.tests.TestUtils;
 import haxe.ui.HaxeUIApp;
@@ -27,6 +28,7 @@ class TestAll {
 			runner.addCase(new TestStatistics());
 			runner.addCase(new TestDataLayer());
 			runner.addCase(new TestUtils());
+			runner.addCase(new TestAxis());
 			Report.create(runner);
 			runner.run();
 		});
