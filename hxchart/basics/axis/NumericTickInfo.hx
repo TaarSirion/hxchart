@@ -2,6 +2,7 @@ package hxchart.basics.axis;
 
 import hxchart.basics.ticks.Ticks.CompassOrientation;
 import haxe.ds.Vector;
+import hxchart.basics.utils.Utils;
 
 class NumericTickInfo implements TickInfo {
 	public var tickNum:Int;

@@ -21,7 +21,6 @@ class TestLegend extends Test {
 	}
 
 	function testNewLegend() {
-		// var legend = new Legend();
 		Assert.isTrue(legend.hasClass("legend-class"));
 		Assert.equals(10, legend.marginBottom);
 		Assert.equals(10, legend.marginTop);
@@ -43,8 +42,6 @@ class TestLegend extends Test {
 	}
 
 	function testStyleSheet() {
-		// var legend = new Legend();
-
 		Assert.equals(".legend-class", legend.styleSheet.rules[0].selector.toString());
 		var legendDirectives = legend.styleSheet.rules[0].directives;
 		// Check both top and right to see if it got set for everything
@@ -73,7 +70,6 @@ class TestLegend extends Test {
 
 	@:depends(testStyleSheet)
 	function testAddNode() {
-		// var legend = new Legend();
 		legend.addNode({
 			text: "test",
 			fontSize: 5,
@@ -90,6 +86,11 @@ class TestLegend extends Test {
 		Assert.equals(80, legend.childComponents[0].childComponents[0].childComponents[1].percentWidth);
 
 		var node:LegendNode = cast(legend.childComponents[0].childComponents[0], LegendNode);
+		Assert.isTrue(node.childComponents[1].hasClass("legend-text"));
+		Assert.equals("left", node.childComponents[1].customStyle.textAlign);
+		Assert.isTrue(node.childComponents[0].hasClass("legend-text-symbol"));
+		Assert.equals(24, node.childComponents[0].height);
+
 		Assert.equals(5, node.fontSize);
 		#if (haxeui_heaps || haxeui_flixel)
 		Assert.equals(Color.fromString("black"), node.customStyle.color);

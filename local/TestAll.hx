@@ -1,3 +1,5 @@
+import hxchart.tests.TestDataLayer;
+import hxchart.tests.TestUtils;
 import haxe.ui.HaxeUIApp;
 import hxchart.tests.TestStatistics;
 import haxe.ui.Toolkit;
@@ -23,6 +25,8 @@ class TestAll {
 			runner.addCase(new TestLegend());
 			runner.addCase(new TestChart());
 			runner.addCase(new TestStatistics());
+			runner.addCase(new TestDataLayer());
+			runner.addCase(new TestUtils());
 			Report.create(runner);
 			runner.run();
 		});
