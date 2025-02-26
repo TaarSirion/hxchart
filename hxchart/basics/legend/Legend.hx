@@ -1,5 +1,6 @@
 package hxchart.basics.legend;
 
+import haxe.ui.components.Spacer;
 import hxchart.basics.legend.LegendNode.LegendNodeStyling;
 import haxe.ui.components.Button;
 import haxe.ui.containers.HBox;
@@ -28,7 +29,7 @@ enum LegendPosition {
 	right;
 	top;
 	bottom;
-	Point(x:Float, y:Float);
+	Point(x:Float, y:Float, vertical:Bool);
 }
 
 typedef LegendTitle = {
@@ -50,6 +51,7 @@ typedef LegendTitle = {
 	@:optional public var subTitle:LegendTitle;
 	@:optional public var data:Array<LegendNodeData>;
 	@:optional public var nodeStyle:LegendNodeStyling;
+	@:optional public var position:LegendPosition;
 	public var useLegend:Bool;
 
 	public function validate() {
@@ -93,11 +95,6 @@ typedef LegendTitle = {
 
 @:composite(Builder, LegendLayout)
 class Legend extends VBox {
-	/**
-	 * Alginment of the legend. 0 means left. 1 means right. 2 means top. 3 means bottom. 
-	 */
-	@:clonable @:behaviour(DefaultBehaviour, 1) public var align:Null<Int>;
-
 	@:clonable @:behaviour(DefaultBehaviour, 20) public var fontSizeTitle:Null<Int>;
 	@:clonable @:behaviour(DefaultBehaviour, 18) public var fontSizeSubTitle:Null<Int>;
 
@@ -107,11 +104,19 @@ class Legend extends VBox {
 	@:clonable @:behaviour(TitleBehaviour) public var legendTitle:String;
 	@:clonable @:behaviour(SubTitleBehaviour) public var legendSubTitle:String;
 
+	// public var legendTitle:String;
+	// public var legendSubTitle:String;
+
 	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
 
 	public var childNodes:Array<String>;
 
+	public var legendPosition:LegendPosition = right;
+
 	public function new(info:LegendInfo) {
+		if (info.position != null) {
+			legendPosition = info.position;
+		}
 		super();
 		if (info.title != null) {
 			fontSizeTitle = info.title.fontSize == null ? fontSizeTitle : info.title.fontSize;
@@ -137,18 +142,9 @@ private class TitleBehaviour extends DataBehaviour {
 		label.text = _value;
 		label.addClass("legend-title");
 		var legend = cast(_component, Legend);
-		if (legend.align < 2) {
-			label.percentWidth = 100;
-			var textContainer = cast(legend.childComponents[0], VBox);
-			if (textContainer != null) {
-				textContainer.addComponentAt(label, 0);
-			}
-		} else {
-			label.percentHeight = 100;
-			var textHBox = cast(legend.childComponents[1], HBox);
-			if (textHBox != null) {
-				textHBox.addComponentAt(label, 0);
-			}
+		var textContainer:Component = legend.findComponent("legend-title-container", Component, true, "css");
+		if (textContainer != null) {
+			textContainer.addComponentAt(label, 0);
 		}
 	}
 }
@@ -160,18 +156,9 @@ private class SubTitleBehaviour extends DataBehaviour {
 		label.text = _value;
 		label.addClass("legend-sub-title");
 		var legend = cast(_component, Legend);
-		if (legend.align < 2) {
-			label.percentWidth = 100;
-			var textContainer = cast(legend.childComponents[0], VBox);
-			if (textContainer != null) {
-				textContainer.addComponentAt(label, 1);
-			}
-		} else {
-			label.percentHeight = 100;
-			var textHBox = cast(legend.childComponents[1], HBox);
-			if (textHBox != null) {
-				textHBox.addComponentAt(label, 1);
-			}
+		var textContainer:Component = legend.findComponent("legend-title-container", Component, true, "css");
+		if (textContainer != null) {
+			textContainer.addComponentAt(label, 1);
 		}
 	}
 }
@@ -180,21 +167,22 @@ private class SubTitleBehaviour extends DataBehaviour {
 private class AddNode extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var legend = cast(_component, Legend);
-		var node = new LegendNode(legend);
-		if (legend.align < 2) {
-			node.percentWidth = 100;
-			node.marginLeft = 10;
-			node.marginRight = 10;
-			node.childComponents[0].percentWidth = 20;
-			node.childComponents[1].percentWidth = 80;
-		} else {
-			node.percentHeight = 100;
-			node.childComponents[0].percentWidth = 20;
-			node.childComponents[1].percentWidth = 80;
-			node.marginLeft = 40;
+		var node = new LegendNode(legend, param);
+		var spacer = new Spacer();
+		switch legend.legendPosition {
+			case right:
+			case left:
+			case top:
+				spacer.width = 40;
+			case bottom:
+				spacer.width = 40;
+			case Point(x, y, vertical):
+				if (!vertical) {
+					spacer.width = 40;
+				}
 		}
-		node.data = param;
 		legend.addComponent(node);
+		legend.addComponent(spacer);
 		legend.childNodes.push(node.text);
 		return node;
 	}
@@ -204,47 +192,72 @@ private class AddNode extends Behaviour {
 @:access(haxe.ui.core.Component)
 class Builder extends CompositeBuilder {
 	private var _legend:Legend;
-	private var _textVBox:VBox;
-	private var _textHBox:HBox;
+	private var _legendContainer:Component;
 
 	public function new(legend:Legend) {
 		super(legend);
 		_legend = legend;
-		_legend.marginBottom = 10;
-		_legend.marginTop = 10;
-		_legend.marginLeft = 10;
-		_legend.marginRight = 10;
-		_legend.height = 30;
-		_legend.percentWidth = 100;
 		_legend.childNodes = [];
 		_legend.addClass("legend-class");
-		_textVBox = new VBox();
-		_textVBox.id = "legend-container";
-		_textVBox.percentHeight = 100;
-		_textVBox.percentWidth = 100;
-		_legend.addComponent(_textVBox);
-		_textHBox = new HBox();
-		_textHBox.id = "legend-container";
-		_textHBox.percentHeight = 100;
-		_textHBox.percentWidth = 100;
-		_legend.addComponent(_textHBox);
+
+		switch (_legend.legendPosition) {
+			case left:
+				_legendContainer = new VBox();
+				_legendContainer.addClass("legend-node-container");
+				_legendContainer.addClass("legend-title-container");
+			case right:
+				_legendContainer = new VBox();
+				_legendContainer.addClass("legend-node-container");
+				_legendContainer.addClass("legend-title-container");
+			case top:
+				_legendContainer = new VBox();
+				var titleContainer = new HBox();
+				titleContainer.addClass("legend-title-container");
+				_legendContainer.addComponent(titleContainer);
+				var nodeContainer = new HBox();
+				nodeContainer.addClass("legend-node-container");
+				_legendContainer.addComponent(nodeContainer);
+			case bottom:
+				_legendContainer = new VBox();
+				var titleContainer = new HBox();
+				titleContainer.addClass("legend-title-container");
+				_legendContainer.addComponent(titleContainer);
+				var nodeContainer = new HBox();
+				nodeContainer.addClass("legend-node-container");
+				_legendContainer.addComponent(nodeContainer);
+			case Point(x, y, vertical):
+				_legendContainer = new VBox();
+				if (vertical) {
+					_legendContainer.addClass("legend-node-container");
+					_legendContainer.addClass("legend-title-container");
+				} else {
+					var titleContainer = new HBox();
+					titleContainer.addClass("legend-title-container");
+					_legendContainer.addComponent(titleContainer);
+					var nodeContainer = new HBox();
+					nodeContainer.addClass("legend-node-container");
+					_legendContainer.addComponent(nodeContainer);
+				}
+		}
+		_legendContainer.id = "legend-container";
+		_legend.addComponent(_legendContainer);
 		setStyleSheet();
 	}
 
 	public override function addComponent(child:Component):Component {
 		if (Std.isOfType(child, LegendNode)) {
-			if (_legend.align < 2) {
-				return _textVBox.addComponent(child);
-			} else {
-				return _textHBox.addComponent(child);
-			}
+			var container = _legend.findComponent("legend-node-container", Component, true, "css");
+			return container.addComponent(child);
+		}
+		if (child is Spacer) {
+			var container = _legend.findComponent("legend-node-container", Component, true, "css");
+			return container.addComponent(child);
 		}
 		return null;
 	}
 
 	override function removeAllComponents(dispose:Bool = true):Bool {
-		_textHBox.removeAllComponents();
-		_textVBox.removeAllComponents();
+		_legendContainer.removeAllComponents(dispose);
 		return true;
 	}
 
@@ -280,30 +293,71 @@ class Builder extends CompositeBuilder {
 
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
-		_legend.top += style.marginTop;
-		_legend.height -= style.marginBottom;
+		// _legend.top += style.marginTop;
+		// _legend.height -= style.marginBottom;
 	}
 
 	override function validateComponentLayout():Bool {
+		trace("AMM");
 		super.validateComponentLayout();
-		if (_legend.align < 2) {
-			_legend.childComponents[1].hide();
-			var heights = 0.0;
-			for (child in _legend.childComponents[0].childComponents) {
-				heights += child.height;
-			}
-			_legend.height = (35 - _legend.marginBottom) + heights;
-		} else {
-			_legend.childComponents[0].hide();
-			var fullLength = _legend.childComponents[1].width;
-			for (child in _legend.childComponents[1].childComponents) {
-				if (child.numComponents == 0) {
-					fullLength -= child.width;
-					continue;
-				}
-				child.width = fullLength / _legend.childNodes.length;
-			}
-		}
+		trace("here");
+		// switch (_legend.legendPosition) {
+		// 	case left:
+		// 		var height = _legend.paddingBottom + _legend.paddingTop;
+		// 		for (child in _legend.childComponents[0].childComponents) {
+		// 			height += child.height + child.marginTop + child.marginBottom + 5;
+		// 		}
+		// 		_legend.height = height;
+		// 	case right:
+		// 		var height = _legend.paddingBottom + _legend.paddingTop;
+		// 		for (child in _legend.childComponents[0].childComponents) {
+		// 			height += child.height + child.marginTop + child.marginBottom + 5;
+		// 		}
+		// 		_legend.height = height;
+		// 	case top:
+		// 		// var width = _legend.paddingLeft + _legend.paddingRight;
+		// 		// for (child in _legend.childComponents[0].childComponents) {
+		// 		// 	width += child.width + child.marginLeft + child.marginRight + 5;
+		// 		// }
+		// 		// _legend.width = width;
+		// 		var fullLength = _legend.childComponents[0].width;
+		// 		for (child in _legend.childComponents[0].childComponents) {
+		// 			if (child.numComponents == 0) {
+		// 				fullLength -= child.width;
+		// 				continue;
+		// 			}
+		// 			child.width = fullLength / _legend.childNodes.length;
+		// 		}
+		// 	case bottom:
+		// 		var width = _legend.paddingLeft + _legend.paddingRight;
+		// 		for (child in _legend.childComponents[0].childComponents) {
+		// 			width += child.width + child.marginLeft + child.marginRight + 5;
+		// 		}
+		// 		_legend.width = width;
+		// 	// var fullLength = _legend.childComponents[0].width;
+		// 	// for (child in _legend.childComponents[1].childComponents) {
+		// 	// 	if (child.numComponents == 0) {
+		// 	// 		fullLength -= child.width;
+		// 	// 		continue;
+		// 	// 	}
+		// 	// 	child.width = fullLength / _legend.childNodes.length;
+		// 	// }
+		// 	case Point(x, y, vertical):
+		// 		if (vertical) {
+		// 			var height = _legend.paddingBottom + _legend.paddingTop;
+		// 			for (child in _legend.childComponents[0].childComponents) {
+		// 				trace(child.height, child.width);
+		// 				height += child.height + child.marginTop + child.marginBottom + 5;
+		// 			}
+		// 			_legend.height = height;
+		// 		} else {
+		// 			var width = _legend.paddingLeft + _legend.paddingRight;
+		// 			for (child in _legend.childComponents[0].childComponents) {
+		// 				width += child.width + child.marginLeft + child.marginRight + 5;
+		// 			}
+		// 			_legend.width = width;
+		// 		}
+		// }
 		return true;
 	}
 }

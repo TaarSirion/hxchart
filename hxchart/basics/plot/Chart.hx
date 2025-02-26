@@ -1,5 +1,7 @@
 package hxchart.basics.plot;
 
+import haxe.ui.containers.HBox;
+import haxe.ui.containers.VBox;
 import hxchart.basics.events.EventLayer.EventInfo;
 import hxchart.basics.events.EventLayer.EventHandler;
 import haxe.ui.events.MouseEvent;
@@ -203,7 +205,57 @@ class Chart extends Absolute {
 		if (legendInfo.useLegend) {
 			this.legend = new Legend(legendInfo);
 			this.legendInfo = legendInfo;
-			addComponent(legend);
+			// addComponent(legend);
+
+			switch (legend.legendPosition) {
+				case left:
+					var vbox = new HBox();
+					vbox.percentWidth = 100;
+					vbox.percentHeight = 100;
+					chartBody.percentWidth = 80;
+					legend.percentWidth = 20;
+					vbox.addComponent(legend);
+					vbox.addComponent(chartBody);
+					addComponent(vbox);
+				// _chart.legend.left = 0;
+				// _chart.chartBody.left = _chart.legend.width + _chart.marginRight;
+				case right:
+					var vbox = new HBox();
+
+					vbox.addComponent(chartBody);
+					vbox.addComponent(legend);
+					addComponent(vbox);
+
+				case top:
+					var vbox = new VBox();
+					vbox.percentWidth = 100;
+					vbox.percentHeight = 100;
+					// chartBody.percentHeight = 80;
+					// legend.percentHeight = 20;
+					// _chart.legend.left = _chart.chartBody.width + _chart.legend.marginLeft;
+					vbox.addComponent(legend);
+					vbox.addComponent(chartBody);
+					addComponent(vbox);
+				case bottom:
+					var vbox = new VBox();
+					vbox.percentWidth = 100;
+					vbox.percentHeight = 100;
+					chartBody.percentHeight = 80;
+					legend.percentHeight = 20;
+					// _chart.legend.left = _chart.chartBody.width + _chart.legend.marginLeft;
+					vbox.addComponent(chartBody);
+					vbox.addComponent(legend);
+					addComponent(vbox);
+				case Point(x, y, vertical):
+					chartBody.percentHeight = 100;
+					chartBody.percentWidth = 100;
+					// legend.percentWidth = 20;
+					// legend.percentHeight = 20;
+					legend.left = x;
+					legend.top = y;
+					addComponent(chartBody);
+					addComponent(legend);
+			}
 		}
 
 		setData();
@@ -323,7 +375,7 @@ class Builder extends CompositeBuilder {
 		_chart.chartBody = new Absolute();
 		_chart.chartBody.percentWidth = 100;
 		_chart.chartBody.percentHeight = 100;
-		_chart.addComponent(_chart.chartBody);
+		// _chart.addComponent(_chart.chartBody);
 		_chart.registerEvent(MouseEvent.MOUSE_MOVE, function(e) {
 			for (handler in eventHandler.hoverHandlers) {
 				handler(e);
@@ -346,12 +398,6 @@ class Builder extends CompositeBuilder {
 		_chart.top = _chart.marginTop;
 		_chart.width -= _chart.marginLeft + _chart.marginRight;
 		_chart.height -= _chart.marginTop + _chart.marginBottom;
-
-		if (_chart.legend != null) {
-			_chart.chartBody.percentWidth = 80;
-			_chart.legend.percentWidth = 20;
-			_chart.legend.left = _chart.chartBody.width + _chart.legend.marginLeft;
-		}
 		validateCharts(ChartStatus.redraw);
 		return super.validateComponentLayout();
 	}

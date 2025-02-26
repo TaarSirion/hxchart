@@ -1,5 +1,6 @@
 package hxchart.basics.legend;
 
+import haxe.ui.components.Spacer;
 import hxchart.basics.legend.Legend.LegendSymbols;
 import haxe.ui.components.Button;
 import haxe.ui.core.TextDisplay;
@@ -40,14 +41,20 @@ class LegendNode extends HBox {
 
 	public var legendCanvas:Canvas;
 
-	private var legend:Legend;
+	private var legend:Component;
 
 	public var symbolColor:Color;
 	public var textColor:Color;
 
-	public function new(parent:Legend) {
+	public function new(parent:Component, data:LegendNodeData) {
 		legend = parent;
 		super();
+
+		text = data.text;
+		textColor = data.style.textColor;
+		symbolColor = data.style.symbolColor;
+		fontSize = data.style.fontSize;
+		symbol = data.style.symbol.getName();
 	}
 
 	private var _data:LegendNodeData = null;
@@ -75,7 +82,7 @@ class LegendNode extends HBox {
 			case LegendSymbols.point:
 				legendCanvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
 			case LegendSymbols.rectangle:
-				legendCanvas.componentGraphics.rectangle(2, 2, 6, 6);
+				legendCanvas.componentGraphics.rectangle(2, 2, 8, 8);
 			case LegendSymbols.line:
 			default:
 				legendCanvas.componentGraphics.circle(5, (fontSize * 1.25 + 4) / 2, 3);
@@ -122,20 +129,23 @@ private class Builder extends CompositeBuilder {
 		super(legendNode);
 		_legendNode = legendNode;
 		_legendNode.fontSize = 16;
+
 		_label = new Label();
 		_label.addClass("legend-text");
-		_label.text = "Legend Text";
 		_label.customStyle.textAlign = "left";
 		_legendNode.legendCanvas = new Canvas();
 		_legendNode.legendCanvas.addClass("legend-text-symbol");
-		_legendNode.legendCanvas.height = _legendNode.fontSize * 1.25 + 4;
+		_legendNode.legendCanvas.height = 10;
+		_legendNode.legendCanvas.width = 10;
 		_legendNode.addComponent(_legendNode.legendCanvas);
+		var spacer = new Spacer();
+		spacer.width = 5;
+		_legendNode.addComponent(spacer);
 		_legendNode.addComponent(_label);
 	}
 
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
-		_legendNode.legendCanvas.height = _legendNode.childComponents[1].height;
 		_legendNode.drawSymbol(LegendSymbols.createByName(_legendNode.symbol));
 	}
 
