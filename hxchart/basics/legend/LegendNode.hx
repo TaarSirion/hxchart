@@ -22,9 +22,7 @@ typedef LegendNodeData = {
 }
 
 typedef LegendNodeStyling = {
-	?textColor:Color,
 	?symbolColor:Color,
-	?fontSize:Int,
 	?symbol:LegendSymbols
 }
 
@@ -51,9 +49,7 @@ class LegendNode extends HBox {
 		super();
 
 		text = data.text;
-		textColor = data.style.textColor;
 		symbolColor = data.style.symbolColor;
-		fontSize = data.style.fontSize;
 		symbol = data.style.symbol.getName();
 	}
 
@@ -67,9 +63,7 @@ class LegendNode extends HBox {
 
 	private function set_data(value:LegendNodeData):LegendNodeData {
 		text = value.text;
-		textColor = value.style.textColor;
 		symbolColor = value.style.symbolColor;
-		fontSize = value.style.fontSize;
 		symbol = value.style.symbol.getName();
 		_data = value;
 		return value;
@@ -112,9 +106,6 @@ private class TextBehaviour extends DataBehaviour {
 		if (label != null) {
 			label.text = _value;
 			label.htmlText = _value;
-			var legend = cast(_component, LegendNode);
-			label.customStyle.fontSize = legend.fontSize;
-			label.customStyle.color = legend.textColor;
 		}
 	}
 }
@@ -128,11 +119,8 @@ private class Builder extends CompositeBuilder {
 	private function new(legendNode:LegendNode) {
 		super(legendNode);
 		_legendNode = legendNode;
-		_legendNode.fontSize = 16;
-
 		_label = new Label();
 		_label.addClass("legend-text");
-		_label.customStyle.textAlign = "left";
 		_legendNode.legendCanvas = new Canvas();
 		_legendNode.legendCanvas.addClass("legend-text-symbol");
 		_legendNode.legendCanvas.height = 10;

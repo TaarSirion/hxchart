@@ -1,5 +1,6 @@
 package hxchart.basics.plot;
 
+import haxe.ui.styles.StyleSheet;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
 import hxchart.basics.events.EventLayer.EventInfo;
@@ -162,77 +163,49 @@ class Chart extends Absolute {
 	public var groupNumber:Int;
 	public var axes:Map<String, Array<Axis>>;
 	public var legend:Legend;
+	public var chartStyleSheet:StyleSheet;
 
-	public function new(chartInfo:TrailInfo, ?legendInfo:LegendInfo) {
+	public function new(chartInfo:TrailInfo, ?legendInfo:LegendInfo, ?styleSheet:StyleSheet) {
 		super();
 		trailInfos = [];
 		axes = new Map();
 		groups = new Map();
 		groupNumber = 0;
 		trailInfos.push(chartInfo);
+		chartStyleSheet = styleSheet;
+		setLegend(legendInfo, styleSheet);
+		setData();
+	}
+
+	private function setLegend(legendInfo:LegendInfo, styleSheet:StyleSheet) {
 		if (legendInfo == null) {
 			legendInfo = {
-				useLegend: true,
-				title: {
-					text: "Legend",
-					fontSize: 20
-				},
-				nodeStyle: {
-					fontSize: 16,
-					symbol: rectangle,
-					textColor: 0x000000
-				}
+				useLegend: false
 			};
-		} else {
-			if (legendInfo.nodeStyle == null) {
-				legendInfo.nodeStyle = {
-					fontSize: 16,
-					symbol: rectangle,
-					textColor: 0x000000
-				};
-			}
-			if (legendInfo.nodeStyle.fontSize == null) {
-				legendInfo.nodeStyle.fontSize = 16;
-			}
-			if (legendInfo.nodeStyle.symbol == null) {
-				legendInfo.nodeStyle.symbol = rectangle;
-			}
-			if (legendInfo.nodeStyle.textColor == null) {
-				legendInfo.nodeStyle.textColor = 0x000000;
-			}
 		}
-
 		if (legendInfo.useLegend) {
-			this.legend = new Legend(legendInfo);
+			this.legend = new Legend(legendInfo, styleSheet);
 			this.legendInfo = legendInfo;
-			// addComponent(legend);
 
 			switch (legend.legendPosition) {
 				case left:
-					var vbox = new HBox();
-					vbox.percentWidth = 100;
-					vbox.percentHeight = 100;
-					chartBody.percentWidth = 80;
-					legend.percentWidth = 20;
-					vbox.addComponent(legend);
-					vbox.addComponent(chartBody);
-					addComponent(vbox);
-				// _chart.legend.left = 0;
-				// _chart.chartBody.left = _chart.legend.width + _chart.marginRight;
+					var hbox = new HBox();
+					hbox.percentWidth = 100;
+					hbox.percentHeight = 100;
+					hbox.addComponent(legend);
+					hbox.addComponent(chartBody);
+					addComponent(hbox);
 				case right:
-					var vbox = new HBox();
-
-					vbox.addComponent(chartBody);
-					vbox.addComponent(legend);
-					addComponent(vbox);
-
+					var hbox = new HBox();
+					hbox.percentWidth = 100;
+					hbox.percentHeight = 100;
+					hbox.addComponent(chartBody);
+					hbox.addComponent(legend);
+					addComponent(hbox);
 				case top:
 					var vbox = new VBox();
 					vbox.percentWidth = 100;
 					vbox.percentHeight = 100;
-					// chartBody.percentHeight = 80;
-					// legend.percentHeight = 20;
-					// _chart.legend.left = _chart.chartBody.width + _chart.legend.marginLeft;
 					vbox.addComponent(legend);
 					vbox.addComponent(chartBody);
 					addComponent(vbox);
@@ -240,25 +213,18 @@ class Chart extends Absolute {
 					var vbox = new VBox();
 					vbox.percentWidth = 100;
 					vbox.percentHeight = 100;
-					chartBody.percentHeight = 80;
-					legend.percentHeight = 20;
-					// _chart.legend.left = _chart.chartBody.width + _chart.legend.marginLeft;
 					vbox.addComponent(chartBody);
 					vbox.addComponent(legend);
 					addComponent(vbox);
 				case Point(x, y, vertical):
 					chartBody.percentHeight = 100;
 					chartBody.percentWidth = 100;
-					// legend.percentWidth = 20;
-					// legend.percentHeight = 20;
 					legend.left = x;
 					legend.top = y;
 					addComponent(chartBody);
 					addComponent(legend);
 			}
 		}
-
-		setData();
 	}
 
 	public function setData(reset:Bool = false) {
@@ -302,8 +268,6 @@ class Chart extends Absolute {
 				}
 				legend.addNode({
 					style: {
-						fontSize: legendInfo.nodeStyle.fontSize,
-						textColor: legendInfo.nodeStyle.textColor,
 						symbol: legendInfo.nodeStyle.symbol,
 						symbolColor: colors[groupIterationIndex]
 					},
@@ -371,6 +335,7 @@ class Builder extends CompositeBuilder {
 	public function new(chart:Chart) {
 		super(chart);
 		_chart = chart;
+		_chart.styleSheet = chart.chartStyleSheet;
 		eventHandler = {};
 		_chart.chartBody = new Absolute();
 		_chart.chartBody.percentWidth = 100;

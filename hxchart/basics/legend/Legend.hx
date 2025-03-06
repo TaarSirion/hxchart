@@ -1,8 +1,9 @@
 package hxchart.basics.legend;
 
+import haxe.ui.styles.elements.Directive;
+import haxe.ui.styles.elements.RuleElement;
 import haxe.ui.components.Spacer;
 import hxchart.basics.legend.LegendNode.LegendNodeStyling;
-import haxe.ui.components.Button;
 import haxe.ui.containers.HBox;
 import haxe.ui.util.Color;
 import haxe.ui.styles.Style;
@@ -16,7 +17,6 @@ import haxe.ui.core.CompositeBuilder;
 import haxe.ui.containers.VBox;
 import haxe.ui.styles.StyleSheet;
 import haxe.ui.components.Label;
-import haxe.ui.behaviours.DefaultBehaviour;
 
 enum LegendSymbols {
 	point;
@@ -33,9 +33,7 @@ enum LegendPosition {
 }
 
 typedef LegendTitle = {
-	text:String,
-	?fontSize:Null<Int>,
-	?color:Color
+	text:String
 }
 
 /**
@@ -60,14 +58,8 @@ typedef LegendTitle = {
 		}
 		if (nodeStyle == null) {
 			for (node in data) {
-				if (node.style.textColor == null) {
-					node.style.textColor = Color.fromString("black");
-				}
 				if (node.style.symbolColor == null) {
 					node.style.symbolColor = Color.fromString("black");
-				}
-				if (node.style.fontSize == null) {
-					node.style.fontSize = 16;
 				}
 				if (node.style.symbol == null) {
 					node.style.symbol = LegendSymbols.rectangle;
@@ -77,14 +69,8 @@ typedef LegendTitle = {
 		}
 
 		for (node in data) {
-			if (node.style.textColor == null) {
-				node.style.textColor = nodeStyle.textColor == null ? Color.fromString("black") : nodeStyle.textColor;
-			}
 			if (node.style.symbolColor == null) {
 				node.style.symbolColor = nodeStyle.symbolColor == null ? Color.fromString("black") : nodeStyle.symbolColor;
-			}
-			if (node.style.fontSize == null) {
-				node.style.fontSize = nodeStyle.fontSize == null ? 16 : nodeStyle.fontSize;
 			}
 			if (node.style.symbol == null) {
 				node.style.symbol = nodeStyle.symbol == null ? LegendSymbols.rectangle : nodeStyle.symbol;
@@ -95,38 +81,48 @@ typedef LegendTitle = {
 
 @:composite(Builder, LegendLayout)
 class Legend extends VBox {
-	@:clonable @:behaviour(DefaultBehaviour, 20) public var fontSizeTitle:Null<Int>;
-	@:clonable @:behaviour(DefaultBehaviour, 18) public var fontSizeSubTitle:Null<Int>;
-
-	@:clonable @:behaviour(DefaultBehaviour, 0x000000) public var colorTitle:Null<Int>;
-	@:clonable @:behaviour(DefaultBehaviour, 0x000000) public var colorSubTitle:Null<Int>;
-
 	@:clonable @:behaviour(TitleBehaviour) public var legendTitle:String;
 	@:clonable @:behaviour(SubTitleBehaviour) public var legendSubTitle:String;
-
-	// public var legendTitle:String;
-	// public var legendSubTitle:String;
 
 	@:call(AddNode) public function addNode(data:LegendNodeData):LegendNode;
 
 	public var childNodes:Array<String>;
 
 	public var legendPosition:LegendPosition = right;
+	public var legendStyleSheet:StyleSheet;
 
-	public function new(info:LegendInfo) {
+	public function new(info:LegendInfo, ?styleSheet:StyleSheet) {
+		if (info == null) {
+			info = {
+				title: {
+					text: "Legend",
+				},
+				useLegend: true,
+				nodeStyle: {
+					symbol: rectangle,
+				}
+			};
+		} else {
+			if (info.nodeStyle == null) {
+				info.nodeStyle = {
+					symbol: rectangle,
+				};
+			}
+			if (info.nodeStyle.symbol == null) {
+				info.nodeStyle.symbol = rectangle;
+			}
+		}
+
 		if (info.position != null) {
 			legendPosition = info.position;
 		}
+		legendStyleSheet = styleSheet;
 		super();
 		if (info.title != null) {
-			fontSizeTitle = info.title.fontSize == null ? fontSizeTitle : info.title.fontSize;
-			colorTitle = info.title.color == null ? colorTitle : info.title.color;
 			legendTitle = info.title.text;
 		}
 
 		if (info.subTitle != null) {
-			fontSizeSubTitle = info.subTitle.fontSize == null ? fontSizeSubTitle : info.subTitle.fontSize;
-			colorSubTitle = info.subTitle.color == null ? colorSubTitle : info.subTitle.color;
 			legendSubTitle = info.subTitle.text;
 		}
 	}
@@ -245,7 +241,7 @@ class Builder extends CompositeBuilder {
 	}
 
 	public override function addComponent(child:Component):Component {
-		if (Std.isOfType(child, LegendNode)) {
+		if (child is LegendNode) {
 			var container = _legend.findComponent("legend-node-container", Component, true, "css");
 			return container.addComponent(child);
 		}
@@ -262,39 +258,57 @@ class Builder extends CompositeBuilder {
 	}
 
 	private function setStyleSheet() {
+		if (_legend.legendStyleSheet != null) {
+			_legend.styleSheet = _legend.legendStyleSheet;
+			return;
+		}
 		_legend.styleSheet = new StyleSheet();
-		_legend.styleSheet.parse("
-			.legend-class{ 
-				border: 1px solid #000000;
-				background-color: #f5f5f5;
-				padding: 10px;
-				font-family: Arial;
-			}
-			.legend-title {
-				text-align: center;
-				font-size: "
-			+ _legend.fontSizeTitle
-			+ "px;
-				color: "
-			+ _legend.colorTitle
-			+ ";
-			}
-			.legend-sub-title {
-				text-align: center;
-				font-size: "
-			+ _legend.fontSizeSubTitle
-			+ "px;
-			color: "
-			+ _legend.colorSubTitle
-			+ ";
-			}
-		");
+		_legend.styleSheet.addRule(new RuleElement(".legend-class", [
+			new Directive("border-size", VDimension(PX(1))),
+			new Directive("border-color", VColor(0x000000)),
+			new Directive("border-style", VString("solid")),
+			new Directive("background-color", VColor(0xf5f5f5)),
+			new Directive("padding", VDimension(PX(10)))
+		]));
+		_legend.styleSheet.addRule(new RuleElement(".legend-title", [
+			new Directive("text-align", VString("center")),
+			new Directive("font-size", VDimension(PX(20))),
+			new Directive("color", VColor(0x000000))
+		]));
+		_legend.styleSheet.addRule(new RuleElement(".legend-subtitle", [
+			new Directive("text-align", VString("center")),
+			new Directive("font-size", VDimension(PX(17))),
+			new Directive("color", VColor(0x000000))
+		]));
+		_legend.styleSheet.addRule(new RuleElement(".legend-text", [
+			new Directive("text-align", VString("left")),
+			new Directive("font-size", VDimension(PX(15))),
+			new Directive("color", VColor(0x000000))
+		]));
+		switch (_legend.legendPosition) {
+			case left:
+				_legend.styleSheet.addRule(new RuleElement(".legend-class", [
+					new Directive("vertical-align", VString("center")),
+					new Directive("margin-left", VDimension(PX(10))),
+					new Directive("margin-right", VDimension(PX(10)))
+				]));
+			case right:
+				_legend.styleSheet.addRule(new RuleElement(".legend-class", [
+					new Directive("vertical-align", VString("center")),
+					new Directive("margin-left", VDimension(PX(10))),
+					new Directive("margin-right", VDimension(PX(10)))
+				]));
+
+			case top:
+				_legend.styleSheet.addRule(new RuleElement(".legend-class", [new Directive("horizontal-align", VString("center"))]));
+			case bottom:
+				_legend.styleSheet.addRule(new RuleElement(".legend-class", [new Directive("horizontal-align", VString("center"))]));
+			case Point(x, y, vertical):
+		}
 	}
 
 	override function applyStyle(style:Style) {
 		super.applyStyle(style);
-		// _legend.top += style.marginTop;
-		// _legend.height -= style.marginBottom;
 	}
 
 	override function validateComponentLayout():Bool {
