@@ -386,29 +386,28 @@ class Builder extends CompositeBuilder {
 			switch (chartInfo.type) {
 				case scatter:
 					if (chartInfo.axisInfo == null) {
-						chartInfo.axisInfo = [{}, {}];
-						var x = chartInfo.data.values.get("x")[0];
-						if (x is Int || x is Float) {
-							chartInfo.axisInfo[0].type = linear;
-						} else if (x is String) {
-							chartInfo.axisInfo[0].type = categorical;
-						}
-						var y = chartInfo.data.values.get("y")[0];
-						if (y is Int || y is Float) {
-							chartInfo.axisInfo[1].type = linear;
-						} else if (y is String) {
-							chartInfo.axisInfo[1].type = categorical;
-						}
+						chartInfo.axisInfo = [
+							{
+								id: "x_" + axisID
+							},
+							{
+								id: "y_" + axisID
+							}
+						];
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
 					} else if (chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
 					if (_chart.axes.exists(axisID)) {
 						chartInfo.axisInfo = [
 							{
+								id: "x_" + axisID,
 								type: linear,
 								axis: _chart.axes.get(axisID)[0]
 							},
 							{
+								id: "y_" + axisID,
 								type: linear,
 								axis: _chart.axes.get(axisID)[1]
 							}
@@ -421,29 +420,28 @@ class Builder extends CompositeBuilder {
 					}
 				case line:
 					if (chartInfo.axisInfo == null) {
-						chartInfo.axisInfo = [{}, {}];
-						var x = chartInfo.data.values.get("x")[0];
-						if (x is Int || x is Float) {
-							chartInfo.axisInfo[0].type = linear;
-						} else if (x is String) {
-							chartInfo.axisInfo[0].type = categorical;
-						}
-						var y = chartInfo.data.values.get("y")[0];
-						if (y is Int || y is Float) {
-							chartInfo.axisInfo[1].type = linear;
-						} else if (y is String) {
-							chartInfo.axisInfo[1].type = categorical;
-						}
+						chartInfo.axisInfo = [
+							{
+								id: "x_" + axisID
+							},
+							{
+								id: "y_" + axisID
+							}
+						];
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
 					} else if (chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
 					if (_chart.axes.exists(axisID)) {
 						chartInfo.axisInfo = [
 							{
+								id: "x_" + axisID,
 								type: linear,
 								axis: _chart.axes.get(axisID)[0]
 							},
 							{
+								id: "y_" + axisID,
 								type: linear,
 								axis: _chart.axes.get(axisID)[1]
 							}
@@ -461,10 +459,12 @@ class Builder extends CompositeBuilder {
 					if (_chart.axes.exists(axisID)) {
 						chartInfo.axisInfo = [
 							{
+								id: axisID,
 								type: categorical,
 								axis: _chart.axes.get(axisID)[0]
 							},
 							{
+								id: axisID,
 								type: linear,
 								axis: _chart.axes.get(axisID)[1]
 							}

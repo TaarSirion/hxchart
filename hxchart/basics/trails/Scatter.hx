@@ -295,34 +295,6 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 	}
 
-	@:allow(hxchart.tests)
-	function setTickInfo(type:AxisTypes, infoValues:Array<Any>, dataValues:Array<Any>, dataMin:Null<Float>, dataMax:Null<Float>) {
-		var tickInfo:TickInfo = null;
-		switch (type) {
-			case linear:
-				var min:Float = dataMin;
-				var max:Float = dataMax;
-				if (infoValues != null && infoValues.length >= 2) {
-					min = infoValues[0];
-					max = infoValues[1];
-				}
-				tickInfo = new NumericTickInfo(min, max);
-			case categorical:
-				var values:Array<String> = [];
-				if (infoValues == null || infoValues.length == 0) {
-					for (val in dataValues) {
-						values.push(val);
-					}
-				} else {
-					for (val in infoValues) {
-						values.push(val);
-					}
-				}
-				tickInfo = new StringTickInfo(values);
-		}
-		return tickInfo;
-	}
-
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle) {
 		axes = [null, null];
 		if (axisInfo[0].axis != null) {
@@ -341,28 +313,15 @@ class Scatter implements AxisLayer implements DataLayer {
 		var isPreviousXAxis = false;
 		var isPreviousYAxis = false;
 		if (axes[0] == null) {
-			var xValues = [];
-			for (any in data) {
-				var group:Array<ScatterDataPoint> = any;
-				xValues = xValues.concat(group.map(dataPoint -> {
-					return dataPoint.values.x;
-				}));
-			}
-			var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, xValues, minX, maxX);
-			axes[0] = new Axis(new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
+			axisInfo[0].length = xAxisLength;
+			axes[0] = new Axis(axisInfo[0]);
 		} else {
 			isPreviousXAxis = true;
 		}
 		if (axes[1] == null) {
-			var yValues = [];
-			for (any in data) {
-				var group:Array<ScatterDataPoint> = any;
-				yValues = yValues.concat(group.map(dataPoint -> {
-					return dataPoint.values.y;
-				}));
-			}
-			var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, yValues, minY, maxY);
-			axes[1] = new Axis(new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
+			axisInfo[1].length = yAxisLength;
+			axisInfo[1].rotation = 270;
+			axes[1] = new Axis(axisInfo[1]);
 		} else {
 			isPreviousYAxis = true;
 		}

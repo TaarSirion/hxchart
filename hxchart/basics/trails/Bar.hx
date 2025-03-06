@@ -289,7 +289,7 @@ class Bar implements AxisLayer implements DataLayer {
 				var val:Data2D = x;
 				return val.xValue;
 			}), minX, maxX);
-			axes[0] = new Axis(new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
+			axes[0] = new Axis(axisInfo[0]); // new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
 		} else {
 			isPreviousXAxis = true;
 		}
@@ -298,7 +298,7 @@ class Bar implements AxisLayer implements DataLayer {
 				var val:Data2D = x;
 				return val.yValue;
 			}), minY, maxY);
-			axes[1] = new Axis(new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
+			axes[1] = new Axis(axisInfo[1]); // new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
 		} else {
 			isPreviousYAxis = true;
 		}
