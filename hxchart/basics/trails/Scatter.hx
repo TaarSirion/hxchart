@@ -474,15 +474,15 @@ class Scatter implements AxisLayer implements DataLayer {
 		// Hover event handling
 		eventHandler.hoverHandlers.push(function(e) {
 			hoverLayer.componentGraphics.clear();
-			if (chartInfo.events != null && chartInfo.events.onHandle != null) {
+			if (chartInfo.events != null && chartInfo.events.onHover != null) {
 				for (group in dataByGroup) {
 					for (dataPoint in group) {
 						if (!dataPoint.allowed) {
 							continue;
 						}
-						if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
+						if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x + parent.left, dataPoint.coord.y + parent.top),
 							dataPoint.size + dataPoint.borderThickness)) {
-							var selectInfo = chartInfo.events.onHandle({
+							var selectInfo = chartInfo.events.onHover({
 								coords: [dataPoint.coord],
 								border: {
 									thickness: dataPoint.borderThickness,
@@ -506,7 +506,7 @@ class Scatter implements AxisLayer implements DataLayer {
 					if (!dataPoint.allowed) {
 						continue;
 					}
-					if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
+					if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x + parent.left, dataPoint.coord.y + parent.top),
 						dataPoint.size + dataPoint.borderThickness)) {
 						hoverLayer.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
 						hoverLayer.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
@@ -526,7 +526,7 @@ class Scatter implements AxisLayer implements DataLayer {
 						}
 						if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
 							dataPoint.size + dataPoint.borderThickness)) {
-							var selectInfo = chartInfo.events.onHandle({
+							var selectInfo = chartInfo.events.onHover({
 								coords: [dataPoint.coord],
 								border: {
 									thickness: dataPoint.borderThickness,

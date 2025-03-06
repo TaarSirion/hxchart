@@ -24,6 +24,6 @@ import haxe.ui.events.MouseEvent;
 }
 
 @:structInit class EventInfo {
-	@:optional public var onHandle:EventObject->EventObject;
+	@:optional public var onHover:EventObject->EventObject;
 	@:optional public var onClick:EventObject->EventObject;
 }
