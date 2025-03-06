@@ -1,5 +1,6 @@
 Export/
 local/Main.hx
+local/test.xml
 local/MainPages.hx
 hl.hxml
 html.hxml

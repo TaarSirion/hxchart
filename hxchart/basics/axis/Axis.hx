@@ -1,5 +1,6 @@
 package hxchart.basics.axis;
 
+import haxe.ui.styles.StyleSheet;
 import haxe.Timer;
 import haxe.ui.util.Color;
 import haxe.ui.behaviours.Behaviour;
@@ -31,9 +32,14 @@ enum AxisTypes {
  * @param values Optional. Values the axis should have. Depending on the type, this will work differently.
  */
 @:structInit class AxisInfo {
-	@:optional public var type:AxisTypes;
+	public var id:String;
+	public var tickInfo:TickInfo;
+	public var type:AxisTypes;
 	@:optional public var axis:Axis;
 	@:optional public var values:Array<Any>;
+	@:optional public var rotation:Int;
+	@:optional public var start:Point;
+	@:optional public var length:Float;
 }
 
 @:composite(AxisBuilder, Layout)
@@ -127,7 +133,7 @@ class Axis extends Absolute {
 
 	public var axisColor:Color;
 
-	public function new(start:Point, rotation:Int, length:Float, tickInfo:TickInfo, idName:String, color:String = "black") {
+	public function new(axisInfo:AxisInfo, styleSheet:StyleSheet) {
 		super();
 		top = start.y;
 		left = start.x;
