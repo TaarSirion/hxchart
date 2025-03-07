@@ -19,6 +19,11 @@ enum AxisTypes {
 	categorical;
 }
 
+typedef TicksInAxis = {
+	tickInfo:TickInfo,
+	isUpdate:Bool,
+}
+
 /**
  * Axis information. Usually used in the first trail.
  * 
@@ -41,6 +46,9 @@ enum AxisTypes {
 	@:optional public var rotation:Int;
 	@:optional public var start:Point;
 	@:optional public var length:Float;
+	@:optional public var showZeroTick:Bool;
+	@:optional public var zeroTickOrientation:CompassOrientation;
+	@:optional public var tickMargin:Float;
 
 	public function setAxisInfo(trailValues:Array<Any>) {
 		if (trailValues.length == 0) {
@@ -91,15 +99,25 @@ enum AxisTypes {
 
 @:composite(AxisBuilder, Layout)
 class Axis extends Absolute {
-	@:clonable @:behaviour(DefaultBehaviour, 10) public var tickMargin:Null<Float>;
+	/**
+	 * Set and update tick positions on the axis.
+	 * @param data Contains TickInfo and if it should update the positions, or set new ones.
+	 */
+	@:call(SetTicks) public function setTicks(data:TicksInAxis):Void;
 
-	@:call(SetTicks) public function setTicks(data:TickInfo):Void;
-
-	@:call(UpdateTicks) public function updateTicks(data:TickInfo):Void;
-
+	/**
+	 * Draw the axis and ticks on the canvas.
+	 */
 	@:call(Draw) public function drawAxis():Void;
 
-	public var axisInfo:AxisInfo;
+	/**
+	 * Information on the axis.
+	 */
+	public var axisInfo(default, set):AxisInfo;
+
+	private function set_axisInfo(info:AxisInfo) {
+		return axisInfo = info;
+	}
 
 	/**
 	 * Rotation of an axis in degrees.
@@ -112,20 +130,25 @@ class Axis extends Absolute {
 
 	/**
 	 * Start Point of an axis. Will not be calculated dynamically.
+	 * Updates ticks when set.
 	 */
 	public var startPoint(default, set):Point;
 
 	function set_startPoint(point:Point) {
 		if (startPoint == null) {
 			startPoint = point;
-			setTicks(tickInfo);
+			setTicks({tickInfo: tickInfo, isUpdate: false});
 		} else {
 			startPoint = point;
-			updateTicks(tickInfo);
+			setTicks({tickInfo: tickInfo, isUpdate: true});
 		}
 		return startPoint;
 	}
 
+	/**
+	 * Array of all linked axes. Will be used to position this axis in accordance to the linked axes.
+	 * Currently this only works with linking one axis to "x" or "y".
+	 */
 	public var linkedAxes(default, set):Map<String, Axis>;
 
 	function set_linkedAxes(links:Map<String, Axis>) {
@@ -150,37 +173,68 @@ class Axis extends Absolute {
 		return axisLength = length;
 	}
 
+	/**
+	 * Array of all ticks on the axis.
+	 */
 	public var ticks(default, set):Array<Ticks>;
 
 	private function set_ticks(ticks:Array<Ticks>) {
 		return this.ticks = ticks;
 	}
 
+	/**
+	 * Information on the ticks.
+	 */
 	public var tickInfo(default, set):TickInfo;
 
 	private function set_tickInfo(tickInfo:TickInfo) {
 		return this.tickInfo = tickInfo;
 	}
 
+	/**
+	 * Array of all subticks on the axis.
+	 */
 	public var sub_ticks(default, set):Array<Ticks>;
 
 	private function set_sub_ticks(ticks:Array<Ticks>) {
 		return this.sub_ticks = ticks;
 	}
 
+	/**
+	 * Show the zero tick. Default is true.
+	 */
 	public var showZeroTick(default, set):Bool;
 
 	private function set_showZeroTick(show:Bool) {
 		return showZeroTick = show;
 	}
 
-	public var zeroTickPosition(default, set):CompassOrientation;
+	/**
+	 * Orientation of the zero tick label. Default is south, meaning below the axis and the tick. 
+	 */
+	public var zeroTickOrientation(default, set):CompassOrientation;
 
-	private function set_zeroTickPosition(pos:CompassOrientation) {
-		return zeroTickPosition = pos;
+	private function set_zeroTickOrientation(pos:CompassOrientation) {
+		return zeroTickOrientation = pos;
 	}
 
-	public var axisColor:Color;
+	/**
+	 * Color of the axis. Can be set via stylesheet, or by hand.
+	 */
+	public var axisColor(default, set):Color;
+
+	private function set_axisColor(color:Color) {
+		return axisColor = color;
+	}
+
+	/**
+	 * Margin between the ticks on the axis.
+	 */
+	public var tickMargin(default, set):Float;
+
+	private function set_tickMargin(margin:Float) {
+		return tickMargin = margin;
+	}
 
 	public function new(axisInfo:AxisInfo, ?styleSheet:StyleSheet) {
 		super();
@@ -196,16 +250,37 @@ class Axis extends Absolute {
 		if (axisInfo.tickInfo == null) {
 			throw new Exception("Axis cannot be created without TickInfo. You can generate the TickInfo via setAxisInfo in AxisInfo or provide one by hand.");
 		}
+		tickInfo = axisInfo.tickInfo;
+		id = axisInfo.id;
 
-		if (axisInfo.start == null) {
-			axisInfo.start = new Point(0, 0);
+		if (axisInfo.showZeroTick == null) {
+			showZeroTick = true;
+		} else {
+			showZeroTick = axisInfo.showZeroTick;
+		}
+
+		if (axisInfo.zeroTickOrientation == null) {
+			zeroTickOrientation = S;
+		} else {
+			zeroTickOrientation = axisInfo.zeroTickOrientation;
 		}
 
 		if (axisInfo.length == null) {
-			axisInfo.length = 100;
+			axisLength = 100;
+		} else {
+			axisLength = axisInfo.length;
 		}
+
 		if (axisInfo.rotation == null) {
-			axisInfo.rotation = 0;
+			axisRotation = 0;
+		} else {
+			axisRotation = axisInfo.rotation;
+		}
+
+		if (axisInfo.tickMargin == null) {
+			tickMargin = 10;
+		} else {
+			tickMargin = axisInfo.tickMargin;
 		}
 
 		if (styleSheet != null) {
@@ -215,14 +290,15 @@ class Axis extends Absolute {
 			axisColor = 0x000000;
 		}
 
-		top = axisInfo.start.y;
-		left = axisInfo.start.x;
-		this.axisRotation = axisInfo.rotation;
-		axisLength = axisInfo.length;
-		showZeroTick = true;
-		this.tickInfo = axisInfo.tickInfo;
-		id = axisInfo.id;
-		startPoint = axisInfo.start;
+		if (axisInfo.start == null) {
+			top = 0;
+			left = 0;
+			startPoint = new Point(0, 0);
+		} else {
+			top = axisInfo.start.y;
+			left = axisInfo.start.x;
+			startPoint = axisInfo.start;
+		}
 	}
 
 	override function onResized() {
@@ -234,7 +310,7 @@ class Axis extends Absolute {
 	}
 
 	/**
-	 * Only needed at the beginning of creating the chart, to correctly center the startpoint.
+	 * Centers the startpoint at the beginning and positions it according to its linked axes on update.
 	 */
 	public function centerStartPoint(alternateWidth:Float = 0, alternateHeight:Float = 0) {
 		var marginLeft = (width - axisLength) / 2;
@@ -283,7 +359,6 @@ private class Draw extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var axis = cast(_component, Axis);
 		var canvas = _component.findComponent(null, Canvas);
-		trace("DRAWING");
 		if (canvas != null) {
 			canvas.componentGraphics.strokeStyle(axis.axisColor);
 			canvas.componentGraphics.moveTo(axis.startPoint.x, axis.startPoint.y);
@@ -315,32 +390,16 @@ private class Draw extends Behaviour {
 
 @:dox(hide) @:noCompletion
 private class SetTicks extends Behaviour {
-	var axis:Axis;
-	var start:Point;
-	var end:Point;
-
-	var is_y:Bool;
-	var ticks:Array<Ticks>;
-	var sub_ticks:Array<Ticks>;
-
-	var layer:Absolute;
-
 	public override function call(param:Any = null):Variant {
-		var tickInfo:TickInfo = param;
-		axis = cast(_component, Axis);
-		start = axis.startPoint;
-		end = axis.endPoint;
-		ticks = axis.ticks;
-		sub_ticks = axis.sub_ticks;
-		layer = _component.findComponent(null, Absolute);
-		setTickPosition(tickInfo);
-		return null;
-	}
+		var ticksInAxis:TicksInAxis = param;
+		var tickInfo = ticksInAxis.tickInfo;
+		var axis = cast(_component, Axis);
+		var layer = _component.findComponent(null, Absolute);
 
-	private function setTickPosition(tickInfo:TickInfo) {
-		axis.ticks = [];
-		axis.sub_ticks = [];
-		var start = axis.startPoint;
+		if (!ticksInAxis.isUpdate) {
+			axis.ticks = [];
+			axis.sub_ticks = [];
+		}
 		var tickNum = tickInfo.tickNum;
 		if (Std.isOfType(tickInfo, StringTickInfo)) {
 			// Increase tickNum size so that positioning centers the ticks. Necessary because StringTickInfo has no zero Tick.
@@ -355,89 +414,23 @@ private class SetTicks extends Behaviour {
 		var subIndex = 0;
 		for (i in 0...tickInfo.tickNum) {
 			var tick = new Ticks(false, axis.axisRotation);
-			var tickPoint = AxisTools.positionEndpoint(start, axis.axisRotation, axis.tickMargin + i * tickPos);
+			if (ticksInAxis.isUpdate) {
+				tick = axis.ticks[i];
+			}
+			var tickPoint = AxisTools.positionEndpoint(axis.startPoint, axis.axisRotation, axis.tickMargin + i * tickPos);
 			tick.left = tickPoint.x;
 			tick.top = tickPoint.y;
 			if (tickInfo.zeroIndex == i && !axis.showZeroTick) {
 				tick.hidden = true;
 			}
-			if (tickInfo.zeroIndex == i && axis.zeroTickPosition != null) {
-				tick.labelPosition = axis.zeroTickPosition;
+			if (tickInfo.zeroIndex == i && axis.zeroTickOrientation != null) {
+				tick.labelPosition = axis.zeroTickOrientation;
 			}
 			tick.text = tickInfo.labels[i];
-			axis.ticks.push(tick);
-			layer.addComponent(tick);
-			for (j in 0...subTicksPerTick) {
-				if (i == (tickInfo.tickNum - 1)) {
-					break;
-				}
-				var tick = new Ticks(true, axis.axisRotation);
-				var tickPoint = AxisTools.positionEndpoint(tickPoint, axis.axisRotation, (j + 1) * tickPos / (subTicksPerTick + 1));
-				tick.left = tickPoint.x;
-				tick.top = tickPoint.y;
-				tick.text = tickInfo.subLabels[subIndex];
-				tick.labelPosition = tickInfo.labelPosition;
-				subIndex++;
-				axis.sub_ticks.push(tick);
+			if (!ticksInAxis.isUpdate) {
+				axis.ticks.push(tick);
 				layer.addComponent(tick);
 			}
-		}
-	}
-}
-
-@:dox(hide) @:noCompletion
-private class UpdateTicks extends Behaviour {
-	var axis:Axis;
-	var start:Point;
-	var end:Point;
-
-	var is_y:Bool;
-	var ticks:Array<Ticks>;
-	var sub_ticks:Array<Ticks>;
-
-	var layer:Absolute;
-
-	public override function call(param:Any = null):Variant {
-		var tickInfo:TickInfo = param;
-		axis = cast(_component, Axis);
-		start = axis.startPoint;
-		end = axis.endPoint;
-		ticks = axis.ticks;
-		sub_ticks = axis.sub_ticks;
-		if (ticks.length == 0) {
-			return null;
-		}
-		layer = _component.findComponent(null, Absolute);
-		setTickPosition(tickInfo);
-		return null;
-	}
-
-	private function setTickPosition(tickInfo:TickInfo) {
-		var start = axis.startPoint;
-		var tickNum = tickInfo.tickNum;
-		if (tickInfo is StringTickInfo) {
-			// Increase tickNum size so that positioning centers the ticks.
-			tickNum++;
-		}
-
-		var tickPos = (axis.axisLength - 2 * axis.tickMargin) / (tickNum - 1);
-		var subTicksPerTick = 0;
-		if (tickInfo.useSubTicks) {
-			subTicksPerTick = tickInfo.subTicksPerPart;
-		}
-		var subIndex = 0;
-		for (i in 0...tickInfo.tickNum) {
-			var tick = axis.ticks[i];
-			var tickPoint = AxisTools.positionEndpoint(start, axis.axisRotation, axis.tickMargin + i * tickPos);
-			tick.left = tickPoint.x;
-			tick.top = tickPoint.y;
-			if (tickInfo.zeroIndex == i && !axis.showZeroTick) {
-				tick.hidden = true;
-			}
-			if (tickInfo.zeroIndex == i && axis.zeroTickPosition != null) {
-				tick.labelPosition = axis.zeroTickPosition;
-			}
-			tick.text = tickInfo.labels[i];
 			for (j in 0...subTicksPerTick) {
 				if (i == (tickInfo.tickNum - 1)) {
 					break;
@@ -448,8 +441,13 @@ private class UpdateTicks extends Behaviour {
 				tick.top = tickPoint.y;
 				tick.text = tickInfo.subLabels[subIndex];
 				subIndex++;
+				if (!ticksInAxis.isUpdate) {
+					axis.sub_ticks.push(tick);
+					layer.addComponent(tick);
+				}
 			}
 		}
+		return null;
 	}
 }
 
@@ -465,6 +463,10 @@ private class AxisBuilder extends CompositeBuilder {
 		_axis.sub_ticks = [];
 		_tickLabelLayer = new Absolute();
 		_tickCanvasLayer = new Canvas();
+		_tickCanvasLayer.percentWidth = 100;
+		_tickLabelLayer.percentWidth = 100;
+		_tickCanvasLayer.percentHeight = 100;
+		_tickLabelLayer.percentHeight = 100;
 		_axis.addComponent(_tickCanvasLayer);
 		_axis.addComponent(_tickLabelLayer);
 	}
@@ -472,31 +474,16 @@ private class AxisBuilder extends CompositeBuilder {
 	override function validateComponentData() {
 		_tickCanvasLayer.componentGraphics.clear();
 		_tickLabelLayer.removeAllComponents();
-
-		if (_axis.startPoint == null) {
-			_axis.startPoint = new Point(40, 40);
-		}
-
 		_axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.axisRotation, _axis.axisLength);
-		_axis.setTicks(_axis.tickInfo);
-
-		_tickCanvasLayer.percentWidth = 100;
-		_tickLabelLayer.percentWidth = 100;
-		_tickCanvasLayer.percentHeight = 100;
-		_tickLabelLayer.percentHeight = 100;
-		trace("HERE");
+		_axis.setTicks({tickInfo: _axis.tickInfo, isUpdate: false});
 		_axis.drawAxis();
 	}
 
 	override function validateComponentLayout():Bool {
 		_tickCanvasLayer.componentGraphics.clear();
-		if (_axis.startPoint == null) {
-			_axis.startPoint = new Point(40, 40);
-		}
-
 		_axis.centerStartPoint();
 		_axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.axisRotation, _axis.axisLength);
-		_axis.updateTicks(_axis.tickInfo);
+		_axis.setTicks({tickInfo: _axis.tickInfo, isUpdate: true});
 		_axis.drawAxis();
 		return super.validateComponentLayout();
 	}
