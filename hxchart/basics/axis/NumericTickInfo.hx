@@ -83,9 +83,26 @@ class NumericTickInfo implements TickInfo {
 	 * @param min Min value of the axis.
 	 * @param max Max value of the axis.
 	 */
-	public function new(min:Float, max:Float, useSubTicks:Bool = false, subTicksPerPart:Int = 3, removeLead:Bool = false) {
-		this.min = min;
-		this.max = max;
+	public function new(values:Map<String, Array<Float>>, useSubTicks:Bool = false, subTicksPerPart:Int = 3, removeLead:Bool = false) {
+		if (values.exists("min")) {
+			this.min = values.get("min")[0];
+		}
+		if (values.exists("max")) {
+			this.max = values.get("max")[0];
+		}
+		if (values.exists("ticks")) {
+			var ticks:Array<Float> = values.get("ticks");
+			tickNum = ticks.length;
+			negNum = ticks.filter(tick -> tick < 0).length;
+			zeroIndex = ticks.indexOf(0);
+			if (zeroIndex == -1) {
+				zeroIndex = negNum;
+				tickNum++;
+			}
+			labels = ticks.map(tick -> Std.string(tick));
+			labels.insert(zeroIndex, "0");
+			return;
+		}
 		this.useSubTicks = useSubTicks;
 		this.subTicksPerPart = subTicksPerPart;
 		this.removeLead = removeLead;

@@ -48,6 +48,7 @@ typedef TicksInAxis = {
 	@:optional public var length:Float;
 	@:optional public var showZeroTick:Bool;
 	@:optional public var zeroTickOrientation:CompassOrientation;
+
 	@:optional public var tickMargin:Float;
 
 	public function setAxisInfo(trailValues:Array<Any>) {
@@ -80,7 +81,7 @@ typedef TicksInAxis = {
 				dataValues.sort(Reflect.compare);
 				min = dataValues[0];
 				max = dataValues[dataValues.length - 1];
-				tickInfo = new NumericTickInfo(min, max);
+				tickInfo = new NumericTickInfo(["min" => [min], "max" => [max]]);
 			case categorical:
 				var values:Array<String> = [];
 				if (values == null || values.length == 0) {
