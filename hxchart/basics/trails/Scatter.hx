@@ -338,7 +338,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		axes[0].centerStartPoint(parent.width, parent.height);
 		axes[1].centerStartPoint(parent.width, parent.height);
 		axes[1].showZeroTick = false;
-		axes[0].zeroTickPosition = CompassOrientation.SW;
+		axes[0].zeroTickOrientation = CompassOrientation.SW;
 		// Positioning data before axes, so that axes are drawn on top of data.
 		positionData(chartInfo.style);
 		if (isPreviousXAxis) {
@@ -580,17 +580,17 @@ class Scatter implements AxisLayer implements DataLayer {
 			}
 			return ticksFiltered[0].left;
 		}
-		var xMax = Std.parseFloat(ticks[ticks.length - 1].text);
-		var xMin = Std.parseFloat(ticks[0].text);
-		var x_ratio:Float = 0.0;
-		if (xValue > 0) {
-			x_ratio = xValue / xMax;
+		var largerTicks = ticks.filter(tick -> Std.parseFloat(tick.text) >= xValue);
+		var xMax = Std.parseFloat(largerTicks[0].text);
+		var maxIndex = ticks.indexOf(largerTicks[0]);
+		var minIndex = maxIndex == 0 ? 0 : maxIndex - 1;
+		var xMin = Std.parseFloat(ticks[minIndex].text);
+		if (xMax == xMin) {
+			return ticks[minIndex].left;
 		}
-		var x = zeroPos + xDist.pos_dist * x_ratio;
-		if (xValue < 0) {
-			x_ratio = xValue / xMin;
-			x = zeroPos - xDist.neg_dist * x_ratio;
-		}
+		var tickLeft = ticks[minIndex].left;
+		var tickRight = largerTicks[0].left;
+		var x = (tickRight - tickLeft) * (xValue - xMin) / (xMax - xMin) + tickLeft;
 		return x;
 	}
 
@@ -604,17 +604,17 @@ class Scatter implements AxisLayer implements DataLayer {
 			}
 			return ticksFiltered[0].top;
 		}
-		var yMax = Std.parseFloat(ticks[ticks.length - 1].text);
-		var yMin = Std.parseFloat(ticks[0].text);
-		var y_ratio:Float = 0;
-		if (yValue > 0) {
-			y_ratio = yValue / yMax;
+		var largerTicks = ticks.filter(tick -> Std.parseFloat(tick.text) >= yValue);
+		var yMax = Std.parseFloat(largerTicks[0].text);
+		var maxIndex = ticks.indexOf(largerTicks[0]);
+		var minIndex = maxIndex == 0 ? 0 : maxIndex - 1;
+		var yMin = Std.parseFloat(ticks[minIndex].text);
+		if (yMin == yMax) {
+			return ticks[minIndex].top;
 		}
-		var y = zeroPos - yDist.pos_dist * y_ratio;
-		if (yValue < 0) {
-			y_ratio = yValue / yMin;
-			y = zeroPos + yDist.neg_dist * y_ratio;
-		}
+		var tickBottom = ticks[minIndex].top;
+		var tickTop = largerTicks[0].top;
+		var y = tickBottom - (tickBottom - tickTop) * (yValue - yMin) / (yMax - yMin);
 		return y;
 	}
 

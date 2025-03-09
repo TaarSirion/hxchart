@@ -92,15 +92,16 @@ class NumericTickInfo implements TickInfo {
 		}
 		if (values.exists("ticks")) {
 			var ticks:Array<Float> = values.get("ticks");
+			ticks.sort(Reflect.compare);
 			tickNum = ticks.length;
 			negNum = ticks.filter(tick -> tick < 0).length;
+			labels = ticks.map(tick -> Std.string(tick));
 			zeroIndex = ticks.indexOf(0);
 			if (zeroIndex == -1) {
 				zeroIndex = negNum;
 				tickNum++;
+				labels.insert(zeroIndex, "0");
 			}
-			labels = ticks.map(tick -> Std.string(tick));
-			labels.insert(zeroIndex, "0");
 			return;
 		}
 		this.useSubTicks = useSubTicks;
