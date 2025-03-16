@@ -53,6 +53,9 @@ typedef LegendTitle = {
 	public var useLegend:Bool;
 
 	public function validate() {
+		if (!useLegend) {
+			return;
+		}
 		if (data == null) {
 			return;
 		}

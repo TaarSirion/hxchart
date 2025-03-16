@@ -12,8 +12,15 @@ import utest.Test;
 
 class TestAxis extends Test {
 	function testAxisCreation() {
-		var tickInfo:NumericTickInfo = new NumericTickInfo(0, 100);
-		var axisX = new Axis(new Point(50, 50), 0, 100, tickInfo, "xaxis");
+		var tickInfo:NumericTickInfo = new NumericTickInfo(["min" => [0], "max" => [100]]);
+		var axisX = new Axis({
+			id: "xaxis",
+			tickInfo: tickInfo,
+			start: new Point(50, 50),
+			rotation: 0,
+			length: 100,
+			type: linear
+		});
 		Assert.equals(50, axisX.top);
 		Assert.equals(50, axisX.left);
 		Assert.equals(0, axisX.axisRotation);
@@ -33,19 +40,33 @@ class TestAxis extends Test {
 	}
 
 	function testTicks() {
-		var tickInfo:NumericTickInfo = new NumericTickInfo(0, 100);
-		var axisX = new Axis(new Point(50, 50), 0, 100, tickInfo, "xaxis");
+		var tickInfo:NumericTickInfo = new NumericTickInfo(["min" => [0], "max" => [100]]);
+		var axisX = new Axis({
+			start: new Point(50, 50),
+			rotation: 0,
+			length: 100,
+			tickInfo: tickInfo,
+			id: "xaxis",
+			type: linear
+		});
 		axisX.endPoint = new Point(150, 50);
-		axisX.setTicks(tickInfo);
+		axisX.setTicks({tickInfo: tickInfo, isUpdate: false});
 		Assert.equals(60, axisX.ticks[0].left);
 		Assert.equals(68, axisX.ticks[1].left);
 		Assert.equals(100, axisX.ticks[5].left);
 		Assert.equals(132, axisX.ticks[9].left);
 		Assert.equals(140, axisX.ticks[10].left);
 
-		var axisX = new Axis(new Point(50, 50), 90, 100, tickInfo, "xaxis");
+		var axisX = new Axis({
+			start: new Point(50, 50),
+			rotation: 90,
+			length: 100,
+			tickInfo: tickInfo,
+			id: "xaxis",
+			type: linear
+		});
 		axisX.endPoint = new Point(50, 150);
-		axisX.setTicks(tickInfo);
+		axisX.setTicks({tickInfo: tickInfo, isUpdate: false});
 		Assert.equals(60, axisX.ticks[0].top);
 		Assert.equals(68, axisX.ticks[1].top);
 		Assert.equals(100, axisX.ticks[5].top);

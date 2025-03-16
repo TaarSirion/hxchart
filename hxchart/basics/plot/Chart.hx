@@ -183,9 +183,9 @@ class Chart extends Absolute {
 				useLegend: false
 			};
 		}
+		this.legendInfo = legendInfo;
 		if (legendInfo.useLegend) {
 			this.legend = new Legend(legendInfo, styleSheet);
-			this.legendInfo = legendInfo;
 
 			switch (legend.legendPosition) {
 				case left:
@@ -255,25 +255,27 @@ class Chart extends Absolute {
 		if (colors.length < groupNumber) {
 			colors = colors.concat(ColorPalettes.defaultColors(groupNumber - colors.length));
 		}
-		legendInfo.validate();
-		if (legendInfo.data != null) {
-			for (node in legendInfo.data) {
-				legend.addNode(node);
-			}
-		} else {
-			var groupIterationIndex:Int = 0;
-			for (group in groups.keys()) {
-				if (legend.childNodes.contains(group)) {
-					continue;
+		if (legendInfo.useLegend) {
+			legendInfo.validate();
+			if (legendInfo.data != null) {
+				for (node in legendInfo.data) {
+					legend.addNode(node);
 				}
-				legend.addNode({
-					style: {
-						symbol: legendInfo.nodeStyle.symbol,
-						symbolColor: colors[groupIterationIndex]
-					},
-					text: group
-				});
-				groupIterationIndex++;
+			} else {
+				var groupIterationIndex:Int = 0;
+				for (group in groups.keys()) {
+					if (legend.childNodes.contains(group)) {
+						continue;
+					}
+					legend.addNode({
+						style: {
+							symbol: legendInfo.nodeStyle.symbol,
+							symbolColor: colors[groupIterationIndex]
+						},
+						text: group
+					});
+					groupIterationIndex++;
+				}
 			}
 		}
 

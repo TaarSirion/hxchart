@@ -31,17 +31,45 @@ class TestAxisTools extends Test {
 	}
 
 	function testOverlap() {
-		var tickInfo:NumericTickInfo = new NumericTickInfo(0, 100);
-		var axisX = new Axis(new Point(50, 50), 0, 100, tickInfo, "xaxis");
-		var axisY = new Axis(new Point(70, 30), 0, 100, tickInfo, "yaxis"); // Rotation is irrelevant, because I set the endpoint from hand
+		var tickInfo:NumericTickInfo = new NumericTickInfo(["min" => [0], "max" => [100]]);
+		var axisX = new Axis({
+			type: linear,
+			start: new Point(50, 50),
+			rotation: 0,
+			length: 100,
+			tickInfo: tickInfo,
+			id: "xaxis"
+		});
+		var axisY = new Axis({
+			type: linear,
+			start: new Point(70, 30),
+			rotation: 0,
+			length: 100,
+			tickInfo: tickInfo,
+			id: "yaxis"
+		}); // Rotation is irrelevant, because I set the endpoint from hand
 		axisX.endPoint = new Point(150, 50);
 		axisY.endPoint = new Point(70, 130);
 		var overlap = AxisTools.findOverlap(axisX, axisY);
 		Assert.equals(70, overlap.x);
 		Assert.equals(50, overlap.y);
 
-		var axisX = new Axis(new Point(50, 50), 0, 100, tickInfo, "xaxis");
-		var axisY = new Axis(new Point(40, 30), 0, 100, tickInfo, "yaxis"); // Rotation is irrelevant, because I set the endpoint from hand
+		var axisX = new Axis({
+			type: linear,
+			start: new Point(50, 50),
+			rotation: 0,
+			length: 100,
+			tickInfo: tickInfo,
+			id: "xaxis"
+		});
+		var axisY = new Axis({
+			type: linear,
+			start: new Point(40, 30),
+			rotation: 0,
+			length: 100,
+			tickInfo: tickInfo,
+			id: "yaxis"
+		}); // Rotation is irrelevant, because I set the endpoint from hand
 		axisX.endPoint = new Point(150, 50);
 		axisY.endPoint = new Point(40, 130);
 		var overlap = AxisTools.findOverlap(axisX, axisY);

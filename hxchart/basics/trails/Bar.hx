@@ -241,28 +241,28 @@ class Bar implements AxisLayer implements DataLayer {
 	@:allow(hxchart.tests)
 	function setTickInfo(type:AxisTypes, infoValues:Array<Any>, dataValues:Array<Any>, dataMin:Float, dataMax:Float) {
 		var tickInfo:TickInfo = null;
-		switch (type) {
-			case linear:
-				var min:Float = dataMin;
-				var max:Float = dataMax;
-				if (infoValues != null && infoValues.length >= 2) {
-					min = infoValues[0];
-					max = infoValues[1];
-				}
-				tickInfo = new NumericTickInfo(min, max);
-			case categorical:
-				var values:Array<String> = [];
-				if (infoValues == null || infoValues.length == 0) {
-					for (val in dataValues) {
-						values.push(val);
-					}
-				} else {
-					for (val in infoValues) {
-						values.push(val);
-					}
-				}
-				tickInfo = new StringTickInfo(values);
-		}
+		// switch (type) {
+		// 	case linear:
+		// 		var min:Float = dataMin;
+		// 		var max:Float = dataMax;
+		// 		if (infoValues != null && infoValues.length >= 2) {
+		// 			min = infoValues[0];
+		// 			max = infoValues[1];
+		// 		}
+		// 		tickInfo = new NumericTickInfo(min, max);
+		// 	case categorical:
+		// 		var values:Array<String> = [];
+		// 		if (infoValues == null || infoValues.length == 0) {
+		// 			for (val in dataValues) {
+		// 				values.push(val);
+		// 			}
+		// 		} else {
+		// 			for (val in infoValues) {
+		// 				values.push(val);
+		// 			}
+		// 		}
+		// 		tickInfo = new StringTickInfo(values);
+		// }
 		return tickInfo;
 	}
 
@@ -317,7 +317,7 @@ class Bar implements AxisLayer implements DataLayer {
 		axes[1].centerStartPoint(parent.width, parent.height);
 
 		axes[1].showZeroTick = false;
-		axes[0].zeroTickPosition = CompassOrientation.SW;
+		axes[0].zeroTickOrientation = CompassOrientation.SW;
 		// Positioning data before axes, so that axes are drawn on top of data.
 		positionData(trailInfo.style);
 		if (isPreviousXAxis) {
