@@ -43,10 +43,10 @@ typedef TicksInAxis = {
 	@:optional public var type:AxisTypes;
 	@:optional public var axis:Axis;
 	@:optional public var values:Array<Any>;
-	@:optional public var rotation:Int;
+	@:optional public var rotation:Null<Int>;
 	@:optional public var start:Point;
-	@:optional public var length:Float;
-	@:optional public var showZeroTick:Bool;
+	@:optional public var length:Null<Float>;
+	@:optional public var showZeroTick:Null<Bool>;
 	@:optional public var zeroTickOrientation:CompassOrientation;
 
 	@:optional public var tickMargin:Float;
@@ -284,11 +284,13 @@ class Axis extends Absolute {
 			tickMargin = axisInfo.tickMargin;
 		}
 
+		axisColor = 0x000000;
 		if (styleSheet != null) {
 			var rule = styleSheet.findRule(".axis");
-			axisColor = Color.fromString(rule.directives.get("background-color").value.getParameters()[0]);
-		} else {
-			axisColor = 0x000000;
+			var colorRule = rule.directives.get("background-color");
+			if (colorRule != null) {
+				axisColor = Color.fromString(colorRule.value.getParameters()[0]);
+			}
 		}
 
 		if (axisInfo.start == null) {
