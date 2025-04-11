@@ -67,6 +67,18 @@ class Ticks extends Box {
 		return labelPosition = pos;
 	}
 
+	public var bottomPos(default, set):Point;
+
+	function set_bottomPos(pos:Point) {
+		return bottomPos = pos;
+	}
+
+	public var topPos(default, set):Point;
+
+	function set_topPos(pos:Point) {
+		return topPos = pos;
+	}
+
 	public function new(is_sub:Bool = false, rotation:Int = 0) {
 		super();
 		this.is_sub = is_sub;
@@ -134,31 +146,39 @@ class TickUtils {
 		var tickLength = is_sub ? _tick.subTickLength : _tick.tickLength;
 		var tickFontsize = is_sub ? _tick.subFontSize : _tick.fontSize;
 		var zeroPoint = new Point(0, 0);
-		var labelPoint = AxisTools.positionEndpoint(zeroPoint, _tick.tickRotation, tickLength / 2 + 11);
+
 		_label.customStyle.fontSize = tickFontsize;
 		switch (_tick.labelPosition) {
 			case S:
+				var labelPoint = AxisTools.positionEndpoint(zeroPoint, 270, tickLength / 2 + 11);
 				_label.left = labelPoint.x - _label.width / 2;
 				_label.top = labelPoint.y - _label.height / 2;
 			case N:
+				var labelPoint = AxisTools.positionEndpoint(zeroPoint, 90, tickLength / 2 + 11);
 				_label.left = labelPoint.x - _label.width / 2;
 				_label.top = labelPoint.y + _label.height;
 			case E:
+				var labelPoint = AxisTools.positionEndpoint(zeroPoint, 0, tickLength / 2 + 11);
 				_label.left = labelPoint.x + _label.width / 2;
-				_label.top = labelPoint.y + _label.height / 2;
+				_label.top = labelPoint.y - _label.height / 2;
 			case W:
-				_label.left = labelPoint.x - _label.width;
-				_label.top = labelPoint.y + _label.height / 2;
+				var labelPoint = AxisTools.positionEndpoint(zeroPoint, 180, tickLength / 2 + 11);
+				_label.left = labelPoint.x - _label.width / 2;
+				_label.top = labelPoint.y - _label.height / 2;
 			case NE:
+				var labelPoint = AxisTools.positionEndpoint(zeroPoint, 90, tickLength / 2 + 11);
 				_label.left = labelPoint.x + _label.width / 2;
 				_label.top = labelPoint.y + _label.height;
 			case NW:
+				var labelPoint = AxisTools.positionEndpoint(zeroPoint, 90, tickLength / 2 + 11);
 				_label.left = labelPoint.x - _label.width;
 				_label.top = labelPoint.y + _label.height;
 			case SE:
+				var labelPoint = AxisTools.positionEndpoint(zeroPoint, 270, tickLength / 2 + 11);
 				_label.left = labelPoint.x + _label.width / 2;
 				_label.top = labelPoint.y - _label.height / 2;
 			case SW:
+				var labelPoint = AxisTools.positionEndpoint(zeroPoint, 270, tickLength / 2 + 11);
 				_label.left = labelPoint.x - _label.width;
 				_label.top = labelPoint.y - _label.height / 2;
 		}

@@ -46,4 +46,9 @@ class Statistics {
 		}
 		return values;
 	}
+
+	public static function any<T>(arr:Array<T>, f:T->Bool):Bool {
+		var values = arr.map(f);
+		return values.indexOf(true) != -1;
+	}
 }

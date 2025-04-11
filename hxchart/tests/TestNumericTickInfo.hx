@@ -4,6 +4,13 @@ import hxchart.basics.axis.NumericTickInfo;
 import utest.Assert;
 
 class TestNumericTickInfo extends utest.Test {
+	function testCustomTicks() {
+		var tickInfo = new NumericTickInfo(["ticks" => [0, 1, 4]]);
+		Assert.equals("0", tickInfo.labels[0]);
+		Assert.equals(3, tickInfo.tickNum);
+		Assert.equals("4", tickInfo.labels[tickInfo.labels.length - 1]);
+	}
+
 	function testPrecision() {
 		var tickInfo = new NumericTickInfo(["min" => [0], "max" => [10]]);
 		Assert.equals(0, tickInfo.precision);

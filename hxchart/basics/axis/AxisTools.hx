@@ -13,17 +13,17 @@ class AxisTools {
 	 * @return Either null or Point
 	 */
 	public static function findOverlap(axisX:Axis, axisY:Axis) {
-		var y = axisX.startPoint.y;
-		var x = axisY.startPoint.x;
-		var overlapPoint = new Point(x, y);
-		if (overlapPoint.x < axisX.startPoint.x || overlapPoint.x > axisX.endPoint.x) {
-			return null;
-		}
+		// var y = axisX.startPoint.y;
+		// var x = axisY.startPoint.x;
+		// var overlapPoint = new Point(x, y);
+		// if (overlapPoint.x < axisX.startPoint.x || overlapPoint.x > axisX.endPoint.x) {
+		// 	return null;
+		// }
 
-		if (overlapPoint.y < axisY.startPoint.y || overlapPoint.y > axisY.endPoint.y) {
-			return null;
-		}
-		return overlapPoint;
+		// if (overlapPoint.y < axisY.startPoint.y || overlapPoint.y > axisY.endPoint.y) {
+		// 	return null;
+		// }
+		// return overlapPoint;
 	}
 
 	/**
@@ -43,7 +43,7 @@ class AxisTools {
 		endPoint.y -= startPoint.y;
 		var x = endPoint.x * c - endPoint.y * s;
 		var y = endPoint.x * s + endPoint.y * c;
-		return new Point(x + startPoint.x, y + startPoint.y);
+		return new Point(x + startPoint.x, startPoint.y - y);
 	}
 
 	public static function addAxisToParent(axis:Axis, parent:Absolute) {
@@ -55,6 +55,7 @@ class AxisTools {
 
 	public static function replaceAxisInParent(axis:Axis, parent:Absolute) {
 		var comp = parent.findComponent(axis.id);
+		trace("find axis", axis.id, comp);
 		if (comp == null) {
 			parent.addComponent(axis);
 		} else {

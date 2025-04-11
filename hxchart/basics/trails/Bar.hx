@@ -28,7 +28,7 @@ class Bar implements AxisLayer implements DataLayer {
 	public var parent:Absolute;
 	public var dataCanvas:Canvas;
 	public var colors:Array<Color>;
-	public var axes:Array<Axis>;
+	public var axes:Axis;
 
 	public var trailInfo:TrailInfo;
 	public var axisID:String;
@@ -141,27 +141,27 @@ class Bar implements AxisLayer implements DataLayer {
 		}
 	}
 
-	function setAxisDist(min, max, axis) {
+	function setAxisDist(min, max, info:AxisInfo) {
 		var ratio = 1.0;
-		if (Std.isOfType(axis.tickInfo, NumericTickInfo)) {
-			var tickInfo:NumericTickInfo = cast(axis.tickInfo, NumericTickInfo);
+		if (Std.isOfType(info.tickInfo, NumericTickInfo)) {
+			var tickInfo:NumericTickInfo = cast(info.tickInfo, NumericTickInfo);
 			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
 		}
 		return ChartTools.calcAxisDists(min, max, ratio);
 	}
 
 	public function positionData(style:TrailStyle):Void {
-		if (axes.length < 2) {
-			throw new Exception("Too few axes for drawing data.");
-		}
-		if (axes[0].tickInfo == null || axes[1].tickInfo == null) {
-			throw new Exception("Two tickinfos are needed for positioning the data correctly!");
-		}
+		// if (axes.length < 2) {
+		// 	throw new Exception("Too few axes for drawing data.");
+		// }
+		// if (axes[0].tickInfo == null || axes[1].tickInfo == null) {
+		// 	throw new Exception("Two tickinfos are needed for positioning the data correctly!");
+		// }
 
-		var xDist = setAxisDist(axes[0].ticks[0].left, axes[0].ticks[axes[0].ticks.length - 1].left, axes[0]);
-		var yDist = setAxisDist(axes[1].ticks[axes[1].ticks.length - 1].top, axes[1].ticks[0].top, axes[1]);
-		var yZeroPos = axes[1].ticks[axes[1].tickInfo.zeroIndex].top;
-		var xZeroPos = axes[0].ticks[axes[0].tickInfo.zeroIndex].left;
+		var xDist = setAxisDist(axes.ticksPerInfo[0][0].left, axes.ticksPerInfo[0][axes.ticksPerInfo[0].length - 1].left, axes.axesInfo[0]);
+		var yDist = setAxisDist(axes.ticksPerInfo[1][axes.ticksPerInfo[1].length - 1].top, axes.ticksPerInfo[1][0].top, axes.axesInfo[1]);
+		var yZeroPos = axes.zeroPoint.x;
+		var xZeroPos = axes.zeroPoint.y;
 		for (valueGroup in valueGroups) {
 			var indexes = [];
 			var previousValue:Float = 0;
@@ -175,8 +175,8 @@ class Bar implements AxisLayer implements DataLayer {
 
 			for (i in indexes) {
 				var dataPoint:Data2D = data[i];
-				var x = calcCoordinate(dataPoint.xValue, dataPoint.group, axes[0].ticks, xZeroPos, xDist, style, previousValue, false);
-				var y = calcCoordinate(dataPoint.yValue, dataPoint.group, axes[1].ticks, yZeroPos, yDist, style, previousValue, true);
+				var x = calcCoordinate(dataPoint.xValue, dataPoint.group, axes.ticksPerInfo[0], xZeroPos, xDist, style, previousValue, false);
+				var y = calcCoordinate(dataPoint.yValue, dataPoint.group, axes.ticksPerInfo[1], yZeroPos, yDist, style, previousValue, true);
 				dataCanvas.componentGraphics.fillStyle(colors[i], 1);
 				if (x == null || y == null) {
 					continue;
@@ -267,68 +267,60 @@ class Bar implements AxisLayer implements DataLayer {
 	}
 
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle):Void {
-		axes = [null, null];
-		if (axisInfo[0].axis != null) {
-			axes[0] = axisInfo[0].axis;
-		}
-		if (axisInfo[1].axis != null) {
-			axes[1] = axisInfo[1].axis;
-		}
-		if (axes[0] != null && axes[1] != null) {
-			AxisTools.addAxisToParent(axes[0], parent);
-			AxisTools.addAxisToParent(axes[1], parent);
+		if (axes != null) {
+			AxisTools.addAxisToParent(axes, parent);
 			return;
 		}
+		axes = new Axis(axisID, axisInfo);
+		// var yAxisLength = parent.height * 0.9;
+		// var xAxisLength = parent.width * 0.9;
+		// var isPreviousXAxis = false;
+		// var isPreviousYAxis = false;
+		// if (axes[0] == null) {
+		// 	var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, data.map(x -> {
+		// 		var val:Data2D = x;
+		// 		return val.xValue;
+		// 	}), minX, maxX);
+		// 	axes[0] = new Axis(axisInfo[0]); // new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
+		// } else {
+		// 	isPreviousXAxis = true;
+		// }
+		// if (axes[1] == null) {
+		// 	var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, data.map(x -> {
+		// 		var val:Data2D = x;
+		// 		return val.yValue;
+		// 	}), minY, maxY);
+		// 	axes[1] = new Axis(axisInfo[1]); // new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
+		// } else {
+		// 	isPreviousYAxis = true;
+		// }
 
-		var yAxisLength = parent.height * 0.9;
-		var xAxisLength = parent.width * 0.9;
-		var isPreviousXAxis = false;
-		var isPreviousYAxis = false;
-		if (axes[0] == null) {
-			var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, data.map(x -> {
-				var val:Data2D = x;
-				return val.xValue;
-			}), minX, maxX);
-			axes[0] = new Axis(axisInfo[0]); // new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
-		} else {
-			isPreviousXAxis = true;
-		}
-		if (axes[1] == null) {
-			var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, data.map(x -> {
-				var val:Data2D = x;
-				return val.yValue;
-			}), minY, maxY);
-			axes[1] = new Axis(axisInfo[1]); // new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
-		} else {
-			isPreviousYAxis = true;
-		}
+		// axes[0].percentWidth = 100;
+		// axes[0].percentHeight = 100;
+		// axes[1].percentWidth = 100;
+		// axes[1].percentHeight = 100;
 
-		axes[0].percentWidth = 100;
-		axes[0].percentHeight = 100;
-		axes[1].percentWidth = 100;
-		axes[1].percentHeight = 100;
+		// axes[0].linkedAxes = new Map();
+		// axes[0].linkedAxes.set("y", axes[1]);
+		// axes[1].linkedAxes = new Map();
+		// axes[1].linkedAxes.set("x", axes[0]);
 
-		axes[0].linkedAxes = new Map();
-		axes[0].linkedAxes.set("y", axes[1]);
-		axes[1].linkedAxes = new Map();
-		axes[1].linkedAxes.set("x", axes[0]);
+		// axes.centerStartPoint();
+		// axes[1].centerStartPoint(parent.width, parent.height);
 
-		axes[0].centerStartPoint(parent.width, parent.height);
-		axes[1].centerStartPoint(parent.width, parent.height);
-
-		axes[1].showZeroTick = false;
-		axes[0].zeroTickOrientation = CompassOrientation.SW;
+		// axes[1].showZeroTick = false;
+		// axes[0].zeroTickOrientation = CompassOrientation.SW;
 		// Positioning data before axes, so that axes are drawn on top of data.
 		positionData(trailInfo.style);
-		if (isPreviousXAxis) {
-			AxisTools.addAxisToParent(axes[0], parent);
-		} else {
-			AxisTools.replaceAxisInParent(axes[0], parent);
-		}
-		if (isPreviousYAxis) {
-			AxisTools.addAxisToParent(axes[1], parent);
-		} else {
-			AxisTools.replaceAxisInParent(axes[1], parent);
-		}
+		// if (isPreviousXAxis) {
+		// 	AxisTools.addAxisToParent(axes[0], parent);
+		// } else {
+		// 	AxisTools.replaceAxisInParent(axes[0], parent);
+		// }
+		// if (isPreviousYAxis) {
+		// 	AxisTools.addAxisToParent(axes[1], parent);
+		// } else {
+		AxisTools.replaceAxisInParent(axes, parent);
+		// }
 	};
 }

@@ -161,7 +161,7 @@ class Chart extends Absolute {
 	public var chartBody:Absolute;
 	public var groups:Map<String, Int>;
 	public var groupNumber:Int;
-	public var axes:Map<String, Array<Axis>>;
+	public var axes:Map<String, Axis>;
 	public var legend:Legend;
 	public var chartStyleSheet:StyleSheet;
 
@@ -390,10 +390,12 @@ class Builder extends CompositeBuilder {
 					if (chartInfo.axisInfo == null) {
 						chartInfo.axisInfo = [
 							{
-								id: "x_" + axisID
+								id: "x_" + axisID,
+								rotation: 0
 							},
 							{
-								id: "y_" + axisID
+								id: "y_" + axisID,
+								rotation: 90
 							}
 						];
 						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
@@ -402,18 +404,7 @@ class Builder extends CompositeBuilder {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
 					if (_chart.axes.exists(axisID)) {
-						chartInfo.axisInfo = [
-							{
-								id: "x_" + axisID,
-								type: linear,
-								axis: _chart.axes.get(axisID)[0]
-							},
-							{
-								id: "y_" + axisID,
-								type: linear,
-								axis: _chart.axes.get(axisID)[1]
-							}
-						];
+						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
 					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID, eventHandler);
 					scatter.validateChart();
@@ -424,10 +415,12 @@ class Builder extends CompositeBuilder {
 					if (chartInfo.axisInfo == null) {
 						chartInfo.axisInfo = [
 							{
-								id: "x_" + axisID
+								id: "x_" + axisID,
+								rotation: 0
 							},
 							{
-								id: "y_" + axisID
+								id: "y_" + axisID,
+								rotation: 90
 							}
 						];
 						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
@@ -436,18 +429,7 @@ class Builder extends CompositeBuilder {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
 					if (_chart.axes.exists(axisID)) {
-						chartInfo.axisInfo = [
-							{
-								id: "x_" + axisID,
-								type: linear,
-								axis: _chart.axes.get(axisID)[0]
-							},
-							{
-								id: "y_" + axisID,
-								type: linear,
-								axis: _chart.axes.get(axisID)[1]
-							}
-						];
+						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
 					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID, eventHandler);
 					scatter.validateChart();
@@ -459,18 +441,7 @@ class Builder extends CompositeBuilder {
 						throw new Exception("Not able to use more than 2 axes for bar-chart!");
 					}
 					if (_chart.axes.exists(axisID)) {
-						chartInfo.axisInfo = [
-							{
-								id: axisID,
-								type: categorical,
-								axis: _chart.axes.get(axisID)[0]
-							},
-							{
-								id: axisID,
-								type: linear,
-								axis: _chart.axes.get(axisID)[1]
-							}
-						];
+						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
 					var bar = new Bar(chartInfo, _chart.chartBody, chartID, axisID);
 					bar.validateChart();

@@ -5,7 +5,7 @@ import hxchart.basics.axis.Axis.AxisInfo;
 import haxe.ui.containers.Absolute;
 
 interface AxisLayer {
-	public var axes:Array<Axis>;
+	public var axes:Axis;
 	public var parent:Absolute;
 
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle):Void;
