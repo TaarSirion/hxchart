@@ -17,6 +17,10 @@ import haxe.ui.components.Canvas;
 import hxchart.basics.ticks.Ticks;
 import haxe.ui.geom.Point;
 import haxe.ui.behaviours.DefaultBehaviour;
+#if haxeui_html5
+import js.Browser;
+import js.html.Element;
+#end
 
 enum AxisTypes {
 	linear;
@@ -350,6 +354,11 @@ private class Draw extends Behaviour {
 						continue;
 					}
 
+					#if haxeui_heaps
+					title.rotate(info.rotation * Math.PI / 180);
+					#elseif haxeui_html5
+					title.element.style.transform = "rotate(" + info.rotation + "deg)";
+					#end
 					var x = Math.abs(info.start.x - endPoint.x);
 					var y = Math.abs(info.start.y - endPoint.y);
 					title.left = x == 0 ? (info.start.x + axis.titleMargin) : x / 2;
