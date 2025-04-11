@@ -344,11 +344,17 @@ private class Draw extends Behaviour {
 			canvas.componentGraphics.moveTo(info.start.x, info.start.y);
 			canvas.componentGraphics.lineTo(endPoint.x, endPoint.y);
 			if (info.title != null) {
-				var title = axis.findComponent("axis-title", Label, true, "css");
-				var x = Math.abs(info.start.x - endPoint.x);
-				var y = Math.abs(info.start.y - endPoint.y);
-				title.left = x == 0 ? (info.start.x + axis.titleMargin) : x / 2;
-				title.top = y == 0 ? (info.start.y + axis.titleMargin) : y / 2;
+				var titles = axis.findComponents("axis-title", Label);
+				for (title in titles) {
+					if (title.text != info.title) {
+						continue;
+					}
+
+					var x = Math.abs(info.start.x - endPoint.x);
+					var y = Math.abs(info.start.y - endPoint.y);
+					title.left = x == 0 ? (info.start.x + axis.titleMargin) : x / 2;
+					title.top = y == 0 ? (info.start.y + axis.titleMargin) : y / 2;
+				}
 			}
 
 			for (tick in axis.ticksPerInfo[i]) {
