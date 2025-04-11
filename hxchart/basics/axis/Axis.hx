@@ -353,15 +353,16 @@ private class Draw extends Behaviour {
 					if (title.text != info.title) {
 						continue;
 					}
-
+					trace(title.text, info.start);
 					#if haxeui_heaps
 					title.rotate(info.rotation * Math.PI / 180);
 					#elseif haxeui_html5
 					title.element.style.transform = "rotate(" + info.rotation + "deg)";
+					title.element.style.transformOrigin = "0 0";
 					#end
-					var x = Math.abs(info.start.x - endPoint.x);
-					var y = Math.abs(info.start.y - endPoint.y);
-					title.left = x == 0 ? (info.start.x + axis.titleMargin) : x / 2;
+					var x = Math.round(Math.abs(info.start.x - endPoint.x));
+					var y = Math.round(Math.abs(info.start.y - endPoint.y));
+					title.left = x == 0 ? (info.start.x - axis.titleMargin) : x / 2;
 					title.top = y == 0 ? (info.start.y + axis.titleMargin) : y / 2;
 				}
 			}
