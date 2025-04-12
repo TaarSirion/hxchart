@@ -178,5 +178,7 @@ class TestAxis extends Test {
 		// Validate axis lengths
 		Assert.equals(axisInfo[0].length, axis.width - axis.axisMarginLeft * 2);
 		Assert.equals(axisInfo[1].length, axis.height - axis.axisMarginTop * 2);
+		Assert.equals(axisInfo[0].start.x, axis.axisMarginLeft);
+		Assert.equals(axisInfo[1].start.y, axis.height - axis.axisMarginTop);
 	}
 }
