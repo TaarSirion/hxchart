@@ -28,6 +28,19 @@ enum AxisTypes {
 }
 
 /**
+ * Information for drawing the axis title.
+ * 
+ * @param text Text of the title.
+ * @param position Optional. Position of the title. If not provided, it will be centered underneath the axis.
+ * @param rotation Optional. Rotation of the title. Will default to the axis rotation.
+ */
+typedef AxisTitle = {
+	var text:String;
+	@:optional var position:Point;
+	@:optional var rotation:Int;
+}
+
+/**
  * Axis information. For each drawn axis.
  * Attention: The Axis object is a combination of multiple axis informations. Each axis information
  * draws a line on the canvas.
@@ -60,7 +73,7 @@ enum AxisTypes {
 	@:optional public var start:Point;
 	@:optional public var length:Null<Float>;
 	@:optional public var showZeroTick:Null<Bool>;
-	@:optional public var title:String;
+	@:optional public var title:AxisTitle;
 
 	@:optional public var tickMargin:Float;
 
@@ -264,6 +277,9 @@ class Axis extends Absolute {
 					if (info.title == null) {
 						continue;
 					}
+					if (info.title.position != null) {
+						continue;
+					}
 					if (zeroPoint.y >= (height - axisMarginTop)) {
 						newHeight = height - axisMarginTop * 2 - titleMargin;
 						zeroPoint.y = height - axisMarginTop - titleMargin;
@@ -272,6 +288,9 @@ class Axis extends Absolute {
 					}
 				case 90:
 					if (info.title == null) {
+						continue;
+					}
+					if (info.title.position != null) {
 						continue;
 					}
 					if (zeroPoint.x <= (axisMarginLeft)) {
@@ -340,16 +359,21 @@ private class Draw extends Behaviour {
 			if (info.title != null) {
 				var titles = axis.findComponents("axis-title", Label);
 				for (title in titles) {
-					if (title.text != info.title) {
+					if (title.text != info.title.text) {
 						continue;
 					}
-					trace(title.text, info.start);
+					var titleRotation = info.title.rotation != null ? info.title.rotation : info.rotation;
 					#if haxeui_heaps
-					title.rotate(info.rotation * Math.PI / 180);
+					title.rotate(titleRotation * Math.PI / 180);
 					#elseif haxeui_html5
-					title.element.style.transform = "rotate(" + info.rotation + "deg)";
+					title.element.style.transform = "rotate(" + titleRotation + "deg)";
 					title.element.style.transformOrigin = "0 0";
 					#end
+					if (info.title.position != null) {
+						title.left = info.title.position.x;
+						title.top = info.title.position.y;
+						break;
+					}
 					var x = Math.round(Math.abs(info.start.x - endPoint.x));
 					var y = Math.round(Math.abs(info.start.y - endPoint.y));
 					title.left = x == 0 ? (info.start.x - axis.titleMargin) : x / 2;
@@ -468,7 +492,7 @@ private class AxisBuilder extends CompositeBuilder {
 		for (info in _axis.axesInfo) {
 			if (info.title != null) {
 				var title = new Label();
-				title.text = info.title;
+				title.text = info.title.text;
 				title.addClass("axis-title");
 				titleLayer.addComponent(title);
 			}
@@ -486,9 +510,6 @@ private class AxisBuilder extends CompositeBuilder {
 	override function validateComponentData() {
 		_tickCanvasLayer.componentGraphics.clear();
 		_tickLabelLayer.childComponents[0].removeAllComponents();
-		// _tickLabelLayer.childComponents[1].removeAllComponents();
-		// _axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.axisRotation, _axis.axisLength);
-		trace("VALID");
 		_axis.positionStartPoint();
 		_axis.setTicks(false);
 		_axis.drawAxis();
@@ -496,9 +517,7 @@ private class AxisBuilder extends CompositeBuilder {
 
 	override function validateComponentLayout():Bool {
 		_tickCanvasLayer.componentGraphics.clear();
-		trace("VALID 2");
 		_axis.positionStartPoint();
-		// _axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.axisRotation, _axis.axisLength);
 		_axis.setTicks(true);
 		_axis.drawAxis();
 		return super.validateComponentLayout();

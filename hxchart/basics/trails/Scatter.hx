@@ -305,7 +305,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		// axes.id = axisID;
 		axes.width = parent.width;
 		axes.height = parent.height;
-		axes.centerStartPoint();
+		axes.positionStartPoint();
 		axes.setTicks(false);
 		positionData(chartInfo.style);
 		AxisTools.replaceAxisInParent(axes, parent);
