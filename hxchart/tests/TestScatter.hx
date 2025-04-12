@@ -1,5 +1,6 @@
 package hxchart.tests;
 
+import hxchart.basics.axis.Axis;
 import hxchart.basics.axis.Axis.AxisInfo;
 import haxe.Exception;
 import hxchart.basics.data.Data2D;
@@ -24,11 +25,13 @@ class TestScatter extends Test {
 		parent.height = 100;
 		var xaxis:AxisInfo = {
 			type: linear,
+			rotation: 0,
 			id: "xaxis"
 		};
 		xaxis.setAxisInfo([2, 0, 1]);
 		var yaxis:AxisInfo = {
 			type: linear,
+			rotation: 90,
 			id: "yaxis"
 		};
 		yaxis.setAxisInfo([1, 2, 3]);
@@ -103,10 +106,10 @@ class TestScatter extends Test {
 	function testPositionAxes() {
 		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
 		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.dataByGroup, {});
-		Assert.equals(2, scatter.axes.length);
-		Assert.equals(90, scatter.axes[0].axisLength);
-		Assert.equals(5, scatter.axes[0].startPoint.x);
-		Assert.equals(-10, scatter.axes[0].startPoint.y);
+		Assert.equals(2, scatter.axes.axesInfo.length);
+		Assert.equals(40, scatter.axes.axesInfo[0].length);
+		Assert.equals(30, scatter.axes.axesInfo[0].start.x);
+		Assert.equals(70, scatter.axes.axesInfo[0].start.y);
 	}
 
 	@:depends(testPositionAxes)
@@ -118,12 +121,5 @@ class TestScatter extends Test {
 			groups: ["1" => 0]
 		});
 		Assert.notNull(parent.findComponent("chart"));
-		scatter.axes = [];
-		Assert.raises(function() {
-			scatter.positionData({
-				colorPalette: ColorPalettes.defaultColors(1),
-				groups: ["1" => 0]
-			});
-		}, Exception);
 	}
 }

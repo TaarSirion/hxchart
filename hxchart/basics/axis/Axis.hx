@@ -78,7 +78,7 @@ typedef AxisTitle = {
 	@:optional public var title:AxisTitle;
 	@:optional public var subTitle:AxisTitle;
 
-	@:optional public var tickMargin:Float;
+	@:optional public var tickMargin:Float = 10;
 
 	public function setAxisInfo(trailValues:Array<Any>) {
 		if (trailValues.length == 0 && values.length == 0) {
@@ -233,11 +233,13 @@ class Axis extends Absolute {
 	/**
 	 * Left margin for the Axis object.
 	 */
+	@:allow(hxchart.tests)
 	final axisMarginLeft:Float = 30;
 
 	/**
 	 * Top margin for the Axis object.
 	 */
+	@:allow(hxchart.tests)
 	final axisMarginTop:Float = 30;
 
 	/**
@@ -250,6 +252,7 @@ class Axis extends Absolute {
 	 */
 	public function positionStartPoint() {
 		this.zeroPoint = new Point(axisMarginLeft + (this.width - axisMarginLeft * 2) / 2, axisMarginTop + (this.height - axisMarginTop * 2) / 2);
+		// First position zero point according to axes information. Only the first two axes will be considered.
 		var xaxesNum:Int = 0;
 		var yaxesNum:Int = 0;
 		for (info in this.axesInfo) {
@@ -272,6 +275,7 @@ class Axis extends Absolute {
 				case _:
 			}
 		}
+		// Then we change the height of the axes and position of zeroPoint according to present titles.
 		var newHeight = height - axisMarginTop * 2;
 		var newWidth = width - axisMarginLeft * 2;
 		for (info in this.axesInfo) {
@@ -305,7 +309,7 @@ class Axis extends Absolute {
 				case _:
 			}
 		}
-
+		// Repeat for subtitles
 		for (info in this.axesInfo) {
 			switch (info.rotation) {
 				case 0:
@@ -333,7 +337,7 @@ class Axis extends Absolute {
 				case _:
 			}
 		}
-
+		// Lastly set the start positions of the axes according to zeroPoint and newWidth or newHeight
 		for (info in this.axesInfo) {
 			var rotation = info.rotation;
 			if (info.start == null) {
@@ -397,13 +401,7 @@ private class Draw extends Behaviour {
 					if (title.text != info.title.text) {
 						continue;
 					}
-					var titleRotation = info.title.rotation != null ? info.title.rotation : info.rotation;
-					#if haxeui_heaps
-					title.rotate(titleRotation * Math.PI / 180);
-					#elseif haxeui_html5
-					title.element.style.transform = "rotate(" + titleRotation + "deg)";
-					title.element.style.transformOrigin = "0 0";
-					#end
+					setTitleRotation(title, info.title, info.rotation);
 					if (info.title.position != null) {
 						title.left = info.title.position.x;
 						title.top = info.title.position.y;
@@ -424,13 +422,7 @@ private class Draw extends Behaviour {
 					if (title.text != info.subTitle.text) {
 						continue;
 					}
-					var titleRotation = info.subTitle.rotation != null ? info.subTitle.rotation : info.rotation;
-					#if haxeui_heaps
-					title.rotate(titleRotation * Math.PI / 180);
-					#elseif haxeui_html5
-					title.element.style.transform = "rotate(" + titleRotation + "deg)";
-					title.element.style.transformOrigin = "0 0";
-					#end
+					setTitleRotation(title, info.subTitle, info.rotation);
 					if (info.subTitle.position != null) {
 						title.left = info.subTitle.position.x;
 						title.top = info.subTitle.position.y;
@@ -457,6 +449,16 @@ private class Draw extends Behaviour {
 		}
 
 		return null;
+	}
+
+	function setTitleRotation(title:Label, titleInfo:AxisTitle, rotation:Int) {
+		var titleRotation = titleInfo.rotation != null ? titleInfo.rotation : rotation;
+		#if haxeui_heaps
+		title.rotate(titleRotation * Math.PI / 180);
+		#elseif haxeui_html5
+		title.element.style.transform = "rotate(" + titleRotation + "deg)";
+		title.element.style.transformOrigin = "0 0";
+		#end
 	}
 }
 
@@ -610,6 +612,5 @@ private class AxisBuilder extends CompositeBuilder {
 			new Directive("font-size", VDimension(PX(15))),
 			new Directive("color", VColor(0x000000))
 		]));
-		// _axis.startPoint =
 	}
 }
