@@ -125,7 +125,6 @@ class Scatter implements AxisLayer implements DataLayer {
 	public function setData(newData:TrailData, style:TrailStyle) {
 		var x = newData.values.get("x");
 		var y = newData.values.get("y");
-		dataSize = x.length;
 		var groupsArr = newData.values.get("groups");
 		var uniqueGroupsNum = 0;
 		dataByGroup = [];
@@ -302,7 +301,6 @@ class Scatter implements AxisLayer implements DataLayer {
 			return;
 		}
 		axes = new Axis(axisID, axisInfo);
-		// axes.id = axisID;
 		axes.width = parent.width;
 		axes.height = parent.height;
 		axes.positionStartPoint();
@@ -453,7 +451,7 @@ class Scatter implements AxisLayer implements DataLayer {
 				}
 			}
 		});
-		trace("PLOT");
+
 		// Drawing
 		dataCanvas.componentGraphics.clear();
 		if (chartInfo.type == line) {
@@ -466,7 +464,6 @@ class Scatter implements AxisLayer implements DataLayer {
 				} else {
 					dataCanvas.componentGraphics.fillStyle(0x000000, 0);
 				}
-				trace("group ", start, last);
 				dataCanvas.componentGraphics.strokeStyle(group[0].color, group[0].size, group[0].alpha);
 				#if !(haxeui_heaps)
 				dataCanvas.componentGraphics.beginPath();
@@ -476,7 +473,6 @@ class Scatter implements AxisLayer implements DataLayer {
 					if (!dataPoint.allowed) {
 						continue;
 					}
-					trace(dataPoint.coord);
 					dataCanvas.componentGraphics.lineTo(dataPoint.coord.x, dataPoint.coord.y);
 					last = dataPoint.coord;
 				}

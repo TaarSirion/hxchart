@@ -22,6 +22,16 @@ import hxchart.basics.axis.AxisLayer;
 
 using hxchart.basics.utils.Statistics;
 
+typedef BarDataRec = {
+	coord:Point,
+	width:Float,
+	height:Float,
+	values:{
+		x:Any, y:Any
+	},
+	allowed:Bool
+}
+
 class Bar implements AxisLayer implements DataLayer {
 	public var id:String;
 	public var data:Array<Any>;
@@ -32,6 +42,8 @@ class Bar implements AxisLayer implements DataLayer {
 
 	public var trailInfo:TrailInfo;
 	public var axisID:String;
+
+	public var dataByGroup:Array<Array<BarDataRec>> = [];
 
 	public function new(trailInfo:TrailInfo, parent:Absolute, id:String, axisID:String) {
 		if (trailInfo.axisInfo[0].type == linear && trailInfo.axisInfo[1].type == linear) {
@@ -60,29 +72,68 @@ class Bar implements AxisLayer implements DataLayer {
 		positionAxes(trailInfo.axisInfo, data, trailInfo.style);
 	}
 
+	var minX:Float;
+	var maxX:Float;
+	var minY:Float;
+	var maxY:Float;
+
 	public function setData(newData:TrailData, style:TrailStyle) {
 		data = [];
 		colors = [];
+		dataByGroup = [];
+
 		var x = newData.values.get("x");
 		var y = newData.values.get("y");
 		var groupsArr = newData.values.get("groups");
+		var uniqueGroupsNum = 0;
+		dataByGroup = [];
+		for (key in style.groups.keys()) {
+			uniqueGroupsNum++;
+			dataByGroup.push([]);
+		}
+
+		if (x[0] is String) {
+			isXCategoric = true;
+		}
+
 		for (i in 0...x.length) {
 			var group = groupsArr[i];
-			var point = new Data2D(x[i], y[i], style.groups.get(group));
-			colors.push(style.colorPalette[style.groups.get(group)]);
-			data.push(point);
+			var groupIndex = style.groups.get(group);
+			if (x[i] is Float) {
+				maxX = Math.max(maxX, x[i]);
+				minX = Math.min(minX, x[i]);
+			} else {
+				maxY = Math.max(maxY, y[i]);
+				minY = Math.min(minY, y[i]);
+			}
+			dataByGroup[groupIndex].push({
+				coord: new Point(0, 0),
+				width: 0,
+				height: 0,
+				values: {
+					x: x[i],
+					y: y[i]
+				},
+				allowed: false
+			});
 		}
-		groupNum = 0;
-		for (key in style.groups.keys()) {
-			groupNum++;
-		}
-		sortData(style);
+
+		// var x = newData.values.get("x");
+		// var y = newData.values.get("y");
+		// var groupsArr = newData.values.get("groups");
+		// for (i in 0...x.length) {
+		// 	var group = groupsArr[i];
+		// 	var point = new Data2D(x[i], y[i], style.groups.get(group));
+		// 	colors.push(style.colorPalette[style.groups.get(group)]);
+		// 	data.push(point);
+		// }
+		// groupNum = 0;
+		// for (key in style.groups.keys()) {
+		// 	groupNum++;
+		// }
+		// sortData(style);
 	};
 
-	var minX:Float;
-	var minY:Float;
-	var maxX:Float;
-	var maxY:Float;
 	var isXCategoric:Bool = false;
 	var valueGroups:Array<Dynamic>;
 	var xValues:Array<Dynamic>;
@@ -157,37 +208,141 @@ class Bar implements AxisLayer implements DataLayer {
 		// if (axes[0].tickInfo == null || axes[1].tickInfo == null) {
 		// 	throw new Exception("Two tickinfos are needed for positioning the data correctly!");
 		// }
-
+		var axis = axes;
 		var xDist = setAxisDist(axes.ticksPerInfo[0][0].left, axes.ticksPerInfo[0][axes.ticksPerInfo[0].length - 1].left, axes.axesInfo[0]);
 		var yDist = setAxisDist(axes.ticksPerInfo[1][axes.ticksPerInfo[1].length - 1].top, axes.ticksPerInfo[1][0].top, axes.axesInfo[1]);
 		var yZeroPos = axes.zeroPoint.x;
 		var xZeroPos = axes.zeroPoint.y;
-		for (valueGroup in valueGroups) {
-			var indexes = [];
-			var previousValue:Float = 0;
-			if (isXCategoric) {
-				indexes = xValues.position(valueGroup);
-				previousValue = yZeroPos;
-			} else {
-				indexes = yValues.position(valueGroup);
-				previousValue = xZeroPos;
+
+		var spacePerXTick = (axis.axesInfo[0].length / (axis.ticksPerInfo[0].length - 1)) * 2 / 3;
+		var spacePerYTick = (axis.axesInfo[1].length / (axis.ticksPerInfo[1].length - 1)) * 2 / 3;
+		var spacePerGroupX = spacePerXTick / dataByGroup.length;
+		var spacePerGroupY = spacePerYTick / dataByGroup.length;
+		var prevGroup:Array<BarDataRec> = [];
+		for (i => group in dataByGroup) {
+			if (i > 0) {
+				prevGroup = dataByGroup[i - 1];
 			}
-
-			for (i in indexes) {
-				var dataPoint:Data2D = data[i];
-				var x = calcCoordinate(dataPoint.xValue, dataPoint.group, axes.ticksPerInfo[0], xZeroPos, xDist, style, previousValue, false);
-				var y = calcCoordinate(dataPoint.yValue, dataPoint.group, axes.ticksPerInfo[1], yZeroPos, yDist, style, previousValue, true);
-				dataCanvas.componentGraphics.fillStyle(colors[i], 1);
-				if (x == null || y == null) {
-					continue;
-				}
-				if (isXCategoric) {
-					previousValue = y[0];
+			for (dataRec in group) {
+				if (dataRec.values.x is String) {
+					var tick = axis.ticksPerInfo[0].filter(x -> {
+						return x.text == dataRec.values.x;
+					})[0];
+					var y:Float = dataRec.values.y;
+					var min:Float = 0;
+					var max:Float = 0;
+					var minIndex:Int = 0;
+					var maxIndex:Int = 0;
+					if (y > 0) {
+						min = 0;
+						minIndex = axis.axesInfo[1].tickInfo.zeroIndex;
+						max = Std.parseFloat(axis.ticksPerInfo[1][axis.ticksPerInfo[1].length - 1].text);
+						maxIndex = axis.ticksPerInfo[1].length - 1;
+					} else {
+						max = 0;
+						maxIndex = axis.axesInfo[1].tickInfo.zeroIndex;
+						min = Std.parseFloat(axis.ticksPerInfo[1][0].text);
+						minIndex = 0;
+					}
+					var tickTop = axis.ticksPerInfo[1][maxIndex].top;
+					var tickBottom = axis.ticksPerInfo[1][minIndex].top;
+					var yCoord = tickBottom - (tickBottom - tickTop) * (y - min) / (max - min);
+					var xCoord = tick.left - (spacePerXTick / 2);
+					dataRec.width = spacePerXTick;
+					dataRec.height = y > 0 ? tickBottom - yCoord : yCoord - tickTop;
+					switch (style.positionOption) {
+						case PositionOption.stacked:
+							var prevDataRec = prevGroup.filter(d -> {
+								d.values.x == dataRec.values.x;
+							})[0];
+							yCoord = prevDataRec.coord.y - yCoord;
+						case PositionOption.layered:
+							dataRec.width = spacePerGroupX;
+							var prevDataRec = prevGroup.filter(d -> {
+								d.values.x == dataRec.values.x;
+							})[0];
+						// xCoord =
+						case null:
+						case _:
+					}
+					dataRec.coord = new Point(xCoord, yCoord);
 				} else {
-					previousValue = x[0] + x[1];
+					var tick = axis.ticksPerInfo[1].filter(x -> {
+						return x.text == dataRec.values.y;
+					})[0];
+					var x:Float = dataRec.values.x;
+					var min:Float = 0;
+					var max:Float = 0;
+					var minIndex:Int = 0;
+					var maxIndex:Int = 0;
+					if (x > 0) {
+						min = 0;
+						minIndex = axis.axesInfo[0].tickInfo.zeroIndex;
+						max = Std.parseFloat(axis.ticksPerInfo[0][axis.ticksPerInfo[0].length - 1].text);
+						maxIndex = axis.ticksPerInfo[0].length - 1;
+					} else {
+						max = 0;
+						maxIndex = axis.axesInfo[0].tickInfo.zeroIndex;
+						min = Std.parseFloat(axis.ticksPerInfo[0][0].text);
+						minIndex = 0;
+					}
+					var tickLeft = axis.ticksPerInfo[0][minIndex].left;
+					var tickRight = axis.ticksPerInfo[0][maxIndex].left;
+					var xCoord = (tickRight - tickLeft) * (x - min) / (max - min) + tickLeft;
+					var yCoord = tick.top - (spacePerYTick / 2);
+					dataRec.width = tickRight - tickLeft;
+					dataRec.height = spacePerYTick;
+					switch (style.positionOption) {
+						case PositionOption.stacked:
+							var prevDataRec = prevGroup.filter(d -> {
+								d.values.y == dataRec.values.y;
+							})[0];
+							xCoord = prevDataRec.coord.x + xCoord;
+						case PositionOption.layered:
+						case null:
+						case _:
+					}
+					dataRec.coord = new Point(xCoord, yCoord);
 				}
+			}
+		}
 
-				dataCanvas.componentGraphics.rectangle(x[0], y[0], x[1], y[1]);
+		// for (valueGroup in valueGroups) {
+		// 	var indexes = [];
+		// 	var previousValue:Float = 0;
+		// 	if (isXCategoric) {
+		// 		indexes = xValues.position(valueGroup);
+		// 		previousValue = yZeroPos;
+		// 	} else {
+		// 		indexes = yValues.position(valueGroup);
+		// 		previousValue = xZeroPos;
+		// 	}
+
+		// 	for (i in indexes) {
+		// 		var dataPoint:Data2D = data[i];
+		// 		// if (isXCategoric) {
+		// 		// 	var top = calcCoordinate();
+		// 		// 	var bottom = calcCoordinate();
+		// 		// }
+		// 		// var x = calcCoordinate(dataPoint.xValue, dataPoint.group, axes.ticksPerInfo[0], xZeroPos, xDist, style, previousValue, false);
+		// 		// var y = calcCoordinate(dataPoint.yValue, dataPoint.group, axes.ticksPerInfo[1], yZeroPos, yDist, style, previousValue, true);
+		// 		dataCanvas.componentGraphics.fillStyle(colors[i], 1);
+		// 		// if (x == null || y == null) {
+		// 		// 	continue;
+		// 		// }
+		// 		// if (isXCategoric) {
+		// 		// 	previousValue = y[0];
+		// 		// } else {
+		// 		// 	previousValue = x[0] + x[1];
+		// 		// }
+
+		// 		dataCanvas.componentGraphics.rectangle(x[0], y[0], x[1], y[1]);
+		// 	}
+		// }
+		for (i => group in dataByGroup) {
+			for (dataRec in group) {
+				dataCanvas.componentGraphics.fillStyle(0x000000, 1);
+				dataCanvas.componentGraphics.rectangle(dataRec.coord.x, dataRec.coord.y, dataRec.width, dataRec.height);
 			}
 		}
 		var canvasComponent = parent.findComponent(id);
@@ -200,7 +355,7 @@ class Bar implements AxisLayer implements DataLayer {
 	};
 
 	function calcCoordinate(value:Dynamic, group:Int, ticks:Array<Ticks>, zeroPos:Float, dist:AxisDist, style:TrailStyle, previousPosition:Float, isY:Bool) {
-		if (Std.isOfType(value, String)) {
+		if (value is String) {
 			var ticksFiltered = ticks.filter(x -> {
 				return x.text == value;
 			});
@@ -223,8 +378,14 @@ class Bar implements AxisLayer implements DataLayer {
 			var posOffset = (isY ? ticksFiltered[0].top : ticksFiltered[0].left) - (spacePerGroup / 2) * groupOffset;
 			return [posOffset, spacePerGroup];
 		}
+
 		var max = Std.parseFloat(ticks[ticks.length - 1].text);
 		var min = Std.parseFloat(ticks[0].text);
+
+		// var tickLeft = ticks[0].left;
+		// var tickRight = largerTicks[0].left;
+		// var x = (tickRight - tickLeft) * (xValue - xMin) / (xMax - xMin) + tickLeft;
+
 		var ratio = value < 0 ? value / min : value / max;
 		var pos = zeroPos + (isY ? -1 : 1) * (value < 0 ? -1 * dist.neg_dist : dist.pos_dist) * ratio;
 		var finalPos = pos;
@@ -238,89 +399,17 @@ class Bar implements AxisLayer implements DataLayer {
 		return [finalPos, isY ? zeroPos - pos : pos - zeroPos];
 	}
 
-	@:allow(hxchart.tests)
-	function setTickInfo(type:AxisTypes, infoValues:Array<Any>, dataValues:Array<Any>, dataMin:Float, dataMax:Float) {
-		var tickInfo:TickInfo = null;
-		// switch (type) {
-		// 	case linear:
-		// 		var min:Float = dataMin;
-		// 		var max:Float = dataMax;
-		// 		if (infoValues != null && infoValues.length >= 2) {
-		// 			min = infoValues[0];
-		// 			max = infoValues[1];
-		// 		}
-		// 		tickInfo = new NumericTickInfo(min, max);
-		// 	case categorical:
-		// 		var values:Array<String> = [];
-		// 		if (infoValues == null || infoValues.length == 0) {
-		// 			for (val in dataValues) {
-		// 				values.push(val);
-		// 			}
-		// 		} else {
-		// 			for (val in infoValues) {
-		// 				values.push(val);
-		// 			}
-		// 		}
-		// 		tickInfo = new StringTickInfo(values);
-		// }
-		return tickInfo;
-	}
-
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle):Void {
 		if (axes != null) {
-			AxisTools.addAxisToParent(axes, parent);
+			positionData(style);
 			return;
 		}
 		axes = new Axis(axisID, axisInfo);
-		// var yAxisLength = parent.height * 0.9;
-		// var xAxisLength = parent.width * 0.9;
-		// var isPreviousXAxis = false;
-		// var isPreviousYAxis = false;
-		// if (axes[0] == null) {
-		// 	var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, data.map(x -> {
-		// 		var val:Data2D = x;
-		// 		return val.xValue;
-		// 	}), minX, maxX);
-		// 	axes[0] = new Axis(axisInfo[0]); // new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
-		// } else {
-		// 	isPreviousXAxis = true;
-		// }
-		// if (axes[1] == null) {
-		// 	var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, data.map(x -> {
-		// 		var val:Data2D = x;
-		// 		return val.yValue;
-		// 	}), minY, maxY);
-		// 	axes[1] = new Axis(axisInfo[1]); // new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
-		// } else {
-		// 	isPreviousYAxis = true;
-		// }
-
-		// axes[0].percentWidth = 100;
-		// axes[0].percentHeight = 100;
-		// axes[1].percentWidth = 100;
-		// axes[1].percentHeight = 100;
-
-		// axes[0].linkedAxes = new Map();
-		// axes[0].linkedAxes.set("y", axes[1]);
-		// axes[1].linkedAxes = new Map();
-		// axes[1].linkedAxes.set("x", axes[0]);
-
-		// axes.centerStartPoint();
-		// axes[1].centerStartPoint(parent.width, parent.height);
-
-		// axes[1].showZeroTick = false;
-		// axes[0].zeroTickOrientation = CompassOrientation.SW;
-		// Positioning data before axes, so that axes are drawn on top of data.
-		positionData(trailInfo.style);
-		// if (isPreviousXAxis) {
-		// 	AxisTools.addAxisToParent(axes[0], parent);
-		// } else {
-		// 	AxisTools.replaceAxisInParent(axes[0], parent);
-		// }
-		// if (isPreviousYAxis) {
-		// 	AxisTools.addAxisToParent(axes[1], parent);
-		// } else {
+		axes.width = parent.width;
+		axes.height = parent.height;
+		axes.positionStartPoint();
+		axes.setTicks(false);
+		positionData(style);
 		AxisTools.replaceAxisInParent(axes, parent);
-		// }
 	};
 }

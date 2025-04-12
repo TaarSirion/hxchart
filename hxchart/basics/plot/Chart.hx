@@ -445,8 +445,24 @@ class Builder extends CompositeBuilder {
 						_chart.axes.set(axisID, scatter.axes);
 					}
 				case bar:
-					if (chartInfo.axisInfo != null && chartInfo.axisInfo.length > 2) {
+					if (chartInfo.axisInfo == null) {
+						chartInfo.axisInfo = [
+							{
+								id: "x_" + axisID,
+								rotation: 0
+							},
+							{
+								id: "y_" + axisID,
+								rotation: 90
+							}
+						];
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
+					} else if (chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for bar-chart!");
+					} else {
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
 					}
 					if (_chart.axes.exists(axisID)) {
 						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
