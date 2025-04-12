@@ -28,34 +28,44 @@ enum AxisTypes {
 }
 
 /**
- * Axis information. Usually used in the first trail.
- * 
- * When only `type` is set, the corresponding trail will calculate its own axis.
+ * Axis information. For each drawn axis.
+ * Attention: The Axis object is a combination of multiple axis informations. Each axis information
+ * draws a line on the canvas.
  * 
  * When supplying `values` beware of these differences based on `type`:
- * - linear: Only the first two values in the array will be used, the represent the min and max values of the axis.
+ * - linear: Only the first two values in the array will be used, to represent the min and max values of the axis.
  * - categorical: All values will be used.
  * 
- * @param type Type of axis. The positioning of data depends on this. 
- * @param axis Optional. A full axis object. If this is supplied, the trail will use this axis instead trying to generate its own.
+ * The `setAxisInfo` function will try to automatically set the axis type, tick information and rotation. 
+ * If no values are provided, it will throw an exception.
+ * 
+ * @param id ID of the axis.
+ * @param rotation Rotation of the axis. Can be anything between 0 and 179. 0 is a horizontal axis, 90 is a vertical axis. 
+ * Values equal or higher than 180 will be converted to 0-179. This happens to ensure no backwards drawn axes appear.
+ * @param type Optional. Type of axis. The positioning of data depends on this. 
  * @param values Optional. Values the axis should have. Depending on the type, this will work differently.
+ * @param tickInfo Optional. See hxchart.basics.axis.TickInfo for more information.
+ * @param start Optional. The startpoint of the axis. This will get overwritten by the `positionStartPoint` function.
+ * @param length Optional. The length of the drawn axis. This will get overwritten by the `positionStartPoint` function.
+ * @param title Optional. A title for the drawn axis.
+ * @param tickMargin Optional. Margin in between ticks.
+ * @param showZeroTick Optional. If the zero tick should be shown.
  */
 @:structInit class AxisInfo {
 	public var id:String;
 	@:optional public var tickInfo:TickInfo;
 	@:optional public var type:AxisTypes;
-	@:optional public var values:Array<Any>;
+	@:optional public var values:Array<Any> = [];
 	public var rotation:Int;
 	@:optional public var start:Point;
 	@:optional public var length:Null<Float>;
 	@:optional public var showZeroTick:Null<Bool>;
-	@:optional public var zeroTickOrientation:CompassOrientation;
 	@:optional public var title:String;
 
 	@:optional public var tickMargin:Float;
 
 	public function setAxisInfo(trailValues:Array<Any>) {
-		if (trailValues.length == 0) {
+		if (trailValues.length == 0 && values.length == 0) {
 			throw new Exception("Cannot set AxisInfo without values.");
 		}
 
@@ -67,9 +77,8 @@ enum AxisTypes {
 				type = categorical;
 			}
 		}
-
-		rotation = rotation > 360 ? 0 : (rotation >= 180 ? rotation - 180 : rotation);
-
+		var moduloRotation = Math.round(Math.abs(rotation % 360));
+		rotation = moduloRotation >= 180 ? moduloRotation - 180 : moduloRotation;
 		if (tickInfo != null) {
 			return;
 		}
@@ -81,24 +90,25 @@ enum AxisTypes {
 				if (values != null && values.length >= 2) {
 					min = values[0];
 					max = values[1];
+				} else {
+					var dataValues = trailValues.copy();
+					dataValues.sort(Reflect.compare);
+					min = dataValues[0];
+					max = dataValues[dataValues.length - 1];
 				}
-				var dataValues = trailValues.copy();
-				dataValues.sort(Reflect.compare);
-				min = dataValues[0];
-				max = dataValues[dataValues.length - 1];
 				tickInfo = new NumericTickInfo(["min" => [min], "max" => [max]]);
 			case categorical:
-				var values:Array<String> = [];
+				var dataValues:Array<String> = [];
 				if (values == null || values.length == 0) {
 					for (val in trailValues) {
-						values.push(val);
+						dataValues.push(val);
 					}
 				} else {
 					for (val in values) {
-						values.push(val);
+						dataValues.push(val);
 					}
 				}
-				tickInfo = new StringTickInfo(values);
+				tickInfo = new StringTickInfo(dataValues);
 		}
 	}
 }
@@ -125,6 +135,9 @@ class Axis extends Absolute {
 		return axesInfo = info;
 	}
 
+	/**
+	 * Ticks per drawn axis. 
+	 */
 	public var ticksPerInfo(default, set):Array<Array<Ticks>>;
 
 	private function set_ticksPerInfo(ticks:Array<Array<Ticks>>) {
@@ -150,6 +163,9 @@ class Axis extends Absolute {
 		return axisStyleSheet = styleSheet;
 	}
 
+	/**
+	 * Zero Point of all axes.
+	 */
 	public var zeroPoint(default, set):Point;
 
 	private function set_zeroPoint(point:Point) {
@@ -198,15 +214,25 @@ class Axis extends Absolute {
 		super.onResized();
 	}
 
+	/**
+	 * Left margin for the Axis object.
+	 */
 	final axisMarginLeft:Float = 30;
+
+	/**
+	 * Top margin for the Axis object.
+	 */
 	final axisMarginTop:Float = 30;
 
+	/**
+	 * Title margin for each individual axis. 
+	 */
 	public final titleMargin:Float = 30;
 
 	/**
-	 * Centers the startpoint at the beginning and positions it according to its linked axes on update.
+	 * Positions the startpoints of the axes according to the other axes, titles and margins.
 	 */
-	public function centerStartPoint(alternateWidth:Float = 0, alternateHeight:Float = 0) {
+	public function positionStartPoint() {
 		this.zeroPoint = new Point(axisMarginLeft + (this.width - axisMarginLeft * 2) / 2, axisMarginTop + (this.height - axisMarginTop * 2) / 2);
 		var xaxesNum:Int = 0;
 		var yaxesNum:Int = 0;
@@ -230,9 +256,6 @@ class Axis extends Absolute {
 				case _:
 			}
 		}
-
-		var xaxesTitle = 0;
-		var yaxesTitle = 0;
 		var newHeight = height - axisMarginTop * 2;
 		var newWidth = width - axisMarginLeft * 2;
 		for (info in this.axesInfo) {
@@ -275,23 +298,6 @@ class Axis extends Absolute {
 						info.start.x = axisMarginLeft;
 					}
 					info.start.y = zeroPoint.y;
-
-				// if (info.title != null) {
-				// 	xaxesTitle++;
-				// 	if (this.zeroPoint.y >= (this.height - marginTop - titleMargin)) {
-				// 		info.start = new Point(marginLeft, this.zeroPoint.y - titleMargin);
-				// 		this.zeroPoint.y -= titleMargin;
-				// 		continue;
-				// 	}
-				// }
-				// if (yaxesTitle > 0) {
-				// 	info.length -= titleMargin;
-				// 	if (this.zeroPoint.x <= (marginLeft + titleMargin)) {
-				// 		info.start = new Point(this.zeroPoint.x + titleMargin, this.height - marginTop);
-				// 		continue;
-				// 	}
-				// }
-				// info.start = new Point(marginLeft, this.zeroPoint.y);
 				case 90:
 					if (info.length != newHeight) {
 						info.length = newHeight;
@@ -300,22 +306,6 @@ class Axis extends Absolute {
 						info.start.y = height - axisMarginTop;
 					}
 					info.start.x = zeroPoint.x;
-				// if (info.title != null) {
-				// 	yaxesTitle++;
-				// 	if (this.zeroPoint.x <= (marginLeft + titleMargin)) {
-				// 		info.start = new Point(this.zeroPoint.x + titleMargin, this.height - marginTop);
-				// 		zeroPoint.x += titleMargin;
-				// 		continue;
-				// 	}
-				// }
-				// if (xaxesTitle > 0) {
-				// 	info.length = this.height - marginTop * 2 - titleMargin;
-				// 	if (this.zeroPoint.y >= (this.height - marginTop - titleMargin)) {
-				// 		info.start = new Point(this.zeroPoint.x, this.zeroPoint.y - titleMargin);
-				// 		continue;
-				// 	}
-				// }
-				// info.start = new Point(this.zeroPoint.x, this.height - marginTop);
 				case _:
 			}
 		}
@@ -429,11 +419,7 @@ private class SetTicks extends Behaviour {
 				if (tickInfo.zeroIndex == j && !info.showZeroTick) {
 					tick.hidden = true;
 				}
-				if (tickInfo.zeroIndex == j && info.zeroTickOrientation != null) {
-					tick.labelPosition = info.zeroTickOrientation;
-				} else {
-					tick.labelPosition = labelPosition;
-				}
+				tick.labelPosition = labelPosition;
 
 				tick.text = tickInfo.labels[j];
 				if (!isUpdate) {
@@ -503,7 +489,7 @@ private class AxisBuilder extends CompositeBuilder {
 		// _tickLabelLayer.childComponents[1].removeAllComponents();
 		// _axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.axisRotation, _axis.axisLength);
 		trace("VALID");
-		_axis.centerStartPoint();
+		_axis.positionStartPoint();
 		_axis.setTicks(false);
 		_axis.drawAxis();
 	}
@@ -511,7 +497,7 @@ private class AxisBuilder extends CompositeBuilder {
 	override function validateComponentLayout():Bool {
 		_tickCanvasLayer.componentGraphics.clear();
 		trace("VALID 2");
-		_axis.centerStartPoint();
+		_axis.positionStartPoint();
 		// _axis.endPoint = AxisTools.positionEndpoint(_axis.startPoint, _axis.axisRotation, _axis.axisLength);
 		_axis.setTicks(true);
 		_axis.drawAxis();
