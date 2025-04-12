@@ -1,5 +1,6 @@
 package hxchart.basics.trails;
 
+import hxchart.basics.plot.Chart.PositionOption;
 import hxchart.basics.events.EventLayer.EventHandler;
 import hxchart.basics.plot.Chart.OptimizationType;
 import hxchart.basics.quadtree.OptimGrid;
@@ -54,7 +55,7 @@ class Scatter implements AxisLayer implements DataLayer {
 	var useOptimization:Bool;
 
 	@:allow(hxchart.tests)
-	private var chartInfo:TrailInfo;
+	public var chartInfo:TrailInfo;
 
 	public var colorPalette:Array<Int>;
 
@@ -452,7 +453,7 @@ class Scatter implements AxisLayer implements DataLayer {
 				}
 			}
 		});
-
+		trace("PLOT");
 		// Drawing
 		dataCanvas.componentGraphics.clear();
 		if (chartInfo.type == line) {
@@ -462,16 +463,20 @@ class Scatter implements AxisLayer implements DataLayer {
 				var last = start;
 				if (style.positionOption == filled) {
 					dataCanvas.componentGraphics.fillStyle(group[0].color, 0.5);
+				} else {
+					dataCanvas.componentGraphics.fillStyle(0x000000, 0);
 				}
-				dataCanvas.componentGraphics.strokeStyle(group[0].color, group[0].size, group[0].size);
-				dataCanvas.componentGraphics.moveTo(last.x, last.y);
+				trace("group ", start, last);
+				dataCanvas.componentGraphics.strokeStyle(group[0].color, group[0].size, group[0].alpha);
 				#if !(haxeui_heaps)
 				dataCanvas.componentGraphics.beginPath();
 				#end
-				for (dataPoint in group) {
+				dataCanvas.componentGraphics.moveTo(last.x, last.y);
+				for (i => dataPoint in group) {
 					if (!dataPoint.allowed) {
 						continue;
 					}
+					trace(dataPoint.coord);
 					dataCanvas.componentGraphics.lineTo(dataPoint.coord.x, dataPoint.coord.y);
 					last = dataPoint.coord;
 				}

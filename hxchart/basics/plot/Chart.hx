@@ -1,5 +1,6 @@
 package hxchart.basics.plot;
 
+import haxe.ui.core.Component;
 import haxe.ui.styles.StyleSheet;
 import haxe.ui.containers.HBox;
 import haxe.ui.containers.VBox;
@@ -154,8 +155,9 @@ enum OptimizationType {
  * Beware that trails in the same plot share the same underlying coordinates (i.e. axes, or something similar) and styling. This may have unintended consequences, when the types don't mix well.
  */
 @:composite(Builder)
-class Chart extends Absolute {
+class Chart extends Component {
 	public var trailInfos:Array<TrailInfo>;
+	public var trails:Array<Any>;
 	public var legendInfo:LegendInfo;
 
 	public var chartBody:Absolute;
@@ -168,6 +170,7 @@ class Chart extends Absolute {
 	public function new(chartInfo:TrailInfo, ?legendInfo:LegendInfo, ?styleSheet:StyleSheet) {
 		super();
 		trailInfos = [];
+		trails = [];
 		axes = new Map();
 		groups = new Map();
 		groupNumber = 0;
@@ -224,6 +227,8 @@ class Chart extends Absolute {
 					addComponent(chartBody);
 					addComponent(legend);
 			}
+		} else {
+			addComponent(chartBody);
 		}
 	}
 
@@ -427,6 +432,9 @@ class Builder extends CompositeBuilder {
 						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
 					} else if (chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
+					} else {
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
 					}
 					if (_chart.axes.exists(axisID)) {
 						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];

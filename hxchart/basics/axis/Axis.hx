@@ -260,7 +260,9 @@ class Axis extends Absolute {
 			switch (rotation) {
 				case 0:
 					if (xaxesNum == 0) {
-						this.zeroPoint.x = info.tickInfo.zeroIndex * (this.width - axisMarginLeft * 2) / (info.tickInfo.tickNum - 1) + axisMarginLeft;
+						this.zeroPoint.x = info.tickInfo.zeroIndex * (this.width - axisMarginLeft * 2) / (info.tickInfo.tickNum - 1)
+							+ axisMarginLeft
+							+ info.tickMargin;
 					}
 					info.length = this.width - axisMarginLeft * 2;
 					xaxesNum++;
@@ -268,7 +270,8 @@ class Axis extends Absolute {
 					if (yaxesNum == 0) {
 						this.zeroPoint.y = this.height
 							- info.tickInfo.zeroIndex * (this.height - axisMarginTop * 2) / (info.tickInfo.tickNum - 1)
-							- axisMarginTop;
+							- axisMarginTop
+							- info.tickMargin;
 					}
 					info.length = this.height - axisMarginTop * 2;
 					yaxesNum++;
