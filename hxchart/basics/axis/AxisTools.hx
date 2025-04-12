@@ -5,28 +5,6 @@ import haxe.ui.geom.Point;
 
 class AxisTools {
 	/**
-	 * Find the overlap point between two axes. This is simply the y coordinate of the x-axis and the x coordinate of the y-axis.
-	 * In case the point is outside the range of one of the axis there exists no real overlap between the axis.
-	 * @param axisX 
-	 * @param axisY 
-	 * 
-	 * @return Either null or Point
-	 */
-	public static function findOverlap(axisX:Axis, axisY:Axis) {
-		var y = axisX.startPoint.y;
-		var x = axisY.startPoint.x;
-		var overlapPoint = new Point(x, y);
-		if (overlapPoint.x < axisX.startPoint.x || overlapPoint.x > axisX.endPoint.x) {
-			return null;
-		}
-
-		if (overlapPoint.y < axisY.startPoint.y || overlapPoint.y > axisY.endPoint.y) {
-			return null;
-		}
-		return overlapPoint;
-	}
-
-	/**
 	 * Generate and position the new endpoint according to a strting point, rotation around that starting point and length from starting point.
 	 * @param startPoint 
 	 * @param rotation 
@@ -43,7 +21,7 @@ class AxisTools {
 		endPoint.y -= startPoint.y;
 		var x = endPoint.x * c - endPoint.y * s;
 		var y = endPoint.x * s + endPoint.y * c;
-		return new Point(x + startPoint.x, y + startPoint.y);
+		return new Point(x + startPoint.x, startPoint.y - y);
 	}
 
 	public static function addAxisToParent(axis:Axis, parent:Absolute) {

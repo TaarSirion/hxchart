@@ -27,10 +27,7 @@ class TestChart extends Test {
 			title: {
 				text: "Title"
 			},
-			useLegend: true,
-			nodeStyle: {
-				fontSize: 5
-			}
+			useLegend: true
 		});
 		Assert.equals("Title", chart.legendInfo.title.text);
 		Assert.equals("Title", chart.legend.legendTitle);

@@ -24,23 +24,21 @@ class TestLegend extends Test {
 
 	function testNewLegend() {
 		Assert.isTrue(legend.hasClass("legend-class"));
-		Assert.equals(10, legend.marginBottom);
-		Assert.equals(10, legend.marginTop);
-		Assert.equals(10, legend.marginRight);
-		Assert.equals(10, legend.marginLeft);
-		Assert.equals(30, legend.height);
-		Assert.equals(100, legend.percentWidth);
 		Assert.equals(0, legend.childNodes.length);
 
 		Assert.equals("legend-container", legend.childComponents[0].id);
-		Assert.equals(100, legend.childComponents[0].percentHeight);
-		Assert.equals(100, legend.childComponents[0].percentWidth);
 		Assert.isOfType(legend.childComponents[0], VBox);
-
-		Assert.equals("legend-container", legend.childComponents[1].id);
-		Assert.equals(100, legend.childComponents[1].percentHeight);
-		Assert.equals(100, legend.childComponents[1].percentWidth);
-		Assert.isOfType(legend.childComponents[1], HBox);
+		Assert.isTrue(legend.childComponents[0].hasClass("legend-title-container"));
+		Assert.isTrue(legend.childComponents[0].hasClass("legend-node-container"));
+		var legend = new Legend({
+			useLegend: true,
+			position: top
+		});
+		Assert.equals("legend-container", legend.childComponents[0].id);
+		Assert.isOfType(legend.childComponents[0], VBox);
+		Assert.isTrue(legend.childComponents[0].childComponents[0].hasClass("legend-title-container"));
+		Assert.isTrue(legend.childComponents[0].childComponents[1].hasClass("legend-node-container"));
+		Assert.isOfType(legend.childComponents[0].childComponents[1], HBox);
 	}
 
 	function testStyleSheet() {
@@ -61,7 +59,6 @@ class TestLegend extends Test {
 		Assert.equals(10, paddingTop.getParameters()[0]);
 		var paddingRight:Dimension = legendDirectives.get("padding-right").value.getParameters()[0];
 		Assert.equals(10, paddingRight.getParameters()[0]);
-		Assert.equals("Arial", legendDirectives.get("font-family").value.getParameters()[0]);
 
 		Assert.equals(".legend-title", legend.styleSheet.rules[1].selector.toString());
 		var legendDirectives = legend.styleSheet.rules[1].directives;
@@ -76,8 +73,6 @@ class TestLegend extends Test {
 			text: "test",
 			style: {
 				symbol: rectangle,
-				textColor: 0x000000,
-				fontSize: 5,
 				symbolColor: 0xababab
 			}
 		});
@@ -85,21 +80,11 @@ class TestLegend extends Test {
 		Assert.equals("test", legend.childComponents[0].childComponents[0].text);
 		Assert.equals("test", legend.childNodes[0]);
 		Assert.equals(null, legend.childComponents[0].childComponents[0].percentHeight);
-		Assert.equals(100, legend.childComponents[0].childComponents[0].percentWidth);
-		Assert.equals(10, legend.childComponents[0].childComponents[0].marginLeft);
-		Assert.equals(10, legend.childComponents[0].childComponents[0].marginRight);
-		Assert.equals(20, legend.childComponents[0].childComponents[0].childComponents[0].percentWidth);
-		Assert.equals(80, legend.childComponents[0].childComponents[0].childComponents[1].percentWidth);
 
 		var node:LegendNode = cast(legend.childComponents[0].childComponents[0], LegendNode);
-		Assert.isTrue(node.childComponents[1].hasClass("legend-text"));
-		Assert.equals("left", node.childComponents[1].customStyle.textAlign);
+		Assert.isTrue(node.childComponents[2].hasClass("legend-text")); // 1 is used for the spacer
 		Assert.isTrue(node.childComponents[0].hasClass("legend-text-symbol"));
-		Assert.equals(24, node.childComponents[0].height);
 		Assert.equals("rectangle", node.symbol);
-		Assert.equals(0x000000, node.textColor);
-
-		Assert.equals(5, node.fontSize);
 		Assert.equals(0xababab, node.symbolColor);
 	}
 
@@ -121,17 +106,13 @@ class TestLegend extends Test {
 				}
 			],
 			nodeStyle: {
-				textColor: 0x000000,
 				symbol: rectangle,
-				fontSize: 16,
 				symbolColor: 0xee0000
 			}
 		}
 		info.validate();
-		Assert.equals(16, info.data[0].style.fontSize);
 		Assert.equals(0xababab, info.data[0].style.symbolColor);
 		Assert.equals(rectangle, info.data[0].style.symbol);
-		Assert.equals(16, info.data[1].style.fontSize);
 		Assert.equals(0xee0000, info.data[1].style.symbolColor);
 		Assert.equals(point, info.data[1].style.symbol);
 	}

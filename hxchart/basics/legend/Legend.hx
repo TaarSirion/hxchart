@@ -53,6 +53,9 @@ typedef LegendTitle = {
 	public var useLegend:Bool;
 
 	public function validate() {
+		if (!useLegend) {
+			return;
+		}
 		if (data == null) {
 			return;
 		}
@@ -312,66 +315,7 @@ class Builder extends CompositeBuilder {
 	}
 
 	override function validateComponentLayout():Bool {
-		trace("AMM");
 		super.validateComponentLayout();
-		trace("here");
-		// switch (_legend.legendPosition) {
-		// 	case left:
-		// 		var height = _legend.paddingBottom + _legend.paddingTop;
-		// 		for (child in _legend.childComponents[0].childComponents) {
-		// 			height += child.height + child.marginTop + child.marginBottom + 5;
-		// 		}
-		// 		_legend.height = height;
-		// 	case right:
-		// 		var height = _legend.paddingBottom + _legend.paddingTop;
-		// 		for (child in _legend.childComponents[0].childComponents) {
-		// 			height += child.height + child.marginTop + child.marginBottom + 5;
-		// 		}
-		// 		_legend.height = height;
-		// 	case top:
-		// 		// var width = _legend.paddingLeft + _legend.paddingRight;
-		// 		// for (child in _legend.childComponents[0].childComponents) {
-		// 		// 	width += child.width + child.marginLeft + child.marginRight + 5;
-		// 		// }
-		// 		// _legend.width = width;
-		// 		var fullLength = _legend.childComponents[0].width;
-		// 		for (child in _legend.childComponents[0].childComponents) {
-		// 			if (child.numComponents == 0) {
-		// 				fullLength -= child.width;
-		// 				continue;
-		// 			}
-		// 			child.width = fullLength / _legend.childNodes.length;
-		// 		}
-		// 	case bottom:
-		// 		var width = _legend.paddingLeft + _legend.paddingRight;
-		// 		for (child in _legend.childComponents[0].childComponents) {
-		// 			width += child.width + child.marginLeft + child.marginRight + 5;
-		// 		}
-		// 		_legend.width = width;
-		// 	// var fullLength = _legend.childComponents[0].width;
-		// 	// for (child in _legend.childComponents[1].childComponents) {
-		// 	// 	if (child.numComponents == 0) {
-		// 	// 		fullLength -= child.width;
-		// 	// 		continue;
-		// 	// 	}
-		// 	// 	child.width = fullLength / _legend.childNodes.length;
-		// 	// }
-		// 	case Point(x, y, vertical):
-		// 		if (vertical) {
-		// 			var height = _legend.paddingBottom + _legend.paddingTop;
-		// 			for (child in _legend.childComponents[0].childComponents) {
-		// 				trace(child.height, child.width);
-		// 				height += child.height + child.marginTop + child.marginBottom + 5;
-		// 			}
-		// 			_legend.height = height;
-		// 		} else {
-		// 			var width = _legend.paddingLeft + _legend.paddingRight;
-		// 			for (child in _legend.childComponents[0].childComponents) {
-		// 				width += child.width + child.marginLeft + child.marginRight + 5;
-		// 			}
-		// 			_legend.width = width;
-		// 		}
-		// }
 		return true;
 	}
 }

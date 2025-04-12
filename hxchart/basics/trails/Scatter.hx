@@ -39,7 +39,7 @@ typedef ScatterDataPoint = {
 class Scatter implements AxisLayer implements DataLayer {
 	public var id:String;
 	public var axisID:String;
-	public var axes:Array<Axis>;
+	public var axes:Axis;
 
 	public var dataByGroup:Array<Array<ScatterDataPoint>> = [];
 	public var data:Array<Any>;
@@ -295,137 +295,31 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 	}
 
-	@:allow(hxchart.tests)
-	function setTickInfo(type:AxisTypes, infoValues:Array<Any>, dataValues:Array<Any>, dataMin:Null<Float>, dataMax:Null<Float>) {
-		var tickInfo:TickInfo = null;
-		switch (type) {
-			case linear:
-				var min:Float = dataMin;
-				var max:Float = dataMax;
-				if (infoValues != null && infoValues.length >= 2) {
-					min = infoValues[0];
-					max = infoValues[1];
-				}
-				tickInfo = new NumericTickInfo(min, max);
-			case categorical:
-				var values:Array<String> = [];
-				if (infoValues == null || infoValues.length == 0) {
-					for (val in dataValues) {
-						values.push(val);
-					}
-				} else {
-					for (val in infoValues) {
-						values.push(val);
-					}
-				}
-				tickInfo = new StringTickInfo(values);
-		}
-		return tickInfo;
-	}
-
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle) {
-		axes = [null, null];
-		if (axisInfo[0].axis != null) {
-			axes[0] = axisInfo[0].axis;
-		}
-		if (axisInfo[1].axis != null) {
-			axes[1] = axisInfo[1].axis;
-		}
-		if (axes[0] != null && axes[1] != null) {
+		if (axes != null) {
 			positionData(style);
 			return;
 		}
-
-		var yAxisLength = parent.height * 0.9;
-		var xAxisLength = parent.width * 0.9;
-		var isPreviousXAxis = false;
-		var isPreviousYAxis = false;
-		if (axes[0] == null) {
-			var xValues = [];
-			for (any in data) {
-				var group:Array<ScatterDataPoint> = any;
-				xValues = xValues.concat(group.map(dataPoint -> {
-					return dataPoint.values.x;
-				}));
-			}
-			var xTickInfo = setTickInfo(axisInfo[0].type, axisInfo[0].values, xValues, minX, maxX);
-			axes[0] = new Axis(new Point(0, 0), 0, xAxisLength, xTickInfo, "x" + axisID);
-		} else {
-			isPreviousXAxis = true;
-		}
-		if (axes[1] == null) {
-			var yValues = [];
-			for (any in data) {
-				var group:Array<ScatterDataPoint> = any;
-				yValues = yValues.concat(group.map(dataPoint -> {
-					return dataPoint.values.y;
-				}));
-			}
-			var yTickInfo = setTickInfo(axisInfo[1].type, axisInfo[1].values, yValues, minY, maxY);
-			axes[1] = new Axis(new Point(0, 0), 270, yAxisLength, yTickInfo, "y" + axisID);
-		} else {
-			isPreviousYAxis = true;
-		}
-		axes[0].percentWidth = 100;
-		axes[0].percentHeight = 100;
-		axes[1].percentWidth = 100;
-		axes[1].percentHeight = 100;
-
-		axes[0].linkedAxes = new Map();
-		axes[0].linkedAxes.set("y", axes[1]);
-		axes[1].linkedAxes = new Map();
-		axes[1].linkedAxes.set("x", axes[0]);
-
-		axes[0].centerStartPoint(parent.width, parent.height);
-		axes[1].centerStartPoint(parent.width, parent.height);
-		axes[1].showZeroTick = false;
-		axes[0].zeroTickPosition = CompassOrientation.SW;
-		// Positioning data before axes, so that axes are drawn on top of data.
+		axes = new Axis(axisID, axisInfo);
+		// axes.id = axisID;
+		axes.width = parent.width;
+		axes.height = parent.height;
+		axes.positionStartPoint();
+		axes.setTicks(false);
 		positionData(chartInfo.style);
-		if (isPreviousXAxis) {
-			AxisTools.addAxisToParent(axes[0], parent);
-		} else {
-			AxisTools.replaceAxisInParent(axes[0], parent);
-		}
-		if (isPreviousYAxis) {
-			AxisTools.addAxisToParent(axes[1], parent);
-		} else {
-			AxisTools.replaceAxisInParent(axes[1], parent);
-		}
+		AxisTools.replaceAxisInParent(axes, parent);
 	}
 
 	public function positionData(style:TrailStyle) {
-		if (axes.length < 2) {
-			throw new Exception("Too few axes for drawing data.");
-		}
-		if (axes[0].tickInfo == null || axes[1].tickInfo == null) {
-			throw new Exception("Two tickinfos are needed for positioning the data correctly!");
-		}
-		var x_coord_min = axes[0].ticks[0].left;
-		var x_coord_max = axes[0].ticks[axes[0].ticks.length - 1].left;
-		var ratio = 1.0;
-		if (Std.isOfType(axes[0].tickInfo, NumericTickInfo)) {
-			var tickInfo:NumericTickInfo = cast(axes[0].tickInfo, NumericTickInfo);
-			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
-		}
-		var x_dist = ChartTools.calcAxisDists(x_coord_min, x_coord_max, ratio);
-		var y_coord_min = axes[1].ticks[0].top;
-		var y_coord_max = axes[1].ticks[axes[1].ticks.length - 1].top;
-		ratio = 1.0;
-		if (Std.isOfType(axes[1].tickInfo, NumericTickInfo)) {
-			var tickInfo:NumericTickInfo = cast(axes[1].tickInfo, NumericTickInfo);
-			ratio = 1 - tickInfo.negNum / (tickInfo.tickNum - 1);
-		}
-		var y_dist = ChartTools.calcAxisDists(y_coord_max, y_coord_min, ratio);
-		if (x_dist.pos_dist < 0 || y_dist.pos_dist < 0) {
+		if (axes.ticksPerInfo[0].length == 0) {
 			return;
 		}
 
 		// Coordinates calculation
 		for (group in dataByGroup) {
 			for (dataPoint in group) {
-				var x = calcXCoord(dataPoint.values.x, axes[0].ticks, axes[0].ticks[axes[0].tickInfo.zeroIndex].left, x_dist);
-				var y = calcYCoord(dataPoint.values.y, axes[1].ticks, axes[1].ticks[axes[1].tickInfo.zeroIndex].top, y_dist);
+				var x = calcXCoord(dataPoint.values.x, axes.ticksPerInfo[0]);
+				var y = calcYCoord(dataPoint.values.y, axes.ticksPerInfo[1]);
 				if (x == null || y == null) {
 					continue;
 				}
@@ -582,8 +476,8 @@ class Scatter implements AxisLayer implements DataLayer {
 					last = dataPoint.coord;
 				}
 				if (style.positionOption == filled) {
-					dataCanvas.componentGraphics.lineTo(last.x, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
-					dataCanvas.componentGraphics.lineTo(start.x, axes[1].ticks[axes[1].tickInfo.zeroIndex].top);
+					dataCanvas.componentGraphics.lineTo(last.x, axes.ticksPerInfo[1][axes.axesInfo[1].tickInfo.zeroIndex].top);
+					dataCanvas.componentGraphics.lineTo(start.x, axes.ticksPerInfo[1][axes.axesInfo[1].tickInfo.zeroIndex].top);
 					dataCanvas.componentGraphics.lineTo(start.x, start.y);
 					#if !(haxeui_heaps)
 					dataCanvas.componentGraphics.closePath();
@@ -611,7 +505,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 	}
 
-	public function calcXCoord(xValue:Dynamic, ticks:Array<Ticks>, zeroPos:Float, xDist:AxisDist) {
+	public function calcXCoord(xValue:Dynamic, ticks:Array<Ticks>) {
 		if (Std.isOfType(xValue, String)) {
 			var ticksFiltered = ticks.filter(x -> {
 				return x.text == xValue;
@@ -621,21 +515,21 @@ class Scatter implements AxisLayer implements DataLayer {
 			}
 			return ticksFiltered[0].left;
 		}
-		var xMax = Std.parseFloat(ticks[ticks.length - 1].text);
-		var xMin = Std.parseFloat(ticks[0].text);
-		var x_ratio:Float = 0.0;
-		if (xValue > 0) {
-			x_ratio = xValue / xMax;
+		var largerTicks = ticks.filter(tick -> Std.parseFloat(tick.text) >= xValue);
+		var xMax = Std.parseFloat(largerTicks[0].text);
+		var maxIndex = ticks.indexOf(largerTicks[0]);
+		var minIndex = maxIndex == 0 ? 0 : maxIndex - 1;
+		var xMin = Std.parseFloat(ticks[minIndex].text);
+		if (xMax == xMin) {
+			return ticks[minIndex].left;
 		}
-		var x = zeroPos + xDist.pos_dist * x_ratio;
-		if (xValue < 0) {
-			x_ratio = xValue / xMin;
-			x = zeroPos - xDist.neg_dist * x_ratio;
-		}
+		var tickLeft = ticks[minIndex].left;
+		var tickRight = largerTicks[0].left;
+		var x = (tickRight - tickLeft) * (xValue - xMin) / (xMax - xMin) + tickLeft;
 		return x;
 	}
 
-	public function calcYCoord(yValue:Dynamic, ticks:Array<Ticks>, zeroPos:Float, yDist:AxisDist) {
+	public function calcYCoord(yValue:Dynamic, ticks:Array<Ticks>) {
 		if (Std.isOfType(yValue, String)) {
 			var ticksFiltered = ticks.filter(x -> {
 				return x.text == yValue;
@@ -645,17 +539,17 @@ class Scatter implements AxisLayer implements DataLayer {
 			}
 			return ticksFiltered[0].top;
 		}
-		var yMax = Std.parseFloat(ticks[ticks.length - 1].text);
-		var yMin = Std.parseFloat(ticks[0].text);
-		var y_ratio:Float = 0;
-		if (yValue > 0) {
-			y_ratio = yValue / yMax;
+		var largerTicks = ticks.filter(tick -> Std.parseFloat(tick.text) >= yValue);
+		var yMax = Std.parseFloat(largerTicks[0].text);
+		var maxIndex = ticks.indexOf(largerTicks[0]);
+		var minIndex = maxIndex == 0 ? 0 : maxIndex - 1;
+		var yMin = Std.parseFloat(ticks[minIndex].text);
+		if (yMin == yMax) {
+			return ticks[minIndex].top;
 		}
-		var y = zeroPos - yDist.pos_dist * y_ratio;
-		if (yValue < 0) {
-			y_ratio = yValue / yMin;
-			y = zeroPos + yDist.neg_dist * y_ratio;
-		}
+		var tickBottom = ticks[minIndex].top;
+		var tickTop = largerTicks[0].top;
+		var y = tickBottom - (tickBottom - tickTop) * (yValue - yMin) / (yMax - yMin);
 		return y;
 	}
 

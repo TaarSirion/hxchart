@@ -1,5 +1,7 @@
 package hxchart.tests;
 
+import hxchart.basics.axis.Axis;
+import hxchart.basics.axis.Axis.AxisInfo;
 import haxe.Exception;
 import hxchart.basics.data.Data2D;
 import hxchart.basics.colors.ColorPalettes;
@@ -21,18 +23,23 @@ class TestScatter extends Test {
 		parent = new Absolute();
 		parent.width = 100;
 		parent.height = 100;
+		var xaxis:AxisInfo = {
+			type: linear,
+			rotation: 0,
+			id: "xaxis"
+		};
+		xaxis.setAxisInfo([2, 0, 1]);
+		var yaxis:AxisInfo = {
+			type: linear,
+			rotation: 90,
+			id: "yaxis"
+		};
+		yaxis.setAxisInfo([1, 2, 3]);
 		scatter = new Scatter({
 			data: {
 				values: ["x" => [2, 0, 1], "y" => [1, 2, 3], "groups" => ["1", "1", "1"]]
 			},
-			axisInfo: [
-				{
-					type: linear
-				},
-				{
-					type: linear
-				}
-			],
+			axisInfo: [xaxis, yaxis],
 			type: TrailTypes.scatter,
 			style: {
 				colorPalette: ColorPalettes.defaultColors(1),
@@ -95,27 +102,14 @@ class TestScatter extends Test {
 		Assert.equals(3, scatter.maxY);
 	}
 
-	function testSetTickInfo() {
-		var info = scatter.setTickInfo(AxisTypes.linear, [], [1, 2, 3], 1, 3);
-		Assert.isOfType(info, TickInfo);
-		Assert.isOfType(info, NumericTickInfo);
-
-		var info = scatter.setTickInfo(AxisTypes.categorical, [], ["1", "2", "3"], null, null);
-		Assert.isOfType(info, TickInfo);
-		Assert.isOfType(info, StringTickInfo);
-
-		var info = scatter.setTickInfo(AxisTypes.linear, [1, 2], [1, 2, 3], 1, 3);
-		Assert.equals("2", info.labels[info.labels.length - 1]);
-	}
-
-	@:depends(testSetData, testSetTickInfo)
+	@:depends(testSetData)
 	function testPositionAxes() {
 		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
 		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.dataByGroup, {});
-		Assert.equals(2, scatter.axes.length);
-		Assert.equals(90, scatter.axes[0].axisLength);
-		Assert.equals(5, scatter.axes[0].startPoint.x);
-		Assert.equals(-10, scatter.axes[0].startPoint.y);
+		Assert.equals(2, scatter.axes.axesInfo.length);
+		Assert.equals(40, scatter.axes.axesInfo[0].length);
+		Assert.equals(30, scatter.axes.axesInfo[0].start.x);
+		Assert.equals(70, scatter.axes.axesInfo[0].start.y);
 	}
 
 	@:depends(testPositionAxes)
@@ -127,12 +121,5 @@ class TestScatter extends Test {
 			groups: ["1" => 0]
 		});
 		Assert.notNull(parent.findComponent("chart"));
-		scatter.axes = [];
-		Assert.raises(function() {
-			scatter.positionData({
-				colorPalette: ColorPalettes.defaultColors(1),
-				groups: ["1" => 0]
-			});
-		}, Exception);
 	}
 }

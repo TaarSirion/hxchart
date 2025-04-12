@@ -15,12 +15,18 @@ class NumericTickInfo implements TickInfo {
 	public var subTicksPerPart:Int;
 	public var labelPosition:CompassOrientation;
 
+	/**
+	 * Determines the number of decimal places the tick label shows.
+	 */
 	public var precision(default, set):Int;
 
 	function set_precision(precision:Int) {
 		return this.precision = precision;
 	}
 
+	/**
+	 * Determines the step size between ticks. Based on a base-10 exponent.
+	 */
 	public var power(default, set):Float;
 
 	function set_power(power:Float) {
@@ -37,7 +43,7 @@ class NumericTickInfo implements TickInfo {
 	}
 
 	/**
-	 * Min value
+	 * Min tick value.
 	 */
 	public var min(default, set):Float;
 
@@ -45,6 +51,9 @@ class NumericTickInfo implements TickInfo {
 		return this.min = min;
 	}
 
+	/**
+	 * Max tick value.
+	 */
 	public var max(default, set):Float;
 
 	function set_max(max:Float) {
@@ -52,7 +61,7 @@ class NumericTickInfo implements TickInfo {
 	}
 
 	/**
-	 * Negative Number of Sub Ticks.
+	 * Negative Number of subticks.
 	 */
 	public var subNegNum(default, set):Int;
 
@@ -60,6 +69,9 @@ class NumericTickInfo implements TickInfo {
 		return subNegNum = num;
 	}
 
+	/**
+	 * Remove leading numbers from the subtick labels.
+	 */
 	public var removeLead(default, set):Bool;
 
 	function set_removeLead(remove:Bool) {
@@ -71,9 +83,27 @@ class NumericTickInfo implements TickInfo {
 	 * @param min Min value of the axis.
 	 * @param max Max value of the axis.
 	 */
-	public function new(min:Float, max:Float, useSubTicks:Bool = false, subTicksPerPart:Int = 3, removeLead:Bool = false) {
-		this.min = min;
-		this.max = max;
+	public function new(values:Map<String, Array<Float>>, useSubTicks:Bool = false, subTicksPerPart:Int = 3, removeLead:Bool = false) {
+		if (values.exists("min")) {
+			this.min = values.get("min")[0];
+		}
+		if (values.exists("max")) {
+			this.max = values.get("max")[0];
+		}
+		if (values.exists("ticks")) {
+			var ticks:Array<Float> = values.get("ticks");
+			ticks.sort(Reflect.compare);
+			tickNum = ticks.length;
+			negNum = ticks.filter(tick -> tick < 0).length;
+			labels = ticks.map(tick -> Std.string(tick));
+			zeroIndex = ticks.indexOf(0);
+			if (zeroIndex == -1) {
+				zeroIndex = negNum;
+				tickNum++;
+				labels.insert(zeroIndex, "0");
+			}
+			return;
+		}
 		this.useSubTicks = useSubTicks;
 		this.subTicksPerPart = subTicksPerPart;
 		this.removeLead = removeLead;
@@ -120,6 +150,7 @@ class NumericTickInfo implements TickInfo {
 
 	/**
 	 * Calculate the number of ticks.
+	 * Will add an extra tick for 0.
 	 */
 	public function calcTickNum() {
 		var maxRound = max < 0 ? 0 : Utils.roundToPrec(max, precision);
@@ -183,6 +214,10 @@ class NumericTickInfo implements TickInfo {
 		}
 	}
 
+	/**
+	 * Set the labels of the ticks.
+	 * @param values Not used in this implementation, because NumericTickInfo calculates the labels itself.
+	 */
 	public function setLabels(values:Array<String>) {
 		labels = new Vector(tickNum).toArray();
 		var betweenTickStep = 0.0;

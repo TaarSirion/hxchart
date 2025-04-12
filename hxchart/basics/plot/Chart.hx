@@ -161,7 +161,7 @@ class Chart extends Absolute {
 	public var chartBody:Absolute;
 	public var groups:Map<String, Int>;
 	public var groupNumber:Int;
-	public var axes:Map<String, Array<Axis>>;
+	public var axes:Map<String, Axis>;
 	public var legend:Legend;
 	public var chartStyleSheet:StyleSheet;
 
@@ -183,9 +183,9 @@ class Chart extends Absolute {
 				useLegend: false
 			};
 		}
+		this.legendInfo = legendInfo;
 		if (legendInfo.useLegend) {
 			this.legend = new Legend(legendInfo, styleSheet);
-			this.legendInfo = legendInfo;
 
 			switch (legend.legendPosition) {
 				case left:
@@ -255,25 +255,27 @@ class Chart extends Absolute {
 		if (colors.length < groupNumber) {
 			colors = colors.concat(ColorPalettes.defaultColors(groupNumber - colors.length));
 		}
-		legendInfo.validate();
-		if (legendInfo.data != null) {
-			for (node in legendInfo.data) {
-				legend.addNode(node);
-			}
-		} else {
-			var groupIterationIndex:Int = 0;
-			for (group in groups.keys()) {
-				if (legend.childNodes.contains(group)) {
-					continue;
+		if (legendInfo.useLegend) {
+			legendInfo.validate();
+			if (legendInfo.data != null) {
+				for (node in legendInfo.data) {
+					legend.addNode(node);
 				}
-				legend.addNode({
-					style: {
-						symbol: legendInfo.nodeStyle.symbol,
-						symbolColor: colors[groupIterationIndex]
-					},
-					text: group
-				});
-				groupIterationIndex++;
+			} else {
+				var groupIterationIndex:Int = 0;
+				for (group in groups.keys()) {
+					if (legend.childNodes.contains(group)) {
+						continue;
+					}
+					legend.addNode({
+						style: {
+							symbol: legendInfo.nodeStyle.symbol,
+							symbolColor: colors[groupIterationIndex]
+						},
+						text: group
+					});
+					groupIterationIndex++;
+				}
 			}
 		}
 
@@ -386,33 +388,23 @@ class Builder extends CompositeBuilder {
 			switch (chartInfo.type) {
 				case scatter:
 					if (chartInfo.axisInfo == null) {
-						chartInfo.axisInfo = [{}, {}];
-						var x = chartInfo.data.values.get("x")[0];
-						if (x is Int || x is Float) {
-							chartInfo.axisInfo[0].type = linear;
-						} else if (x is String) {
-							chartInfo.axisInfo[0].type = categorical;
-						}
-						var y = chartInfo.data.values.get("y")[0];
-						if (y is Int || y is Float) {
-							chartInfo.axisInfo[1].type = linear;
-						} else if (y is String) {
-							chartInfo.axisInfo[1].type = categorical;
-						}
+						chartInfo.axisInfo = [
+							{
+								id: "x_" + axisID,
+								rotation: 0
+							},
+							{
+								id: "y_" + axisID,
+								rotation: 90
+							}
+						];
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
 					} else if (chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
 					if (_chart.axes.exists(axisID)) {
-						chartInfo.axisInfo = [
-							{
-								type: linear,
-								axis: _chart.axes.get(axisID)[0]
-							},
-							{
-								type: linear,
-								axis: _chart.axes.get(axisID)[1]
-							}
-						];
+						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
 					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID, eventHandler);
 					scatter.validateChart();
@@ -421,33 +413,23 @@ class Builder extends CompositeBuilder {
 					}
 				case line:
 					if (chartInfo.axisInfo == null) {
-						chartInfo.axisInfo = [{}, {}];
-						var x = chartInfo.data.values.get("x")[0];
-						if (x is Int || x is Float) {
-							chartInfo.axisInfo[0].type = linear;
-						} else if (x is String) {
-							chartInfo.axisInfo[0].type = categorical;
-						}
-						var y = chartInfo.data.values.get("y")[0];
-						if (y is Int || y is Float) {
-							chartInfo.axisInfo[1].type = linear;
-						} else if (y is String) {
-							chartInfo.axisInfo[1].type = categorical;
-						}
+						chartInfo.axisInfo = [
+							{
+								id: "x_" + axisID,
+								rotation: 0
+							},
+							{
+								id: "y_" + axisID,
+								rotation: 90
+							}
+						];
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
 					} else if (chartInfo.axisInfo.length > 2) {
 						throw new Exception("Not able to use more than 2 axes for scatterplot!");
 					}
 					if (_chart.axes.exists(axisID)) {
-						chartInfo.axisInfo = [
-							{
-								type: linear,
-								axis: _chart.axes.get(axisID)[0]
-							},
-							{
-								type: linear,
-								axis: _chart.axes.get(axisID)[1]
-							}
-						];
+						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
 					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID, eventHandler);
 					scatter.validateChart();
@@ -459,16 +441,7 @@ class Builder extends CompositeBuilder {
 						throw new Exception("Not able to use more than 2 axes for bar-chart!");
 					}
 					if (_chart.axes.exists(axisID)) {
-						chartInfo.axisInfo = [
-							{
-								type: categorical,
-								axis: _chart.axes.get(axisID)[0]
-							},
-							{
-								type: linear,
-								axis: _chart.axes.get(axisID)[1]
-							}
-						];
+						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
 					var bar = new Bar(chartInfo, _chart.chartBody, chartID, axisID);
 					bar.validateChart();
