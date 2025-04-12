@@ -61,6 +61,8 @@ typedef AxisTitle = {
  * @param start Optional. The startpoint of the axis. This will get overwritten by the `positionStartPoint` function.
  * @param length Optional. The length of the drawn axis. This will get overwritten by the `positionStartPoint` function.
  * @param title Optional. A title for the drawn axis.
+ * @param subTitle Optional. A subtitle for the drawn axis. Automatic positioning will place the subtitle centered below the title, 
+ * before any rotation is applied to the title. This means it is possible for the subtitle to be not centered, after rotation.
  * @param tickMargin Optional. Margin in between ticks.
  * @param showZeroTick Optional. If the zero tick should be shown.
  */
@@ -74,6 +76,7 @@ typedef AxisTitle = {
 	@:optional public var length:Null<Float>;
 	@:optional public var showZeroTick:Null<Bool>;
 	@:optional public var title:AxisTitle;
+	@:optional public var subTitle:AxisTitle;
 
 	@:optional public var tickMargin:Float;
 
@@ -304,6 +307,34 @@ class Axis extends Absolute {
 		}
 
 		for (info in this.axesInfo) {
+			switch (info.rotation) {
+				case 0:
+					if (info.subTitle == null) {
+						continue;
+					}
+					if (info.subTitle.position != null) {
+						continue;
+					}
+					if (zeroPoint.y >= (height - axisMarginTop - titleMargin)) {
+						newHeight = height - axisMarginTop * 2 - titleMargin * 2;
+						zeroPoint.y = height - axisMarginTop - titleMargin * 2;
+					}
+				case 90:
+					if (info.subTitle == null) {
+						continue;
+					}
+					if (info.subTitle.position != null) {
+						continue;
+					}
+					if (zeroPoint.x <= (axisMarginLeft + titleMargin)) {
+						newWidth = width - axisMarginLeft * 2 - titleMargin * 2;
+						zeroPoint.x = axisMarginLeft + titleMargin * 2;
+					}
+				case _:
+			}
+		}
+
+		for (info in this.axesInfo) {
 			var rotation = info.rotation;
 			if (info.start == null) {
 				info.start = new Point(0, 0);
@@ -356,6 +387,10 @@ private class Draw extends Behaviour {
 			var endPoint = AxisTools.positionEndpoint(info.start, info.rotation, info.length);
 			canvas.componentGraphics.moveTo(info.start.x, info.start.y);
 			canvas.componentGraphics.lineTo(endPoint.x, endPoint.y);
+			var titlePos = info.start;
+			var titleEnd = endPoint;
+			var x = Math.round(Math.abs(info.start.x - endPoint.x));
+			var y = Math.round(Math.abs(info.start.y - endPoint.y));
 			if (info.title != null) {
 				var titles = axis.findComponents("axis-title", Label);
 				for (title in titles) {
@@ -372,12 +407,42 @@ private class Draw extends Behaviour {
 					if (info.title.position != null) {
 						title.left = info.title.position.x;
 						title.top = info.title.position.y;
+						titlePos = new Point(title.left, title.top);
+						titleEnd = new Point(title.width, title.height);
 						break;
 					}
-					var x = Math.round(Math.abs(info.start.x - endPoint.x));
-					var y = Math.round(Math.abs(info.start.y - endPoint.y));
+
 					title.left = x == 0 ? (info.start.x - axis.titleMargin) : x / 2;
 					title.top = y == 0 ? (info.start.y + axis.titleMargin) : y / 2;
+					titlePos = new Point(title.left, title.top);
+					titleEnd = new Point(title.width, title.height);
+				}
+			}
+			if (info.subTitle != null) {
+				var titles = axis.findComponents("axis-subtitle", Label);
+				for (title in titles) {
+					if (title.text != info.subTitle.text) {
+						continue;
+					}
+					var titleRotation = info.subTitle.rotation != null ? info.subTitle.rotation : info.rotation;
+					#if haxeui_heaps
+					title.rotate(titleRotation * Math.PI / 180);
+					#elseif haxeui_html5
+					title.element.style.transform = "rotate(" + titleRotation + "deg)";
+					title.element.style.transformOrigin = "0 0";
+					#end
+					if (info.subTitle.position != null) {
+						title.left = info.subTitle.position.x;
+						title.top = info.subTitle.position.y;
+						break;
+					}
+					if (info.title == null) {
+						title.left = x == 0 ? (info.start.x - axis.titleMargin) : x / 2;
+						title.top = y == 0 ? (info.start.y + axis.titleMargin) : y / 2;
+					} else {
+						title.left = x == 0 ? titlePos.x - axis.titleMargin : titlePos.x - titleEnd.x / 2;
+						title.top = y == 0 ? titlePos.y + axis.titleMargin : titlePos.y - titleEnd.y / 2;
+					}
 				}
 			}
 
@@ -494,6 +559,12 @@ private class AxisBuilder extends CompositeBuilder {
 				var title = new Label();
 				title.text = info.title.text;
 				title.addClass("axis-title");
+				titleLayer.addComponent(title);
+			}
+			if (info.subTitle != null) {
+				var title = new Label();
+				title.text = info.subTitle.text;
+				title.addClass("axis-subtitle");
 				titleLayer.addComponent(title);
 			}
 		}

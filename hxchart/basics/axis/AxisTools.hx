@@ -55,7 +55,6 @@ class AxisTools {
 
 	public static function replaceAxisInParent(axis:Axis, parent:Absolute) {
 		var comp = parent.findComponent(axis.id);
-		trace("find axis", axis.id, comp);
 		if (comp == null) {
 			parent.addComponent(axis);
 		} else {

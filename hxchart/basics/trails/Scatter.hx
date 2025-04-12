@@ -300,7 +300,6 @@ class Scatter implements AxisLayer implements DataLayer {
 			positionData(style);
 			return;
 		}
-		trace(parent.numComponents, axisID);
 		axes = new Axis(axisID, axisInfo);
 		// axes.id = axisID;
 		axes.width = parent.width;
