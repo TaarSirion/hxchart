@@ -409,12 +409,19 @@ class Bar implements AxisLayer implements DataLayer {
 					switch ([style.positionOption, dataByGroup.length > 1, prevGroup.length > 0]) {
 						case [PositionOption.stacked, true, true]:
 							yCoord = calcStackedBarY(dataRec, prevGroup, y, tickBottom, tickTop, min, max);
-						case [PositionOption.layered, true, true]:
+						case [PositionOption.layered(v), true, false]:
+							dataRec.width = spacePerGroupX;
+						case [PositionOption.layered(v), true, true]:
 							dataRec.width = spacePerGroupX;
 							var prevDataRec = prevGroup.filter(d -> {
 								d.values.x == dataRec.values.x;
 							})[0];
-						// xCoord =
+							if (v >= 1) {
+								v = 1;
+							} else if (v <= 0) {
+								v = 0;
+							}
+							xCoord = prevDataRec.coord.x + spacePerGroupX * v;
 						case [null, true, true]: // default to stacked for multiple groups
 							yCoord = calcStackedBarY(dataRec, prevGroup, y, tickBottom, tickTop, min, max);
 						case [_, true, true]: // default to stacked for multiple groups
@@ -452,12 +459,19 @@ class Bar implements AxisLayer implements DataLayer {
 					switch ([style.positionOption, dataByGroup.length > 1, prevGroup.length > 0]) {
 						case [PositionOption.stacked, true, true]:
 							xCoord = calcStackedBarX(dataRec, prevGroup, x, tickLeft, tickRight, min, max);
-						case [PositionOption.layered, true, true]:
-							dataRec.width = spacePerGroupX;
+						case [PositionOption.layered(v), true, false]:
+							dataRec.height = spacePerGroupY;
+						case [PositionOption.layered(v), true, true]:
+							dataRec.height = spacePerGroupY;
 							var prevDataRec = prevGroup.filter(d -> {
-								d.values.x == dataRec.values.x;
+								d.values.y == dataRec.values.y;
 							})[0];
-						// xCoord =
+							if (v >= 1) {
+								v = 1;
+							} else if (v <= 0) {
+								v = 0;
+							}
+							yCoord = prevDataRec.coord.y + spacePerGroupY * v;
 						case [null, true, true]: // default to stacked for multiple groups
 							xCoord = calcStackedBarX(dataRec, prevGroup, x, tickLeft, tickRight, min, max);
 						case [_, true, true]: // default to stacked for multiple groups
