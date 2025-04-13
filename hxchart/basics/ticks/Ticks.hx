@@ -130,9 +130,6 @@ class TickBuilder extends CompositeBuilder {
 		#end
 		label.addClass("tick-label");
 		_tick.addComponent(label);
-		_tick.canvas = new Canvas();
-		_tick.canvas.addClass("tick-symbol");
-		_tick.addComponent(_tick.canvas);
 	}
 
 	public override function onReady() {
