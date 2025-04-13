@@ -1,5 +1,6 @@
 package hxchart.basics.axis;
 
+import haxe.ds.Vector;
 import hxchart.basics.utils.Statistics;
 import haxe.ui.styles.elements.Directive;
 import haxe.ui.styles.elements.RuleElement;
@@ -477,15 +478,20 @@ private class SetTicks extends Behaviour {
 		}
 		for (i => info in axis.axesInfo) {
 			var tickInfo = info.tickInfo;
-			if (!isUpdate) {
-				axis.ticksPerInfo[i] = [];
-				// axis.sub_ticks = [];
-			}
 			var tickNum = tickInfo.tickNum;
 			if (Std.isOfType(tickInfo, StringTickInfo)) {
 				// Increase tickNum size so that positioning centers the ticks. Necessary because StringTickInfo has no zero Tick.
 				tickNum++;
 			}
+
+			if (!isUpdate) {
+				axis.ticksPerInfo[i] = [];
+				// for (j in 0...tickInfo.tickNum) {
+				// 	axis.ticksPerInfo[i].push(new Ticks());
+				// }
+				// axis.sub_ticks = [];
+			}
+
 			var labelPosition:CompassOrientation = S;
 			switch (info.rotation) {
 				case 0:

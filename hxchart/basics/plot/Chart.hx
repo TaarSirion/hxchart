@@ -441,7 +441,12 @@ class Builder extends CompositeBuilder {
 					}
 					// var scatter:Scatter = null;
 					// if (_chart.trails.length < (i + 1)) {
-					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID, eventHandler);
+					var scatter = null;
+					if (!_chart.axes.exists(axisID)) {
+						scatter = new Scatter(chartInfo, null, _chart.chartBody, chartID, axisID, eventHandler);
+					} else {
+						scatter = new Scatter(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID, eventHandler);
+					}
 					// 	_chart.trails.push(scatter);
 					// } else {
 					// 	scatter = _chart.trails[i];
@@ -473,7 +478,12 @@ class Builder extends CompositeBuilder {
 					if (_chart.axes.exists(axisID)) {
 						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
-					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID, eventHandler);
+					var scatter = null;
+					if (!_chart.axes.exists(axisID)) {
+						scatter = new Scatter(chartInfo, null, _chart.chartBody, chartID, axisID, eventHandler);
+					} else {
+						scatter = new Scatter(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID, eventHandler);
+					}
 					scatter.validateChart(status);
 					if (!_chart.axes.exists(axisID)) {
 						_chart.axes.set(axisID, scatter.axes);
@@ -501,7 +511,12 @@ class Builder extends CompositeBuilder {
 					if (_chart.axes.exists(axisID)) {
 						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
-					var bar = new Bar(chartInfo, _chart.chartBody, chartID, axisID);
+					var bar = null;
+					if (!_chart.axes.exists(axisID)) {
+						bar = new Bar(chartInfo, null, _chart.chartBody, chartID, axisID);
+					} else {
+						bar = new Bar(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID);
+					}
 					bar.validateChart(status);
 					if (!_chart.axes.exists(axisID)) {
 						_chart.axes.set(axisID, bar.axes);

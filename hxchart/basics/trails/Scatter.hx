@@ -66,7 +66,7 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var hoverLayer:Canvas;
 	public var clickLayer:Canvas;
 
-	public function new(chartInfo:TrailInfo, parent:Absolute, id:String, axisID:String, eventHandler:EventHandler) {
+	public function new(chartInfo:TrailInfo, axes:Axis, parent:Absolute, id:String, axisID:String, eventHandler:EventHandler) {
 		this.parent = parent;
 		this.eventHandler = eventHandler;
 		hoverLayer = new Canvas();
@@ -84,6 +84,9 @@ class Scatter implements AxisLayer implements DataLayer {
 		this.id = id;
 		this.axisID = axisID;
 		this.chartInfo = chartInfo;
+		if (axes != null) {
+			this.axes = axes;
+		}
 		if (chartInfo.optimizationInfo != null && chartInfo.optimizationInfo.reduceVia != null) {
 			useOptimization = true;
 			switch (chartInfo.optimizationInfo.reduceVia) {
@@ -111,11 +114,11 @@ class Scatter implements AxisLayer implements DataLayer {
 		if (canvasComponent != null) {
 			clickLayer = canvasComponent;
 		}
-		switch status {
-			case start:
-				setData(chartInfo.data, chartInfo.style);
-			case redraw:
-		}
+		// switch status {
+		// 	case start:
+		setData(chartInfo.data, chartInfo.style);
+		// 	case redraw:
+		// }
 		positionAxes(chartInfo.axisInfo, dataByGroup, chartInfo.style);
 	}
 
@@ -303,6 +306,10 @@ class Scatter implements AxisLayer implements DataLayer {
 
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle) {
 		if (axes != null) {
+			axes.width = parent.width;
+			axes.height = parent.height;
+			axes.positionStartPoint();
+			axes.setTicks(true);
 			positionData(style);
 			return;
 		}

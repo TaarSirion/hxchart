@@ -52,7 +52,7 @@ class Bar implements AxisLayer implements DataLayer {
 
 	public var dataByGroup:Array<Array<BarDataRec>> = [];
 
-	public function new(trailInfo:TrailInfo, parent:Absolute, id:String, axisID:String) {
+	public function new(trailInfo:TrailInfo, axes:Axis, parent:Absolute, id:String, axisID:String) {
 		if (trailInfo.axisInfo[0].type == linear && trailInfo.axisInfo[1].type == linear) {
 			throw new Exception("It is not possible to use two 'linear' axes for a bar-chart. Please change one of them to 'categorical'.");
 		}
@@ -70,16 +70,19 @@ class Bar implements AxisLayer implements DataLayer {
 		dataCanvas.percentHeight = 100;
 		dataCanvas.percentWidth = 100;
 		this.id = id;
+		if (axes != null) {
+			this.axes = axes;
+		}
 		this.axisID = axisID;
 		this.trailInfo = trailInfo;
 	}
 
 	public function validateChart(status:ChartStatus) {
-		switch status {
-			case start:
-				setData(trailInfo.data, trailInfo.style);
-			case redraw:
-		}
+		// switch status {
+		// 	case start:
+		setData(trailInfo.data, trailInfo.style);
+		// 	case redraw:
+		// }
 		positionAxes(trailInfo.axisInfo, data, trailInfo.style);
 	}
 
@@ -533,6 +536,10 @@ class Bar implements AxisLayer implements DataLayer {
 
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle):Void {
 		if (axes != null) {
+			axes.width = parent.width;
+			axes.height = parent.height;
+			axes.positionStartPoint();
+			axes.setTicks(true);
 			positionData(style);
 			return;
 		}

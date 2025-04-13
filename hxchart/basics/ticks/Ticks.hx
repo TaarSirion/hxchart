@@ -95,7 +95,7 @@ class Ticks extends Box {
 private class TickLayout extends DefaultLayout {
 	public override function repositionChildren() {
 		var _tick = cast(_component, Ticks);
-		var _label = _component.findComponent("tick-label", Label, null, "css");
+		var _label = _component.findComponent("tick-label", Label, false, "css");
 		if (_tick == null || _label == null) {
 			return;
 		}
@@ -106,7 +106,7 @@ private class TickLayout extends DefaultLayout {
 @:dox(hide) @:noCompletion
 private class TextBehaviour extends DataBehaviour {
 	private override function validateData() {
-		var label = _component.findComponent("tick-label", Label, null, "css");
+		var label = _component.findComponent("tick-label", Label, false, "css");
 		if (label != null) {
 			label.text = _value;
 		}
@@ -121,6 +121,7 @@ class TickBuilder extends CompositeBuilder {
 
 	public function new(tick:Ticks) {
 		super(tick);
+		trace("new tick");
 		_tick = tick;
 		var label = new Label();
 		_label = label;
