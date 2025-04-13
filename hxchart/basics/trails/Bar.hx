@@ -21,14 +21,20 @@ import hxchart.basics.data.DataLayer;
 import hxchart.basics.axis.AxisLayer;
 
 using hxchart.basics.utils.Statistics;
+using Lambda;
 
 typedef BarDataRec = {
 	coord:Point,
 	width:Float,
 	height:Float,
 	values:{
-		x:Any, y:Any
+		x:Any, y:Any, ?acc:Float
 	},
+	borderAlpha:Float,
+	borderColor:Int,
+	borderWidth:Float,
+	color:Int,
+	alpha:Float,
 	allowed:Bool
 }
 
@@ -112,26 +118,129 @@ class Bar implements AxisLayer implements DataLayer {
 				height: 0,
 				values: {
 					x: x[i],
-					y: y[i]
+					y: y[i],
+					acc: x[i] is String ? y[i] : x[i]
 				},
-				allowed: false
+				alpha: 1,
+				borderAlpha: 1,
+				borderColor: 0x000000,
+				borderWidth: 1,
+				color: style.colorPalette[groupIndex],
+				allowed: true
 			});
 		}
 
-		// var x = newData.values.get("x");
-		// var y = newData.values.get("y");
-		// var groupsArr = newData.values.get("groups");
-		// for (i in 0...x.length) {
-		// 	var group = groupsArr[i];
-		// 	var point = new Data2D(x[i], y[i], style.groups.get(group));
-		// 	colors.push(style.colorPalette[style.groups.get(group)]);
-		// 	data.push(point);
-		// }
-		// groupNum = 0;
-		// for (key in style.groups.keys()) {
-		// 	groupNum++;
-		// }
-		// sortData(style);
+		if (style.alpha is Float || style.alpha is Int) {
+			var alpha = cast(style.alpha, Float);
+			for (group in dataByGroup) {
+				for (dataRec in group) {
+					dataRec.alpha = alpha;
+				}
+			}
+		} else if (style.alpha is Array) {
+			var alpha:Array<Float> = style.alpha;
+			if (alpha.length == x.length) {
+				var i = 0;
+				for (group in dataByGroup) {
+					for (dataRec in group) {
+						dataRec.alpha = alpha[i];
+						i++;
+					}
+				}
+			} else if (alpha.length == uniqueGroupsNum) {
+				for (i in 0...uniqueGroupsNum) {
+					var groupAlpha = alpha[i];
+					for (dataRec in dataByGroup[i]) {
+						dataRec.alpha = groupAlpha;
+					}
+				}
+			}
+		}
+
+		if (style.borderStyle != null) {
+			if (style.borderStyle.color != null) {
+				if (style.borderStyle.color is Int) {
+					var color = cast(style.borderStyle.color, Int);
+					for (group in dataByGroup) {
+						for (dataRec in group) {
+							dataRec.borderColor = color;
+						}
+					}
+				} else if (style.borderStyle.color is Array) {
+					var color:Array<Int> = style.borderStyle.color;
+					if (color.length == x.length) {
+						var i = 0;
+						for (group in dataByGroup) {
+							for (dataRec in group) {
+								dataRec.borderColor = color[i];
+								i++;
+							}
+						}
+					} else if (color.length == uniqueGroupsNum) {
+						for (i in 0...uniqueGroupsNum) {
+							var groupColor = color[i];
+							for (dataRec in dataByGroup[i]) {
+								dataRec.borderColor = groupColor;
+							}
+						}
+					}
+				}
+			}
+
+			if (style.borderStyle.alpha is Float || style.borderStyle.alpha is Int) {
+				var alpha = cast(style.borderStyle.alpha, Float);
+				for (group in dataByGroup) {
+					for (dataRec in group) {
+						dataRec.borderAlpha = alpha;
+					}
+				}
+			} else if (style.borderStyle.alpha is Array) {
+				var alpha:Array<Float> = style.borderStyle.alpha;
+				if (alpha.length == x.length) {
+					var i = 0;
+					for (group in dataByGroup) {
+						for (dataRec in group) {
+							dataRec.borderAlpha = alpha[i];
+							i++;
+						}
+					}
+				} else if (alpha.length == uniqueGroupsNum) {
+					for (i in 0...uniqueGroupsNum) {
+						var groupAlpha = alpha[i];
+						for (dataRec in dataByGroup[i]) {
+							dataRec.borderAlpha = groupAlpha;
+						}
+					}
+				}
+			}
+
+			if (style.borderStyle.thickness is Float || style.borderStyle.thickness is Int) {
+				var thickness = cast(style.borderStyle.thickness, Float);
+				for (group in dataByGroup) {
+					for (dataRec in group) {
+						dataRec.borderWidth = thickness;
+					}
+				}
+			} else if (style.borderStyle.thickness is Array) {
+				var thickness:Array<Float> = style.borderStyle.thickness;
+				if (thickness.length == x.length) {
+					var i = 0;
+					for (group in dataByGroup) {
+						for (dataRec in group) {
+							dataRec.borderWidth = thickness[i];
+							i++;
+						}
+					}
+				} else if (thickness.length == uniqueGroupsNum) {
+					for (i in 0...uniqueGroupsNum) {
+						var groupThickness = thickness[i];
+						for (dataRec in dataByGroup[i]) {
+							dataRec.borderWidth = groupThickness;
+						}
+					}
+				}
+			}
+		}
 	};
 
 	var isXCategoric:Bool = false;
@@ -202,22 +311,70 @@ class Bar implements AxisLayer implements DataLayer {
 	}
 
 	public function positionData(style:TrailStyle):Void {
-		// if (axes.length < 2) {
-		// 	throw new Exception("Too few axes for drawing data.");
-		// }
-		// if (axes[0].tickInfo == null || axes[1].tickInfo == null) {
-		// 	throw new Exception("Two tickinfos are needed for positioning the data correctly!");
-		// }
-		var axis = axes;
-		var xDist = setAxisDist(axes.ticksPerInfo[0][0].left, axes.ticksPerInfo[0][axes.ticksPerInfo[0].length - 1].left, axes.axesInfo[0]);
-		var yDist = setAxisDist(axes.ticksPerInfo[1][axes.ticksPerInfo[1].length - 1].top, axes.ticksPerInfo[1][0].top, axes.axesInfo[1]);
-		var yZeroPos = axes.zeroPoint.x;
-		var xZeroPos = axes.zeroPoint.y;
-
-		var spacePerXTick = (axis.axesInfo[0].length / (axis.ticksPerInfo[0].length - 1)) * 2 / 3;
-		var spacePerYTick = (axis.axesInfo[1].length / (axis.ticksPerInfo[1].length - 1)) * 2 / 3;
+		var spacePerXTick = (axes.axesInfo[0].length / (axes.ticksPerInfo[0].length - 1)) * 2 / 3;
+		var spacePerYTick = (axes.axesInfo[1].length / (axes.ticksPerInfo[1].length - 1)) * 2 / 3;
 		var spacePerGroupX = spacePerXTick / dataByGroup.length;
 		var spacePerGroupY = spacePerYTick / dataByGroup.length;
+
+		var maxGroupValues = dataByGroup.map(g -> g.length).fold((item, result) -> Math.max(item, result), 0);
+		var maxGroup = dataByGroup.filter(g -> g.length == maxGroupValues)[0];
+		for (group in dataByGroup) {
+			if (group.length == maxGroupValues) {
+				continue;
+			}
+			if (maxGroup[0].values.x is String) {
+				for (dataRec in maxGroup) {
+					var dataRecInGroup = group.filter(d -> {
+						return d.values.x == dataRec.values.x;
+					});
+					if (dataRecInGroup.length > 0) {
+						continue;
+					}
+					group.push({
+						coord: new Point(0, 0),
+						width: 0,
+						height: 0,
+						values: {
+							x: dataRec.values.x,
+							y: 0,
+							acc: 0
+						},
+						alpha: 1,
+						borderAlpha: 1,
+						borderColor: 0x000000,
+						borderWidth: 1,
+						color: 0x000000,
+						allowed: false
+					});
+				}
+			} else {
+				for (dataRec in maxGroup) {
+					var dataRecInGroup = group.filter(d -> {
+						return d.values.y == dataRec.values.y;
+					});
+					if (dataRecInGroup.length > 0) {
+						continue;
+					}
+					group.push({
+						coord: new Point(0, 0),
+						width: 0,
+						height: 0,
+						values: {
+							y: dataRec.values.y,
+							x: 0,
+							acc: 0
+						},
+						alpha: 1,
+						borderAlpha: 1,
+						borderColor: 0x000000,
+						borderWidth: 1,
+						color: 0x000000,
+						allowed: false
+					});
+				}
+			}
+		}
+
 		var prevGroup:Array<BarDataRec> = [];
 		for (i => group in dataByGroup) {
 			if (i > 0) {
@@ -225,7 +382,7 @@ class Bar implements AxisLayer implements DataLayer {
 			}
 			for (dataRec in group) {
 				if (dataRec.values.x is String) {
-					var tick = axis.ticksPerInfo[0].filter(x -> {
+					var tick = axes.ticksPerInfo[0].filter(x -> {
 						return x.text == dataRec.values.x;
 					})[0];
 					var y:Float = dataRec.values.y;
@@ -233,41 +390,41 @@ class Bar implements AxisLayer implements DataLayer {
 					var max:Float = 0;
 					var minIndex:Int = 0;
 					var maxIndex:Int = 0;
-					if (y > 0) {
+					if (y >= 0) {
 						min = 0;
-						minIndex = axis.axesInfo[1].tickInfo.zeroIndex;
-						max = Std.parseFloat(axis.ticksPerInfo[1][axis.ticksPerInfo[1].length - 1].text);
-						maxIndex = axis.ticksPerInfo[1].length - 1;
+						minIndex = axes.axesInfo[1].tickInfo.zeroIndex;
+						max = Std.parseFloat(axes.ticksPerInfo[1][axes.ticksPerInfo[1].length - 1].text);
+						maxIndex = axes.ticksPerInfo[1].length - 1;
 					} else {
 						max = 0;
-						maxIndex = axis.axesInfo[1].tickInfo.zeroIndex;
-						min = Std.parseFloat(axis.ticksPerInfo[1][0].text);
+						maxIndex = axes.axesInfo[1].tickInfo.zeroIndex;
+						min = Std.parseFloat(axes.ticksPerInfo[1][0].text);
 						minIndex = 0;
 					}
-					var tickTop = axis.ticksPerInfo[1][maxIndex].top;
-					var tickBottom = axis.ticksPerInfo[1][minIndex].top;
-					var yCoord = tickBottom - (tickBottom - tickTop) * (y - min) / (max - min);
+					var tickTop = axes.ticksPerInfo[1][maxIndex].top;
+					var tickBottom = axes.ticksPerInfo[1][minIndex].top;
 					var xCoord = tick.left - (spacePerXTick / 2);
+					var yCoord = tickBottom - (tickBottom - tickTop) * (y - min) / (max - min);
 					dataRec.width = spacePerXTick;
 					dataRec.height = y > 0 ? tickBottom - yCoord : yCoord - tickTop;
-					switch (style.positionOption) {
-						case PositionOption.stacked:
-							var prevDataRec = prevGroup.filter(d -> {
-								d.values.x == dataRec.values.x;
-							})[0];
-							yCoord = prevDataRec.coord.y - yCoord;
-						case PositionOption.layered:
+					switch ([style.positionOption, dataByGroup.length > 1, prevGroup.length > 0]) {
+						case [PositionOption.stacked, true, true]:
+							yCoord = calcStackedBarY(dataRec, prevGroup, y, tickBottom, tickTop, min, max);
+						case [PositionOption.layered, true, true]:
 							dataRec.width = spacePerGroupX;
 							var prevDataRec = prevGroup.filter(d -> {
 								d.values.x == dataRec.values.x;
 							})[0];
 						// xCoord =
-						case null:
+						case [null, true, true]: // default to stacked for multiple groups
+							yCoord = calcStackedBarY(dataRec, prevGroup, y, tickBottom, tickTop, min, max);
+						case [_, true, true]: // default to stacked for multiple groups
+							yCoord = calcStackedBarY(dataRec, prevGroup, y, tickBottom, tickTop, min, max);
 						case _:
 					}
 					dataRec.coord = new Point(xCoord, yCoord);
 				} else {
-					var tick = axis.ticksPerInfo[1].filter(x -> {
+					var tick = axes.ticksPerInfo[1].filter(x -> {
 						return x.text == dataRec.values.y;
 					})[0];
 					var x:Float = dataRec.values.x;
@@ -277,17 +434,17 @@ class Bar implements AxisLayer implements DataLayer {
 					var maxIndex:Int = 0;
 					if (x > 0) {
 						min = 0;
-						minIndex = axis.axesInfo[0].tickInfo.zeroIndex;
-						max = Std.parseFloat(axis.ticksPerInfo[0][axis.ticksPerInfo[0].length - 1].text);
-						maxIndex = axis.ticksPerInfo[0].length - 1;
+						minIndex = axes.axesInfo[0].tickInfo.zeroIndex;
+						max = Std.parseFloat(axes.ticksPerInfo[0][axes.ticksPerInfo[0].length - 1].text);
+						maxIndex = axes.ticksPerInfo[0].length - 1;
 					} else {
 						max = 0;
-						maxIndex = axis.axesInfo[0].tickInfo.zeroIndex;
-						min = Std.parseFloat(axis.ticksPerInfo[0][0].text);
+						maxIndex = axes.axesInfo[0].tickInfo.zeroIndex;
+						min = Std.parseFloat(axes.ticksPerInfo[0][0].text);
 						minIndex = 0;
 					}
-					var tickLeft = axis.ticksPerInfo[0][minIndex].left;
-					var tickRight = axis.ticksPerInfo[0][maxIndex].left;
+					var tickLeft = axes.ticksPerInfo[0][minIndex].left;
+					var tickRight = axes.ticksPerInfo[0][maxIndex].left;
 					var xCoord = (tickRight - tickLeft) * (x - min) / (max - min) + tickLeft;
 					var yCoord = tick.top - (spacePerYTick / 2);
 					dataRec.width = tickRight - tickLeft;
@@ -307,41 +464,13 @@ class Bar implements AxisLayer implements DataLayer {
 			}
 		}
 
-		// for (valueGroup in valueGroups) {
-		// 	var indexes = [];
-		// 	var previousValue:Float = 0;
-		// 	if (isXCategoric) {
-		// 		indexes = xValues.position(valueGroup);
-		// 		previousValue = yZeroPos;
-		// 	} else {
-		// 		indexes = yValues.position(valueGroup);
-		// 		previousValue = xZeroPos;
-		// 	}
-
-		// 	for (i in indexes) {
-		// 		var dataPoint:Data2D = data[i];
-		// 		// if (isXCategoric) {
-		// 		// 	var top = calcCoordinate();
-		// 		// 	var bottom = calcCoordinate();
-		// 		// }
-		// 		// var x = calcCoordinate(dataPoint.xValue, dataPoint.group, axes.ticksPerInfo[0], xZeroPos, xDist, style, previousValue, false);
-		// 		// var y = calcCoordinate(dataPoint.yValue, dataPoint.group, axes.ticksPerInfo[1], yZeroPos, yDist, style, previousValue, true);
-		// 		dataCanvas.componentGraphics.fillStyle(colors[i], 1);
-		// 		// if (x == null || y == null) {
-		// 		// 	continue;
-		// 		// }
-		// 		// if (isXCategoric) {
-		// 		// 	previousValue = y[0];
-		// 		// } else {
-		// 		// 	previousValue = x[0] + x[1];
-		// 		// }
-
-		// 		dataCanvas.componentGraphics.rectangle(x[0], y[0], x[1], y[1]);
-		// 	}
-		// }
-		for (i => group in dataByGroup) {
+		for (group in dataByGroup) {
 			for (dataRec in group) {
-				dataCanvas.componentGraphics.fillStyle(0x000000, 1);
+				if (!dataRec.allowed) {
+					continue;
+				}
+				dataCanvas.componentGraphics.fillStyle(dataRec.color, dataRec.alpha);
+				dataCanvas.componentGraphics.strokeStyle(dataRec.borderColor, dataRec.borderWidth, dataRec.borderAlpha);
 				dataCanvas.componentGraphics.rectangle(dataRec.coord.x, dataRec.coord.y, dataRec.width, dataRec.height);
 			}
 		}
@@ -354,49 +483,16 @@ class Bar implements AxisLayer implements DataLayer {
 		}
 	};
 
-	function calcCoordinate(value:Dynamic, group:Int, ticks:Array<Ticks>, zeroPos:Float, dist:AxisDist, style:TrailStyle, previousPosition:Float, isY:Bool) {
-		if (value is String) {
-			var ticksFiltered = ticks.filter(x -> {
-				return x.text == value;
-			});
-			if (ticksFiltered == null || ticksFiltered.length == 0) {
-				return null;
-			}
-			var spacePerTick = (dist.pos_dist / (ticks.length - 1)) * 2 / 3;
-			if (style.positionOption == PositionOption.stacked) {
-				var pos = (isY ? ticksFiltered[0].top : ticksFiltered[0].left) - (spacePerTick / 2);
-				return [pos, spacePerTick];
-			}
-			var spacePerGroup = spacePerTick / groupNum;
-
-			var overlapEffect = 2.0; // This means basically no effect, everything smaller will make the bars overlap
-			if (style.positionOption == PositionOption.layered) {
-				overlapEffect = 1.3;
-			}
-
-			var groupOffset = groupNum - group * overlapEffect;
-			var posOffset = (isY ? ticksFiltered[0].top : ticksFiltered[0].left) - (spacePerGroup / 2) * groupOffset;
-			return [posOffset, spacePerGroup];
-		}
-
-		var max = Std.parseFloat(ticks[ticks.length - 1].text);
-		var min = Std.parseFloat(ticks[0].text);
-
-		// var tickLeft = ticks[0].left;
-		// var tickRight = largerTicks[0].left;
-		// var x = (tickRight - tickLeft) * (xValue - xMin) / (xMax - xMin) + tickLeft;
-
-		var ratio = value < 0 ? value / min : value / max;
-		var pos = zeroPos + (isY ? -1 : 1) * (value < 0 ? -1 * dist.neg_dist : dist.pos_dist) * ratio;
-		var finalPos = pos;
-		if (style.positionOption == PositionOption.stacked) {
-			if (isY) {
-				finalPos = previousPosition - dist.pos_dist * ratio;
-			} else {
-				finalPos = previousPosition;
-			}
-		}
-		return [finalPos, isY ? zeroPos - pos : pos - zeroPos];
+	function calcStackedBarY(dataRec:BarDataRec, prevGroup:Array<BarDataRec>, y:Float, tickBottom:Float, tickTop:Float, min:Float, max:Float) {
+		var prevDataRec = prevGroup.filter(d -> {
+			d.values.x == dataRec.values.x;
+		});
+		y = cast(dataRec.values.y, Float) + prevDataRec[0].values.acc;
+		dataRec.values.acc = y;
+		var yCoord = tickBottom - (tickBottom - tickTop) * (y - min) / (max - min);
+		var bottom = prevDataRec[0].coord.y;
+		dataRec.height = y >= 0 ? bottom - yCoord : yCoord - bottom;
+		return yCoord;
 	}
 
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle):Void {
