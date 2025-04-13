@@ -374,7 +374,6 @@ class Bar implements AxisLayer implements DataLayer {
 				}
 			}
 		}
-
 		var prevGroup:Array<BarDataRec> = [];
 		for (i => group in dataByGroup) {
 			if (i > 0) {
@@ -432,7 +431,7 @@ class Bar implements AxisLayer implements DataLayer {
 					var max:Float = 0;
 					var minIndex:Int = 0;
 					var maxIndex:Int = 0;
-					if (x > 0) {
+					if (x >= 0) {
 						min = 0;
 						minIndex = axes.axesInfo[0].tickInfo.zeroIndex;
 						max = Std.parseFloat(axes.ticksPerInfo[0][axes.ticksPerInfo[0].length - 1].text);
@@ -445,18 +444,24 @@ class Bar implements AxisLayer implements DataLayer {
 					}
 					var tickLeft = axes.ticksPerInfo[0][minIndex].left;
 					var tickRight = axes.ticksPerInfo[0][maxIndex].left;
-					var xCoord = (tickRight - tickLeft) * (x - min) / (max - min) + tickLeft;
+					var xCoord = tickLeft;
+					var widthCoord = (tickRight - tickLeft) * (x - min) / (max - min) + tickLeft;
+					dataRec.width = widthCoord - xCoord;
 					var yCoord = tick.top - (spacePerYTick / 2);
-					dataRec.width = tickRight - tickLeft;
 					dataRec.height = spacePerYTick;
-					switch (style.positionOption) {
-						case PositionOption.stacked:
+					switch ([style.positionOption, dataByGroup.length > 1, prevGroup.length > 0]) {
+						case [PositionOption.stacked, true, true]:
+							xCoord = calcStackedBarX(dataRec, prevGroup, x, tickLeft, tickRight, min, max);
+						case [PositionOption.layered, true, true]:
+							dataRec.width = spacePerGroupX;
 							var prevDataRec = prevGroup.filter(d -> {
-								d.values.y == dataRec.values.y;
+								d.values.x == dataRec.values.x;
 							})[0];
-							xCoord = prevDataRec.coord.x + xCoord;
-						case PositionOption.layered:
-						case null:
+						// xCoord =
+						case [null, true, true]: // default to stacked for multiple groups
+							xCoord = calcStackedBarX(dataRec, prevGroup, x, tickLeft, tickRight, min, max);
+						case [_, true, true]: // default to stacked for multiple groups
+							xCoord = calcStackedBarX(dataRec, prevGroup, x, tickLeft, tickRight, min, max);
 						case _:
 					}
 					dataRec.coord = new Point(xCoord, yCoord);
@@ -493,6 +498,18 @@ class Bar implements AxisLayer implements DataLayer {
 		var bottom = prevDataRec[0].coord.y;
 		dataRec.height = y >= 0 ? bottom - yCoord : yCoord - bottom;
 		return yCoord;
+	}
+
+	function calcStackedBarX(dataRec:BarDataRec, prevGroup:Array<BarDataRec>, x:Float, tickLeft:Float, tickRight:Float, min:Float, max:Float) {
+		var prevDataRec = prevGroup.filter(d -> {
+			d.values.y == dataRec.values.y;
+		});
+		x = cast(dataRec.values.x, Float) + prevDataRec[0].values.acc;
+		dataRec.values.acc = x;
+		var xCoord = prevDataRec[0].coord.x + prevDataRec[0].width;
+		var widthCoord = (tickRight - tickLeft) * (x - min) / (max - min) + tickLeft;
+		dataRec.width = widthCoord - xCoord;
+		return xCoord;
 	}
 
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle):Void {
