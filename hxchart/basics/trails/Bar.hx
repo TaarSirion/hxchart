@@ -1,5 +1,6 @@
 package hxchart.basics.trails;
 
+import hxchart.basics.plot.Chart.ChartStatus;
 import hxchart.basics.plot.Chart.PositionOption;
 import hxchart.basics.ticks.Ticks;
 import hxchart.basics.utils.ChartTools;
@@ -73,8 +74,12 @@ class Bar implements AxisLayer implements DataLayer {
 		this.trailInfo = trailInfo;
 	}
 
-	public function validateChart() {
-		setData(trailInfo.data, trailInfo.style);
+	public function validateChart(status:ChartStatus) {
+		switch status {
+			case start:
+				setData(trailInfo.data, trailInfo.style);
+			case redraw:
+		}
 		positionAxes(trailInfo.axisInfo, data, trailInfo.style);
 	}
 

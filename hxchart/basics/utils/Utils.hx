@@ -1,5 +1,7 @@
 package hxchart.basics.utils;
 
+import haxe.Timer;
+
 using StringTools;
 
 class Utils {
@@ -94,5 +96,16 @@ class Utils {
 		}
 		var x = str.split(".");
 		return x[1];
+	}
+
+	public static function benchmark(f:Void->Void, iterations:Int = 1) {
+		var totalTime = 0.0;
+		for (i in 0...iterations) {
+			var start = Timer.stamp();
+			f();
+			var end = Timer.stamp();
+			totalTime += end - start;
+		}
+		return totalTime / iterations;
 	}
 }

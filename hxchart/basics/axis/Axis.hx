@@ -503,9 +503,11 @@ private class SetTicks extends Behaviour {
 			}
 			var subIndex = 0;
 			for (j in 0...tickInfo.tickNum) {
-				var tick = new Ticks(false, info.rotation);
+				var tick:Ticks = null;
 				if (isUpdate) {
 					tick = axis.ticksPerInfo[i][j];
+				} else {
+					tick = new Ticks(false, info.rotation);
 				}
 				var tickPoint = AxisTools.positionEndpoint(info.start, info.rotation, info.tickMargin + j * tickPos);
 				tick.left = tickPoint.x;

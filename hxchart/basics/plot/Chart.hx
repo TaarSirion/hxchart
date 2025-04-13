@@ -1,5 +1,7 @@
 package hxchart.basics.plot;
 
+import haxe.Timer;
+import hxchart.basics.utils.Utils;
 import haxe.ui.core.Component;
 import haxe.ui.styles.StyleSheet;
 import haxe.ui.containers.HBox;
@@ -189,6 +191,8 @@ class Chart extends Component {
 	public var legend:Legend;
 	public var chartStyleSheet:StyleSheet;
 
+	public var isAlive:Bool = false;
+
 	public function new(chartInfo:TrailInfo, ?legendInfo:LegendInfo, ?styleSheet:StyleSheet) {
 		super();
 		trailInfos = [];
@@ -363,6 +367,7 @@ class Builder extends CompositeBuilder {
 
 	public function new(chart:Chart) {
 		super(chart);
+		trace("NEW CHART");
 		_chart = chart;
 		_chart.styleSheet = chart.chartStyleSheet;
 		eventHandler = {};
@@ -384,14 +389,15 @@ class Builder extends CompositeBuilder {
 
 	override function validateComponentData() {
 		super.validateComponentData();
+		if (_chart.isAlive) {
+			validateCharts(ChartStatus.redraw);
+			return;
+		}
 		validateCharts(ChartStatus.start);
+		_chart.isAlive = true;
 	}
 
 	override function validateComponentLayout():Bool {
-		_chart.left = _chart.marginLeft;
-		_chart.top = _chart.marginTop;
-		_chart.width -= _chart.marginLeft + _chart.marginRight;
-		_chart.height -= _chart.marginTop + _chart.marginBottom;
 		validateCharts(ChartStatus.redraw);
 		return super.validateComponentLayout();
 	}
@@ -433,8 +439,14 @@ class Builder extends CompositeBuilder {
 					if (_chart.axes.exists(axisID)) {
 						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
+					// var scatter:Scatter = null;
+					// if (_chart.trails.length < (i + 1)) {
 					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID, eventHandler);
-					scatter.validateChart();
+					// 	_chart.trails.push(scatter);
+					// } else {
+					// 	scatter = _chart.trails[i];
+					// }
+					scatter.validateChart(status);
 					if (!_chart.axes.exists(axisID)) {
 						_chart.axes.set(axisID, scatter.axes);
 					}
@@ -462,7 +474,7 @@ class Builder extends CompositeBuilder {
 						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
 					var scatter = new Scatter(chartInfo, _chart.chartBody, chartID, axisID, eventHandler);
-					scatter.validateChart();
+					scatter.validateChart(status);
 					if (!_chart.axes.exists(axisID)) {
 						_chart.axes.set(axisID, scatter.axes);
 					}
@@ -490,7 +502,7 @@ class Builder extends CompositeBuilder {
 						chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
 					}
 					var bar = new Bar(chartInfo, _chart.chartBody, chartID, axisID);
-					bar.validateChart();
+					bar.validateChart(status);
 					if (!_chart.axes.exists(axisID)) {
 						_chart.axes.set(axisID, bar.axes);
 					}

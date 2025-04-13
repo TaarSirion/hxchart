@@ -1,5 +1,7 @@
 package hxchart.basics.trails;
 
+import hxchart.basics.plot.Chart.ChartStatus;
+import haxe.Timer;
 import hxchart.basics.plot.Chart.PositionOption;
 import hxchart.basics.events.EventLayer.EventHandler;
 import hxchart.basics.plot.Chart.OptimizationType;
@@ -96,7 +98,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 	}
 
-	public function validateChart() {
+	public function validateChart(status:ChartStatus) {
 		var canvasComponent = parent.findComponent(id);
 		if (canvasComponent != null) {
 			dataCanvas = canvasComponent;
@@ -109,7 +111,11 @@ class Scatter implements AxisLayer implements DataLayer {
 		if (canvasComponent != null) {
 			clickLayer = canvasComponent;
 		}
-		setData(chartInfo.data, chartInfo.style);
+		switch status {
+			case start:
+				setData(chartInfo.data, chartInfo.style);
+			case redraw:
+		}
 		positionAxes(chartInfo.axisInfo, dataByGroup, chartInfo.style);
 	}
 
