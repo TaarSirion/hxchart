@@ -373,7 +373,6 @@ class Builder extends CompositeBuilder {
 		_chart.chartBody = new Absolute();
 		_chart.chartBody.percentWidth = 100;
 		_chart.chartBody.percentHeight = 100;
-		// _chart.addComponent(_chart.chartBody);
 		_chart.registerEvent(MouseEvent.MOUSE_MOVE, function(e) {
 			for (handler in eventHandler.hoverHandlers) {
 				handler(e);
@@ -408,7 +407,6 @@ class Builder extends CompositeBuilder {
 		}
 		var axisID = "axis_0";
 		for (i => chartInfo in _chart.trailInfos) {
-			// var chartInfo = Reflect.copy(_chart.trailInfos[i]);
 			if (chartInfo == null) {
 				continue;
 			}
@@ -477,7 +475,7 @@ class Builder extends CompositeBuilder {
 						scatter = new Scatter(chartInfo, null, _chart.chartBody, chartID, axisID, eventHandler);
 						_chart.trails.push(scatter);
 					} else {
-						scatter = _chart.trails[i]; // new Scatter(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID, eventHandler);
+						scatter = _chart.trails[i];
 					}
 					scatter.validateChart(status);
 					if (!_chart.axes.exists(axisID)) {
@@ -511,7 +509,7 @@ class Builder extends CompositeBuilder {
 						bar = new Bar(chartInfo, null, _chart.chartBody, chartID, axisID);
 						_chart.trails.push(bar);
 					} else {
-						bar = _chart.trails[i]; // new Bar(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID);
+						bar = _chart.trails[i];
 					}
 					bar.validateChart(status);
 					if (!_chart.axes.exists(axisID)) {
