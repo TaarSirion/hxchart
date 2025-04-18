@@ -364,6 +364,7 @@ enum ChartStatus {
 class Builder extends CompositeBuilder {
 	var _chart:Chart;
 	var eventHandler:EventHandler;
+	var registeredHover:Bool = false;
 
 	public function new(chart:Chart) {
 		super(chart);
@@ -401,9 +402,9 @@ class Builder extends CompositeBuilder {
 	}
 
 	function validateCharts(status:ChartStatus) {
-		eventHandler = {};
 		if (status == ChartStatus.start) {
 			_chart.axes = new Map();
+			eventHandler = {};
 		}
 		var axisID = "axis_0";
 		for (i => chartInfo in _chart.trailInfos) {
