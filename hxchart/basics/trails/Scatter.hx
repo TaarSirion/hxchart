@@ -114,11 +114,11 @@ class Scatter implements AxisLayer implements DataLayer {
 		if (canvasComponent != null) {
 			clickLayer = canvasComponent;
 		}
-		// switch status {
-		// 	case start:
-		setData(chartInfo.data, chartInfo.style);
-		// 	case redraw:
-		// }
+		switch status {
+			case start:
+				setData(chartInfo.data, chartInfo.style);
+			case redraw:
+		}
 		positionAxes(chartInfo.axisInfo, dataByGroup, chartInfo.style);
 	}
 

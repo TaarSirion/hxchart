@@ -78,11 +78,15 @@ class Bar implements AxisLayer implements DataLayer {
 	}
 
 	public function validateChart(status:ChartStatus) {
-		// switch status {
-		// 	case start:
-		setData(trailInfo.data, trailInfo.style);
-		// 	case redraw:
-		// }
+		var canvasComponent = parent.findComponent(id, Canvas);
+		if (canvasComponent != null) {
+			dataCanvas = canvasComponent;
+		}
+		switch status {
+			case start:
+				setData(trailInfo.data, trailInfo.style);
+			case redraw:
+		}
 		positionAxes(trailInfo.axisInfo, data, trailInfo.style);
 	}
 
@@ -491,6 +495,8 @@ class Bar implements AxisLayer implements DataLayer {
 			}
 		}
 
+		// Drawing
+		dataCanvas.componentGraphics.clear();
 		for (group in dataByGroup) {
 			for (dataRec in group) {
 				if (!dataRec.allowed) {
@@ -503,9 +509,6 @@ class Bar implements AxisLayer implements DataLayer {
 		}
 		var canvasComponent = parent.findComponent(id);
 		if (canvasComponent == null) {
-			parent.addComponent(dataCanvas);
-		} else {
-			parent.removeComponent(canvasComponent);
 			parent.addComponent(dataCanvas);
 		}
 	};

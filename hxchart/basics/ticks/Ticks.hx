@@ -121,7 +121,6 @@ class TickBuilder extends CompositeBuilder {
 
 	public function new(tick:Ticks) {
 		super(tick);
-		trace("new tick");
 		_tick = tick;
 		var label = new Label();
 		_label = label;
@@ -136,6 +135,16 @@ class TickBuilder extends CompositeBuilder {
 		super.onReady();
 		TickUtils.drawTicks(_tick, _label);
 	}
+
+	override function validateComponentData() {
+		super.validateComponentData();
+		TickUtils.drawTicks(_tick, _label);
+	}
+
+	override function validateComponentLayout():Bool {
+		TickUtils.drawTicks(_tick, _label);
+		return super.validateComponentLayout();
+	}
 }
 
 class TickUtils {
@@ -144,7 +153,6 @@ class TickUtils {
 		var tickLength = is_sub ? _tick.subTickLength : _tick.tickLength;
 		var tickFontsize = is_sub ? _tick.subFontSize : _tick.fontSize;
 		var zeroPoint = new Point(0, 0);
-
 		_label.customStyle.fontSize = tickFontsize;
 		switch (_tick.labelPosition) {
 			case S:

@@ -189,6 +189,8 @@ class Axis extends Absolute {
 		return zeroPoint = point;
 	}
 
+	public var firstGen:Bool = false;
+
 	public function new(id:String, axisInfo:Array<AxisInfo>, ?styleSheet:StyleSheet) {
 		if (axisInfo == null || axisInfo.length == 0) {
 			throw new Exception("No AxisInfo found.");
@@ -470,7 +472,6 @@ private class Draw extends Behaviour {
 private class SetTicks extends Behaviour {
 	public override function call(param:Any = null):Variant {
 		var isUpdate:Bool = param;
-
 		var axis = cast(_component, Axis);
 		var layer = _component.findComponent("axis-label-container", Absolute, true, "css");
 		if (layer == null) {
@@ -528,6 +529,7 @@ private class SetTicks extends Behaviour {
 					axis.ticksPerInfo[i].push(tick);
 					layer.addComponent(tick);
 				}
+
 				// for (j in 0...subTicksPerTick) {
 				// 	if (i == (tickInfo.tickNum - 1)) {
 				// 		break;
@@ -593,9 +595,14 @@ private class AxisBuilder extends CompositeBuilder {
 
 	override function validateComponentData() {
 		_tickCanvasLayer.componentGraphics.clear();
-		_tickLabelLayer.childComponents[0].removeAllComponents();
 		_axis.positionStartPoint();
-		_axis.setTicks(false);
+		if (!_axis.firstGen) {
+			_tickLabelLayer.childComponents[0].removeAllComponents();
+			_axis.setTicks(false);
+			_axis.firstGen = true;
+		} else {
+			_axis.setTicks(true);
+		}
 		_axis.drawAxis();
 	}
 
