@@ -1,5 +1,6 @@
 package hxchart.haxeui.legend;
 
+import hxchart.core.legend.LegendNodeData;
 import haxe.ui.components.Spacer;
 import haxe.ui.components.Button;
 import haxe.ui.core.TextDisplay;

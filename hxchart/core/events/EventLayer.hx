@@ -1,13 +1,11 @@
-package hxchart.haxeui.events;
+package hxchart.core.events;
 
-import haxe.ui.geom.Point;
+import hxchart.core.utils.Point;
 import hxchart.core.styling.BorderStyle;
-import haxe.ui.util.Color;
-import haxe.ui.events.MouseEvent;
 
 @:structInit class EventHandler {
-	@:optional public var hoverHandlers:Array<MouseEvent->Void>;
-	@:optional public var clickHandlers:Array<MouseEvent->Void>;
+	@:optional public var hoverHandlers:Array<Any->Void>;
+	@:optional public var clickHandlers:Array<Any->Void>;
 
 	public function new() {
 		hoverHandlers = [];
@@ -17,7 +15,7 @@ import haxe.ui.events.MouseEvent;
 
 @:structInit class EventObject {
 	public var coords:Array<Point>;
-	public var color:Color;
+	public var color:Int;
 	public var alpha:Float;
 	public var border:BorderStyle;
 	public var size:Float;

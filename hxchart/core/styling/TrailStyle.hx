@@ -1,5 +1,7 @@
 package hxchart.core.styling;
 
+import hxchart.core.styling.PositionOptions.PositionOption;
+
 /**
  * Styling of a trail
  * @param colorPalette Color values in integer form. The length should be equal or greater than the length of `groups`. 

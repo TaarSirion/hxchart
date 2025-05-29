@@ -1,21 +1,21 @@
 package hxchart.haxeui.trails;
 
+import hxchart.haxeui.utils.ConvertCoords;
+import hxchart.core.styling.TrailStyle;
+import hxchart.core.chart.ChartStatus;
+import hxchart.core.trails.TrailInfo;
 import hxchart.haxeui.axis.Axis;
 import haxe.ui.containers.Box;
 import haxe.ui.styles.elements.Directive;
 import haxe.ui.styles.elements.RuleElement;
 import haxe.ui.styles.StyleSheet;
 import haxe.ui.components.Label;
-import hxchart.haxeui.plot.Chart.ChartStatus;
 import haxe.Timer;
-import hxchart.haxeui.plot.Chart.PositionOption;
-import hxchart.haxeui.events.EventLayer.EventHandler;
-import hxchart.haxeui.plot.Chart.OptimizationType;
+import hxchart.core.events.EventLayer.EventHandler;
 import hxchart.core.optimization.OptimGrid;
 import hxchart.core.optimization.Quadtree;
 import hxchart.haxeui.axis.AxisTools;
 import hxchart.core.utils.ChartTools;
-import hxchart.haxeui.plot.Chart.TrailStyle;
 import haxe.Exception;
 import hxchart.core.tickinfo.StringTickInfo;
 import haxe.ui.components.Canvas;
@@ -27,14 +27,14 @@ import haxe.ui.util.Color;
 import hxchart.core.data.DataLayer;
 import hxchart.core.axis.AxisLayer;
 import hxchart.core.trails.Scatter.ScatterDataPoint;
+import hxchart.core.trails.Scatter in ScatterCalc;
+import hxchart.core.optimization.OptimizationType;
 
 class Scatter {
 	public var id:String;
 	public var axisID:String;
 	public var axes:Axis;
 
-	public var dataByGroup:Array<Array<ScatterDataPoint>> = [];
-	public var data:Array<Any>;
 	public var dataLayer:Absolute;
 	public var dataCanvas:Canvas;
 
@@ -45,6 +45,8 @@ class Scatter {
 	var gridStep:Float = 1;
 	var useOptimization:Bool;
 	var keepHoverOn:Bool = false;
+
+	public var scatterCalc:ScatterCalc;
 
 	@:allow(hxchart.tests)
 	public var chartInfo:TrailInfo;
@@ -57,6 +59,9 @@ class Scatter {
 	public var clickLayer:Canvas;
 
 	public function new(chartInfo:TrailInfo, axes:Axis, parent:Absolute, id:String, axisID:String, eventHandler:EventHandler) {
+		scatterCalc = new ScatterCalc(chartInfo, axes.axisCalc, axisID);
+		scatterCalc.validateChart();
+
 		this.parent = parent;
 		this.eventHandler = eventHandler;
 		hoverLayer = new Absolute();
@@ -116,378 +121,19 @@ class Scatter {
 		if (canvasComponent != null) {
 			clickLayer = canvasComponent;
 		}
-		switch status {
-			case start:
-				setData(chartInfo.data, chartInfo.style);
-			case redraw:
-		}
-		positionAxes(chartInfo.axisInfo, dataByGroup, chartInfo.style);
+		render(chartInfo.style);
 	}
 
-	@:allow(hxchart.tests)
-	var minX:Float = Math.POSITIVE_INFINITY;
-	@:allow(hxchart.tests)
-	var maxX:Float = Math.NEGATIVE_INFINITY;
-	@:allow(hxchart.tests)
-	var minY:Float = Math.POSITIVE_INFINITY;
-	@:allow(hxchart.tests)
-	var maxY:Float = Math.NEGATIVE_INFINITY;
-
-	public function setData(newData:TrailData, style:TrailStyle) {
-		var x = newData.values.get("x");
-		var y = newData.values.get("y");
-		var groupsArr = newData.values.get("groups");
-		var uniqueGroupsNum = 0;
-		dataByGroup = [];
-		for (key in style.groups.keys()) {
-			uniqueGroupsNum++;
-			dataByGroup.push([]);
-		}
-
-		for (i in 0...x.length) {
-			var group = groupsArr[i];
-			var groupIndex = style.groups.get(group);
-			maxX = Math.max(maxX, x[i]);
-			minX = Math.min(minX, x[i]);
-			maxY = Math.max(maxY, y[i]);
-			minY = Math.min(minY, y[i]);
-			dataByGroup[groupIndex].push({
-				coord: new Point(0, 0),
-				values: {
-					x: x[i],
-					y: y[i]
-				},
-				size: 2,
-				color: style.colorPalette[groupIndex],
-				alpha: 1,
-				borderColor: style.colorPalette[groupIndex],
-				borderThickness: 1,
-				borderAlpha: 1,
-				allowed: false
-			});
-		}
-		if (style.size is Float || style.size is Int) {
-			var size = cast(style.size, Float);
-			for (group in dataByGroup) {
-				for (dataPoint in group) {
-					dataPoint.size = size;
-				}
-			}
-		} else if (style.size is Array) {
-			var size:Array<Float> = style.size;
-			if (size.length == x.length) {
-				var i = 0;
-				for (group in dataByGroup) {
-					for (dataPoint in group) {
-						dataPoint.size = size[i];
-						i++;
-					}
-				}
-			} else if (size.length == uniqueGroupsNum) {
-				for (i in 0...uniqueGroupsNum) {
-					var groupSize = size[i];
-					for (dataPoint in dataByGroup[i]) {
-						dataPoint.size = groupSize;
-					}
-				}
-			}
-		}
-
-		if (style.alpha is Float || style.alpha is Int) {
-			var alpha = cast(style.alpha, Float);
-			for (group in dataByGroup) {
-				for (dataPoint in group) {
-					dataPoint.alpha = alpha;
-				}
-			}
-		} else if (style.alpha is Array) {
-			var alpha:Array<Float> = style.alpha;
-			if (alpha.length == x.length) {
-				var i = 0;
-				for (group in dataByGroup) {
-					for (dataPoint in group) {
-						dataPoint.alpha = alpha[i];
-						i++;
-					}
-				}
-			} else if (alpha.length == uniqueGroupsNum) {
-				for (i in 0...uniqueGroupsNum) {
-					var groupAlpha = alpha[i];
-					for (dataPoint in dataByGroup[i]) {
-						dataPoint.alpha = groupAlpha;
-					}
-				}
-			}
-		}
-
-		if (style.borderStyle != null) {
-			if (style.borderStyle.color != null) {
-				if (style.borderStyle.color is Int) {
-					var color = cast(style.borderStyle.color, Int);
-					for (group in dataByGroup) {
-						for (dataPoint in group) {
-							dataPoint.borderColor = color;
-						}
-					}
-				} else if (style.borderStyle.color is Array) {
-					var color:Array<Int> = style.borderStyle.color;
-					if (color.length == x.length) {
-						var i = 0;
-						for (group in dataByGroup) {
-							for (dataPoint in group) {
-								dataPoint.borderColor = color[i];
-								i++;
-							}
-						}
-					} else if (color.length == uniqueGroupsNum) {
-						for (i in 0...uniqueGroupsNum) {
-							var groupColor = color[i];
-							for (dataPoint in dataByGroup[i]) {
-								dataPoint.borderColor = groupColor;
-							}
-						}
-					}
-				}
-			}
-
-			if (style.borderStyle.alpha is Float || style.borderStyle.alpha is Int) {
-				var alpha = cast(style.borderStyle.alpha, Float);
-				for (group in dataByGroup) {
-					for (dataPoint in group) {
-						dataPoint.borderAlpha = alpha;
-					}
-				}
-			} else if (style.borderStyle.alpha is Array) {
-				var alpha:Array<Float> = style.borderStyle.alpha;
-				if (alpha.length == x.length) {
-					var i = 0;
-					for (group in dataByGroup) {
-						for (dataPoint in group) {
-							dataPoint.borderAlpha = alpha[i];
-							i++;
-						}
-					}
-				} else if (alpha.length == uniqueGroupsNum) {
-					for (i in 0...uniqueGroupsNum) {
-						var groupAlpha = alpha[i];
-						for (dataPoint in dataByGroup[i]) {
-							dataPoint.borderAlpha = groupAlpha;
-						}
-					}
-				}
-			}
-
-			if (style.borderStyle.thickness is Float || style.borderStyle.thickness is Int) {
-				var thickness = cast(style.borderStyle.thickness, Float);
-				for (group in dataByGroup) {
-					for (dataPoint in group) {
-						dataPoint.borderThickness = thickness;
-					}
-				}
-			} else if (style.borderStyle.thickness is Array) {
-				var thickness:Array<Float> = style.borderStyle.thickness;
-				if (thickness.length == x.length) {
-					var i = 0;
-					for (group in dataByGroup) {
-						for (dataPoint in group) {
-							dataPoint.borderThickness = thickness[i];
-							i++;
-						}
-					}
-				} else if (thickness.length == uniqueGroupsNum) {
-					for (i in 0...uniqueGroupsNum) {
-						var groupThickness = thickness[i];
-						for (dataPoint in dataByGroup[i]) {
-							dataPoint.borderThickness = groupThickness;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle) {
-		if (axes != null) {
-			axes.width = parent.width;
-			axes.height = parent.height;
-			axes.positionStartPoint();
-			axes.setTicks(true);
-			positionData(style);
-			return;
-		}
-		axes = new Axis(axisID, axisInfo);
-		axes.width = parent.width;
-		axes.height = parent.height;
-		axes.positionStartPoint();
-		axes.setTicks(false);
-		positionData(chartInfo.style);
-		AxisTools.replaceAxisInParent(axes, parent);
-	}
-
-	public function positionData(style:TrailStyle) {
-		if (axes.ticksPerInfo[0].length == 0) {
-			return;
-		}
-
-		// Coordinates calculation
-		for (group in dataByGroup) {
-			for (dataPoint in group) {
-				var x = calcXCoord(dataPoint.values.x, axes.ticksPerInfo[0]);
-				var y = calcYCoord(dataPoint.values.y, axes.ticksPerInfo[1]);
-				if (x == null || y == null) {
-					continue;
-				}
-				dataPoint.coord = new Point(x, y);
-			}
-		}
-
-		// Optimization
-		if (useOptimization) {
-			switch (chartInfo.optimizationInfo.reduceVia) {
-				case OptimizationType.optimGrid:
-					for (group in dataByGroup) {
-						for (dataPoint in group) {
-							var xRound = Math.round(dataPoint.coord.x * 1 / gridStep);
-							var yRound = Math.round(dataPoint.coord.y * 1 / gridStep);
-							if (xRound < optimGrid.grid.length) {
-								if (yRound < optimGrid.grid[xRound].length) {
-									if (!optimGrid.grid[xRound][yRound]) {
-										optimGrid.grid[xRound][yRound] = true;
-										dataPoint.allowed = true;
-									}
-								}
-							}
-						}
-					}
-				case OptimizationType.quadTree:
-					for (group in dataByGroup) {
-						for (dataPoint in group) {
-							var xCoord = dataPoint.coord.x;
-							var yCoord = dataPoint.coord.y;
-							if (quadTree.search(new Region(xCoord - 2, xCoord + 2, yCoord - 2, yCoord + 2), []).length == 0) {
-								quadTree.addPoint(new Point(xCoord, yCoord));
-								dataPoint.allowed = true;
-							}
-						}
-					}
-			}
-		} else {
-			for (group in dataByGroup) {
-				for (dataPoint in group) {
-					dataPoint.allowed = true;
-				}
-			}
-		}
-
-		// Hover event handling
-		eventHandler.hoverHandlers.push(function(e) {
-			trace(hoverLayer.numComponents);
-			// hoverLayer.componentGraphics.clear();
-			// if (chartInfo.events != null && chartInfo.events.onHover != null) {
-			// 	for (group in dataByGroup) {
-			// 		for (dataPoint in group) {
-			// 			if (!dataPoint.allowed) {
-			// 				continue;
-			// 			}
-			// 			if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x + parent.left, dataPoint.coord.y + parent.top),
-			// 				dataPoint.size + dataPoint.borderThickness)) {
-			// 				var selectInfo = chartInfo.events.onHover({
-			// 					coords: [dataPoint.coord],
-			// 					border: {
-			// 						thickness: dataPoint.borderThickness,
-			// 						color: dataPoint.borderColor,
-			// 						alpha: dataPoint.borderAlpha
-			// 					},
-			// 					alpha: dataPoint.alpha,
-			// 					color: dataPoint.color,
-			// 					size: dataPoint.size
-			// 				});
-			// 				hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
-			// 				hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
-			// 				hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
-			// 			}
-			// 		}
-			// 	}
-			// 	return;
-			// }
-			for (i in 1...hoverLayer.numComponents) {
-				hoverLayer.removeComponentAt(i);
-			}
-			for (group in dataByGroup) {
-				for (dataPoint in group) {
-					if (!dataPoint.allowed) {
-						continue;
-					}
-
-					if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x + parent.left, dataPoint.coord.y + parent.top),
-						dataPoint.size + dataPoint.borderThickness)) {
-						var abs:Box = new Box();
-						abs.percentWidth = 10;
-						abs.percentHeight = 20;
-						abs.left = dataPoint.coord.x;
-						abs.top = 0;
-						abs.addClass("default-hover-box");
-						abs.onMouseOver = function(e) {}
-						hoverLayer.addComponent(abs);
-						var canvas:Canvas = cast(hoverLayer.childComponents[0], Canvas);
-						canvas.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
-						canvas.componentGraphics.strokeStyle(0x000000, 1, 1);
-						canvas.componentGraphics.rectangle(dataPoint.coord.x, dataPoint.coord.y, 10, 20);
-						canvas.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
-					}
-				}
-			}
-		});
-
-		// Click event handling
-		eventHandler.clickHandlers.push(function(e) {
-			clickLayer.componentGraphics.clear();
-			if (chartInfo.events != null && chartInfo.events.onClick != null) {
-				for (group in dataByGroup) {
-					for (dataPoint in group) {
-						if (!dataPoint.allowed) {
-							continue;
-						}
-						if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
-							dataPoint.size + dataPoint.borderThickness)) {
-							var selectInfo = chartInfo.events.onHover({
-								coords: [dataPoint.coord],
-								border: {
-									thickness: dataPoint.borderThickness,
-									color: dataPoint.borderColor,
-									alpha: dataPoint.borderAlpha
-								},
-								alpha: dataPoint.alpha,
-								color: dataPoint.color,
-								size: dataPoint.size
-							});
-							// hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
-							// hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
-							// hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
-						}
-					}
-				}
-				return;
-			}
-			for (group in dataByGroup) {
-				for (dataPoint in group) {
-					if (!dataPoint.allowed) {
-						continue;
-					}
-					if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
-						dataPoint.size + dataPoint.borderThickness)) {
-						// hoverLayer.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
-						// hoverLayer.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
-					}
-				}
-			}
-		});
-
-		// Drawing
+	public function render(style:TrailStyle) {
 		dataCanvas.componentGraphics.clear();
+		var coordSystem = {
+			zero: new Point(0, 0),
+			width: parent.width,
+			height: parent.height
+		}
 		if (chartInfo.type == line) {
 			dataCanvas.componentGraphics.clear();
-			for (group in dataByGroup) {
+			for (group in scatterCalc.dataByGroup) {
 				var start = group[0].coord;
 				var last = start;
 				if (style.positionOption == filled) {
@@ -508,8 +154,8 @@ class Scatter {
 					last = dataPoint.coord;
 				}
 				if (style.positionOption == filled) {
-					dataCanvas.componentGraphics.lineTo(last.x, axes.ticksPerInfo[1][axes.axesInfo[1].tickInfo.zeroIndex].top);
-					dataCanvas.componentGraphics.lineTo(start.x, axes.ticksPerInfo[1][axes.axesInfo[1].tickInfo.zeroIndex].top);
+					dataCanvas.componentGraphics.lineTo(last.x, axes.axisCalc.ticksPerInfo[1][axes.axisCalc.axesInfo[1].tickInfo.zeroIndex].middlePos.y);
+					dataCanvas.componentGraphics.lineTo(start.x, axes.axisCalc.ticksPerInfo[1][axes.axisCalc.axesInfo[1].tickInfo.zeroIndex].middlePos.y);
 					dataCanvas.componentGraphics.lineTo(start.x, start.y);
 					#if !(haxeui_heaps)
 					dataCanvas.componentGraphics.closePath();
@@ -517,18 +163,19 @@ class Scatter {
 				}
 			}
 		} else {
-			for (group in dataByGroup) {
+			for (group in scatterCalc.dataByGroup) {
 				for (dataPoint in group) {
 					if (!dataPoint.allowed) {
 						continue;
 					}
+					var coord = ConvertCoords.convertFromCore(scatterCalc.coordSystem, coordSystem, dataPoint.coord);
 					dataCanvas.componentGraphics.strokeStyle(dataPoint.borderColor, dataPoint.borderThickness, dataPoint.borderAlpha);
 					dataCanvas.componentGraphics.fillStyle(dataPoint.color, dataPoint.alpha);
-					dataCanvas.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
+					dataCanvas.componentGraphics.circle(coord.x, coord.y, dataPoint.size);
 				}
 			}
 		}
-
+		trace("ADDING scatter");
 		var canvasComponent = parent.findComponent(id);
 		if (canvasComponent == null) {
 			parent.addComponent(dataCanvas);
@@ -537,53 +184,161 @@ class Scatter {
 		}
 	}
 
-	public function calcXCoord(xValue:Dynamic, ticks:Array<Ticks>) {
-		if (Std.isOfType(xValue, String)) {
-			var ticksFiltered = ticks.filter(x -> {
-				return x.text == xValue;
-			});
-			if (ticksFiltered == null || ticksFiltered.length == 0) {
-				return null;
-			}
-			return ticksFiltered[0].left;
-		}
-		var largerTicks = ticks.filter(tick -> Std.parseFloat(tick.text) >= xValue);
-		var xMax = Std.parseFloat(largerTicks[0].text);
-		var maxIndex = ticks.indexOf(largerTicks[0]);
-		var minIndex = maxIndex == 0 ? 0 : maxIndex - 1;
-		var xMin = Std.parseFloat(ticks[minIndex].text);
-		if (xMax == xMin) {
-			return ticks[minIndex].left;
-		}
-		var tickLeft = ticks[minIndex].left;
-		var tickRight = largerTicks[0].left;
-		var x = (tickRight - tickLeft) * (xValue - xMin) / (xMax - xMin) + tickLeft;
-		return x;
-	}
-
-	public function calcYCoord(yValue:Dynamic, ticks:Array<Ticks>) {
-		if (Std.isOfType(yValue, String)) {
-			var ticksFiltered = ticks.filter(x -> {
-				return x.text == yValue;
-			});
-			if (ticksFiltered == null || ticksFiltered.length == 0) {
-				return null;
-			}
-			return ticksFiltered[0].top;
-		}
-		var largerTicks = ticks.filter(tick -> Std.parseFloat(tick.text) >= yValue);
-		var yMax = Std.parseFloat(largerTicks[0].text);
-		var maxIndex = ticks.indexOf(largerTicks[0]);
-		var minIndex = maxIndex == 0 ? 0 : maxIndex - 1;
-		var yMin = Std.parseFloat(ticks[minIndex].text);
-		if (yMin == yMax) {
-			return ticks[minIndex].top;
-		}
-		var tickBottom = ticks[minIndex].top;
-		var tickTop = largerTicks[0].top;
-		var y = tickBottom - (tickBottom - tickTop) * (yValue - yMin) / (yMax - yMin);
-		return y;
-	}
+	// public function positionData(style:TrailStyle) {
+	// 	if (axes.ticksPerInfo[0].length == 0) {
+	// 		return;
+	// 	}
+	// 	// Coordinates calculation
+	// 	for (group in dataByGroup) {
+	// 		for (dataPoint in group) {
+	// 			var x = calcXCoord(dataPoint.values.x, axes.ticksPerInfo[0]);
+	// 			var y = calcYCoord(dataPoint.values.y, axes.ticksPerInfo[1]);
+	// 			if (x == null || y == null) {
+	// 				continue;
+	// 			}
+	// 			dataPoint.coord = new Point(x, y);
+	// 		}
+	// 	}
+	// 	// Optimization
+	// 	if (useOptimization) {
+	// 		switch (chartInfo.optimizationInfo.reduceVia) {
+	// 			case OptimizationType.optimGrid:
+	// 				for (group in dataByGroup) {
+	// 					for (dataPoint in group) {
+	// 						var xRound = Math.round(dataPoint.coord.x * 1 / gridStep);
+	// 						var yRound = Math.round(dataPoint.coord.y * 1 / gridStep);
+	// 						if (xRound < optimGrid.grid.length) {
+	// 							if (yRound < optimGrid.grid[xRound].length) {
+	// 								if (!optimGrid.grid[xRound][yRound]) {
+	// 									optimGrid.grid[xRound][yRound] = true;
+	// 									dataPoint.allowed = true;
+	// 								}
+	// 							}
+	// 						}
+	// 					}
+	// 				}
+	// 			case OptimizationType.quadTree:
+	// 				for (group in dataByGroup) {
+	// 					for (dataPoint in group) {
+	// 						var xCoord = dataPoint.coord.x;
+	// 						var yCoord = dataPoint.coord.y;
+	// 						if (quadTree.search(new Region(xCoord - 2, xCoord + 2, yCoord - 2, yCoord + 2), []).length == 0) {
+	// 							quadTree.addPoint(new Point(xCoord, yCoord));
+	// 							dataPoint.allowed = true;
+	// 						}
+	// 					}
+	// 				}
+	// 		}
+	// 	} else {
+	// 		for (group in dataByGroup) {
+	// 			for (dataPoint in group) {
+	// 				dataPoint.allowed = true;
+	// 			}
+	// 		}
+	// 	}
+	// 	// Hover event handling
+	// 	eventHandler.hoverHandlers.push(function(e) {
+	// 		trace(hoverLayer.numComponents);
+	// 		// hoverLayer.componentGraphics.clear();
+	// 		// if (chartInfo.events != null && chartInfo.events.onHover != null) {
+	// 		// 	for (group in dataByGroup) {
+	// 		// 		for (dataPoint in group) {
+	// 		// 			if (!dataPoint.allowed) {
+	// 		// 				continue;
+	// 		// 			}
+	// 		// 			if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x + parent.left, dataPoint.coord.y + parent.top),
+	// 		// 				dataPoint.size + dataPoint.borderThickness)) {
+	// 		// 				var selectInfo = chartInfo.events.onHover({
+	// 		// 					coords: [dataPoint.coord],
+	// 		// 					border: {
+	// 		// 						thickness: dataPoint.borderThickness,
+	// 		// 						color: dataPoint.borderColor,
+	// 		// 						alpha: dataPoint.borderAlpha
+	// 		// 					},
+	// 		// 					alpha: dataPoint.alpha,
+	// 		// 					color: dataPoint.color,
+	// 		// 					size: dataPoint.size
+	// 		// 				});
+	// 		// 				hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
+	// 		// 				hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
+	// 		// 				hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
+	// 		// 			}
+	// 		// 		}
+	// 		// 	}
+	// 		// 	return;
+	// 		// }
+	// 		for (i in 1...hoverLayer.numComponents) {
+	// 			hoverLayer.removeComponentAt(i);
+	// 		}
+	// 		for (group in dataByGroup) {
+	// 			for (dataPoint in group) {
+	// 				if (!dataPoint.allowed) {
+	// 					continue;
+	// 				}
+	// 				if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x + parent.left, dataPoint.coord.y + parent.top),
+	// 					dataPoint.size + dataPoint.borderThickness)) {
+	// 					var abs:Box = new Box();
+	// 					abs.percentWidth = 10;
+	// 					abs.percentHeight = 20;
+	// 					abs.left = dataPoint.coord.x;
+	// 					abs.top = 0;
+	// 					abs.addClass("default-hover-box");
+	// 					abs.onMouseOver = function(e) {}
+	// 					hoverLayer.addComponent(abs);
+	// 					var canvas:Canvas = cast(hoverLayer.childComponents[0], Canvas);
+	// 					canvas.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
+	// 					canvas.componentGraphics.strokeStyle(0x000000, 1, 1);
+	// 					canvas.componentGraphics.rectangle(dataPoint.coord.x, dataPoint.coord.y, 10, 20);
+	// 					canvas.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
+	// 				}
+	// 			}
+	// 		}
+	// 	});
+	// 	// Click event handling
+	// 	eventHandler.clickHandlers.push(function(e) {
+	// 		clickLayer.componentGraphics.clear();
+	// 		if (chartInfo.events != null && chartInfo.events.onClick != null) {
+	// 			for (group in dataByGroup) {
+	// 				for (dataPoint in group) {
+	// 					if (!dataPoint.allowed) {
+	// 						continue;
+	// 					}
+	// 					if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
+	// 						dataPoint.size + dataPoint.borderThickness)) {
+	// 						var selectInfo = chartInfo.events.onHover({
+	// 							coords: [dataPoint.coord],
+	// 							border: {
+	// 								thickness: dataPoint.borderThickness,
+	// 								color: dataPoint.borderColor,
+	// 								alpha: dataPoint.borderAlpha
+	// 							},
+	// 							alpha: dataPoint.alpha,
+	// 							color: dataPoint.color,
+	// 							size: dataPoint.size
+	// 						});
+	// 						// hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
+	// 						// hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
+	// 						// hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
+	// 					}
+	// 				}
+	// 			}
+	// 			return;
+	// 		}
+	// 		for (group in dataByGroup) {
+	// 			for (dataPoint in group) {
+	// 				if (!dataPoint.allowed) {
+	// 					continue;
+	// 				}
+	// 				if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
+	// 					dataPoint.size + dataPoint.borderThickness)) {
+	// 					// hoverLayer.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
+	// 					// hoverLayer.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
+	// 				}
+	// 			}
+	// 		}
+	// 	});
+	// 	// Drawing
+	// }
 
 	private function inPointRadius(mouseCoords:Point, pointCenter:Point, size:Float) {
 		var dist = Math.pow(pointCenter.x - mouseCoords.x, 2) + Math.pow(pointCenter.y - mouseCoords.y, 2);

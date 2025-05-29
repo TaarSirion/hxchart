@@ -1,5 +1,8 @@
 package hxchart.haxeui.legend;
 
+import hxchart.core.legend.LegendInfo;
+import hxchart.core.legend.LegendPosition;
+import hxchart.core.legend.LegendNodeData;
 import haxe.ui.styles.elements.Directive;
 import haxe.ui.styles.elements.RuleElement;
 import haxe.ui.components.Spacer;

@@ -26,7 +26,7 @@ package hxchart.core.legend;
 		if (nodeStyle == null) {
 			for (node in data) {
 				if (node.style.symbolColor == null) {
-					node.style.symbolColor = Color.fromString("black");
+					node.style.symbolColor = 0x000000;
 				}
 				if (node.style.symbol == null) {
 					node.style.symbol = LegendSymbols.rectangle;
@@ -37,7 +37,7 @@ package hxchart.core.legend;
 
 		for (node in data) {
 			if (node.style.symbolColor == null) {
-				node.style.symbolColor = nodeStyle.symbolColor == null ? Color.fromString("black") : nodeStyle.symbolColor;
+				node.style.symbolColor = nodeStyle.symbolColor == null ? 0x000000 : nodeStyle.symbolColor;
 			}
 			if (node.style.symbol == null) {
 				node.style.symbol = nodeStyle.symbol == null ? LegendSymbols.rectangle : nodeStyle.symbol;

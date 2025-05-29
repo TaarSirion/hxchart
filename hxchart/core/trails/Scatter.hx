@@ -1,5 +1,8 @@
 package hxchart.core.trails;
 
+import hxchart.core.axis.AxisInfo;
+import hxchart.core.styling.TrailStyle;
+import hxchart.core.axis.Axis;
 import hxchart.core.utils.CoordinateSystem;
 import hxchart.core.tick.Tick;
 import hxchart.core.chart.ChartStatus;
@@ -25,6 +28,7 @@ typedef ScatterDataPoint = {
 }
 
 class Scatter implements AxisLayer implements DataLayer {
+	public var dataLayerID:String;
 	public var coordSystem:CoordinateSystem;
 	public var axisID:String;
 	public var axes:Axis;
@@ -46,6 +50,7 @@ class Scatter implements AxisLayer implements DataLayer {
 	public var colorPalette:Array<Int>;
 
 	public function new(chartInfo:TrailInfo, axes:Axis, axisID:String) {
+		coordSystem = new CoordinateSystem();
 		this.axisID = axisID;
 		this.chartInfo = chartInfo;
 		if (axes != null) {
@@ -65,12 +70,8 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 	}
 
-	public function validateChart(status:ChartStatus) {
-		switch status {
-			case start:
-				setData(chartInfo.data, chartInfo.style);
-			case redraw:
-		}
+	public function validateChart() {
+		setData(chartInfo.data, chartInfo.style);
 		positionAxes(chartInfo.axisInfo, dataByGroup, chartInfo.style);
 	}
 
@@ -263,7 +264,7 @@ class Scatter implements AxisLayer implements DataLayer {
 			positionData(style);
 			return;
 		}
-		axes = new Axis(axisID, axisInfo);
+		axes = new Axis(axisInfo, coordSystem);
 		axes.positionStartPoint();
 		axes.setTicks(false);
 		positionData(chartInfo.style);
@@ -333,7 +334,7 @@ class Scatter implements AxisLayer implements DataLayer {
 			if (ticksFiltered == null || ticksFiltered.length == 0) {
 				return null;
 			}
-			return ticksFiltered[0].left;
+			return ticksFiltered[0].middlePos.x;
 		}
 		var largerTicks = ticks.filter(tick -> Std.parseFloat(tick.text) >= xValue);
 		var xMax = Std.parseFloat(largerTicks[0].text);
@@ -341,10 +342,10 @@ class Scatter implements AxisLayer implements DataLayer {
 		var minIndex = maxIndex == 0 ? 0 : maxIndex - 1;
 		var xMin = Std.parseFloat(ticks[minIndex].text);
 		if (xMax == xMin) {
-			return ticks[minIndex].left;
+			return ticks[minIndex].middlePos.x;
 		}
-		var tickLeft = ticks[minIndex].left;
-		var tickRight = largerTicks[0].left;
+		var tickLeft = ticks[minIndex].middlePos.x;
+		var tickRight = largerTicks[0].middlePos.x;
 		var x = (tickRight - tickLeft) * (xValue - xMin) / (xMax - xMin) + tickLeft;
 		return x;
 	}
@@ -357,7 +358,7 @@ class Scatter implements AxisLayer implements DataLayer {
 			if (ticksFiltered == null || ticksFiltered.length == 0) {
 				return null;
 			}
-			return ticksFiltered[0].top;
+			return ticksFiltered[0].middlePos.y;
 		}
 		var largerTicks = ticks.filter(tick -> Std.parseFloat(tick.text) >= yValue);
 		var yMax = Std.parseFloat(largerTicks[0].text);
@@ -365,10 +366,10 @@ class Scatter implements AxisLayer implements DataLayer {
 		var minIndex = maxIndex == 0 ? 0 : maxIndex - 1;
 		var yMin = Std.parseFloat(ticks[minIndex].text);
 		if (yMin == yMax) {
-			return ticks[minIndex].top;
+			return ticks[minIndex].middlePos.y;
 		}
-		var tickBottom = ticks[minIndex].top;
-		var tickTop = largerTicks[0].top;
+		var tickBottom = ticks[minIndex].middlePos.y;
+		var tickTop = largerTicks[0].middlePos.y;
 		var y = tickBottom - (tickBottom - tickTop) * (yValue - yMin) / (yMax - yMin);
 		return y;
 	}

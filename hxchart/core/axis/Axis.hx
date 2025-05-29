@@ -20,7 +20,6 @@ class Axis {
 		for (i => info in axesInfo) {
 			var tickInfo = info.tickInfo;
 			var tickNum = tickInfo.tickNum;
-			trace(tickNum, tickInfo);
 			if (Std.isOfType(tickInfo, StringTickInfo)) {
 				// Increase tickNum size so that positioning centers the ticks. Necessary because StringTickInfo has no zero Tick.
 				tickNum++;
@@ -170,7 +169,6 @@ class Axis {
 		for (info in this.axesInfo) {
 			switch (info.rotation) {
 				case 0:
-					trace(info.title, zeroPoint.y, coordSystem.bottom);
 					if (info.title == null) {
 						continue;
 					}
@@ -185,7 +183,6 @@ class Axis {
 						newHeight = coordSystem.height;
 					}
 				case 90:
-					trace(info.title, zeroPoint.x, coordSystem.left);
 					if (info.title == null) {
 						continue;
 					}
@@ -217,7 +214,6 @@ class Axis {
 						zeroPoint.y = coordSystem.bottom + 20;
 					}
 				case 90:
-					trace(info.title, zeroPoint.x, coordSystem.left);
 					if (info.subTitle == null) {
 						continue;
 					}
