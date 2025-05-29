@@ -1,5 +1,6 @@
 package hxchart.haxeui.trails;
 
+import haxe.ui.events.MouseEvent;
 import hxchart.haxeui.utils.ConvertCoords;
 import hxchart.core.styling.TrailStyle;
 import hxchart.core.chart.ChartStatus;
@@ -125,6 +126,114 @@ class Scatter {
 	}
 
 	public function render(style:TrailStyle) {
+		// Hover event handling
+		eventHandler.hoverHandlers.push(function(e) {
+			trace(hoverLayer.numComponents);
+			if (e is MouseEvent) {
+				var event:MouseEvent = e;
+				// hoverLayer.componentGraphics.clear();
+				// if (chartInfo.events != null && chartInfo.events.onHover != null) {
+				// 	for (group in dataByGroup) {
+				// 		for (dataPoint in group) {
+				// 			if (!dataPoint.allowed) {
+				// 				continue;
+				// 			}
+				// 			if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x + parent.left, dataPoint.coord.y + parent.top),
+				// 				dataPoint.size + dataPoint.borderThickness)) {
+				// 				var selectInfo = chartInfo.events.onHover({
+				// 					coords: [dataPoint.coord],
+				// 					border: {
+				// 						thickness: dataPoint.borderThickness,
+				// 						color: dataPoint.borderColor,
+				// 						alpha: dataPoint.borderAlpha
+				// 					},
+				// 					alpha: dataPoint.alpha,
+				// 					color: dataPoint.color,
+				// 					size: dataPoint.size
+				// 				});
+				// 				hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
+				// 				hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
+				// 				hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
+				// 			}
+				// 		}
+				// 	}
+				// 	return;
+				// }
+				for (i in 1...hoverLayer.numComponents) {
+					hoverLayer.removeComponentAt(i);
+				}
+				for (group in scatterCalc.dataByGroup) {
+					for (dataPoint in group) {
+						if (!dataPoint.allowed) {
+							continue;
+						}
+						if (inPointRadius(new Point(event.localX, event.localY), new Point(dataPoint.coord.x + parent.left, dataPoint.coord.y + parent.top),
+							dataPoint.size + dataPoint.borderThickness)) {
+							var abs:Box = new Box();
+							abs.percentWidth = 10;
+							abs.percentHeight = 20;
+							abs.left = dataPoint.coord.x;
+							abs.top = 0;
+							abs.addClass("default-hover-box");
+							abs.onMouseOver = function(e) {}
+							hoverLayer.addComponent(abs);
+							var canvas:Canvas = cast(hoverLayer.childComponents[0], Canvas);
+							canvas.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
+							canvas.componentGraphics.strokeStyle(0x000000, 1, 1);
+							canvas.componentGraphics.rectangle(dataPoint.coord.x, dataPoint.coord.y, 10, 20);
+							canvas.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
+						}
+					}
+				}
+			}
+		});
+		// Click event handling
+		eventHandler.clickHandlers.push(function(e) {
+			if (e is MouseEvent) {
+				var event:MouseEvent = e;
+				clickLayer.componentGraphics.clear();
+				if (chartInfo.events != null && chartInfo.events.onClick != null) {
+					for (group in scatterCalc.dataByGroup) {
+						for (dataPoint in group) {
+							if (!dataPoint.allowed) {
+								continue;
+							}
+							if (inPointRadius(new Point(event.localX, event.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
+								dataPoint.size + dataPoint.borderThickness)) {
+								var selectInfo = chartInfo.events.onHover({
+									coords: [dataPoint.coord],
+									border: {
+										thickness: dataPoint.borderThickness,
+										color: dataPoint.borderColor,
+										alpha: dataPoint.borderAlpha
+									},
+									alpha: dataPoint.alpha,
+									color: dataPoint.color,
+									size: dataPoint.size
+								});
+								// hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
+								// hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
+								// hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
+							}
+						}
+					}
+					return;
+				}
+				for (group in scatterCalc.dataByGroup) {
+					for (dataPoint in group) {
+						if (!dataPoint.allowed) {
+							continue;
+						}
+						if (inPointRadius(new Point(event.localX, event.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
+							dataPoint.size + dataPoint.borderThickness)) {
+							// hoverLayer.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
+							// hoverLayer.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
+						}
+					}
+				}
+			}
+		});
+
 		dataCanvas.componentGraphics.clear();
 		var coordSystem = {
 			zero: new Point(0, 0),
@@ -134,7 +243,7 @@ class Scatter {
 		if (chartInfo.type == line) {
 			dataCanvas.componentGraphics.clear();
 			for (group in scatterCalc.dataByGroup) {
-				var start = group[0].coord;
+				var start = ConvertCoords.convertFromCore(scatterCalc.coordSystem, coordSystem, group[0].coord);
 				var last = start;
 				if (style.positionOption == filled) {
 					dataCanvas.componentGraphics.fillStyle(group[0].color, 0.5);
@@ -150,8 +259,9 @@ class Scatter {
 					if (!dataPoint.allowed) {
 						continue;
 					}
-					dataCanvas.componentGraphics.lineTo(dataPoint.coord.x, dataPoint.coord.y);
-					last = dataPoint.coord;
+					var coord = ConvertCoords.convertFromCore(scatterCalc.coordSystem, coordSystem, dataPoint.coord);
+					dataCanvas.componentGraphics.lineTo(coord.x, coord.y);
+					last = coord;
 				}
 				if (style.positionOption == filled) {
 					dataCanvas.componentGraphics.lineTo(last.x, axes.axisCalc.ticksPerInfo[1][axes.axisCalc.axesInfo[1].tickInfo.zeroIndex].middlePos.y);
@@ -175,7 +285,6 @@ class Scatter {
 				}
 			}
 		}
-		trace("ADDING scatter");
 		var canvasComponent = parent.findComponent(id);
 		if (canvasComponent == null) {
 			parent.addComponent(dataCanvas);
@@ -183,162 +292,6 @@ class Scatter {
 			parent.addComponent(clickLayer);
 		}
 	}
-
-	// public function positionData(style:TrailStyle) {
-	// 	if (axes.ticksPerInfo[0].length == 0) {
-	// 		return;
-	// 	}
-	// 	// Coordinates calculation
-	// 	for (group in dataByGroup) {
-	// 		for (dataPoint in group) {
-	// 			var x = calcXCoord(dataPoint.values.x, axes.ticksPerInfo[0]);
-	// 			var y = calcYCoord(dataPoint.values.y, axes.ticksPerInfo[1]);
-	// 			if (x == null || y == null) {
-	// 				continue;
-	// 			}
-	// 			dataPoint.coord = new Point(x, y);
-	// 		}
-	// 	}
-	// 	// Optimization
-	// 	if (useOptimization) {
-	// 		switch (chartInfo.optimizationInfo.reduceVia) {
-	// 			case OptimizationType.optimGrid:
-	// 				for (group in dataByGroup) {
-	// 					for (dataPoint in group) {
-	// 						var xRound = Math.round(dataPoint.coord.x * 1 / gridStep);
-	// 						var yRound = Math.round(dataPoint.coord.y * 1 / gridStep);
-	// 						if (xRound < optimGrid.grid.length) {
-	// 							if (yRound < optimGrid.grid[xRound].length) {
-	// 								if (!optimGrid.grid[xRound][yRound]) {
-	// 									optimGrid.grid[xRound][yRound] = true;
-	// 									dataPoint.allowed = true;
-	// 								}
-	// 							}
-	// 						}
-	// 					}
-	// 				}
-	// 			case OptimizationType.quadTree:
-	// 				for (group in dataByGroup) {
-	// 					for (dataPoint in group) {
-	// 						var xCoord = dataPoint.coord.x;
-	// 						var yCoord = dataPoint.coord.y;
-	// 						if (quadTree.search(new Region(xCoord - 2, xCoord + 2, yCoord - 2, yCoord + 2), []).length == 0) {
-	// 							quadTree.addPoint(new Point(xCoord, yCoord));
-	// 							dataPoint.allowed = true;
-	// 						}
-	// 					}
-	// 				}
-	// 		}
-	// 	} else {
-	// 		for (group in dataByGroup) {
-	// 			for (dataPoint in group) {
-	// 				dataPoint.allowed = true;
-	// 			}
-	// 		}
-	// 	}
-	// 	// Hover event handling
-	// 	eventHandler.hoverHandlers.push(function(e) {
-	// 		trace(hoverLayer.numComponents);
-	// 		// hoverLayer.componentGraphics.clear();
-	// 		// if (chartInfo.events != null && chartInfo.events.onHover != null) {
-	// 		// 	for (group in dataByGroup) {
-	// 		// 		for (dataPoint in group) {
-	// 		// 			if (!dataPoint.allowed) {
-	// 		// 				continue;
-	// 		// 			}
-	// 		// 			if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x + parent.left, dataPoint.coord.y + parent.top),
-	// 		// 				dataPoint.size + dataPoint.borderThickness)) {
-	// 		// 				var selectInfo = chartInfo.events.onHover({
-	// 		// 					coords: [dataPoint.coord],
-	// 		// 					border: {
-	// 		// 						thickness: dataPoint.borderThickness,
-	// 		// 						color: dataPoint.borderColor,
-	// 		// 						alpha: dataPoint.borderAlpha
-	// 		// 					},
-	// 		// 					alpha: dataPoint.alpha,
-	// 		// 					color: dataPoint.color,
-	// 		// 					size: dataPoint.size
-	// 		// 				});
-	// 		// 				hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
-	// 		// 				hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
-	// 		// 				hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
-	// 		// 			}
-	// 		// 		}
-	// 		// 	}
-	// 		// 	return;
-	// 		// }
-	// 		for (i in 1...hoverLayer.numComponents) {
-	// 			hoverLayer.removeComponentAt(i);
-	// 		}
-	// 		for (group in dataByGroup) {
-	// 			for (dataPoint in group) {
-	// 				if (!dataPoint.allowed) {
-	// 					continue;
-	// 				}
-	// 				if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x + parent.left, dataPoint.coord.y + parent.top),
-	// 					dataPoint.size + dataPoint.borderThickness)) {
-	// 					var abs:Box = new Box();
-	// 					abs.percentWidth = 10;
-	// 					abs.percentHeight = 20;
-	// 					abs.left = dataPoint.coord.x;
-	// 					abs.top = 0;
-	// 					abs.addClass("default-hover-box");
-	// 					abs.onMouseOver = function(e) {}
-	// 					hoverLayer.addComponent(abs);
-	// 					var canvas:Canvas = cast(hoverLayer.childComponents[0], Canvas);
-	// 					canvas.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
-	// 					canvas.componentGraphics.strokeStyle(0x000000, 1, 1);
-	// 					canvas.componentGraphics.rectangle(dataPoint.coord.x, dataPoint.coord.y, 10, 20);
-	// 					canvas.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
-	// 				}
-	// 			}
-	// 		}
-	// 	});
-	// 	// Click event handling
-	// 	eventHandler.clickHandlers.push(function(e) {
-	// 		clickLayer.componentGraphics.clear();
-	// 		if (chartInfo.events != null && chartInfo.events.onClick != null) {
-	// 			for (group in dataByGroup) {
-	// 				for (dataPoint in group) {
-	// 					if (!dataPoint.allowed) {
-	// 						continue;
-	// 					}
-	// 					if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
-	// 						dataPoint.size + dataPoint.borderThickness)) {
-	// 						var selectInfo = chartInfo.events.onHover({
-	// 							coords: [dataPoint.coord],
-	// 							border: {
-	// 								thickness: dataPoint.borderThickness,
-	// 								color: dataPoint.borderColor,
-	// 								alpha: dataPoint.borderAlpha
-	// 							},
-	// 							alpha: dataPoint.alpha,
-	// 							color: dataPoint.color,
-	// 							size: dataPoint.size
-	// 						});
-	// 						// hoverLayer.componentGraphics.strokeStyle(selectInfo.border.color, selectInfo.border.thickness, selectInfo.border.alpha);
-	// 						// hoverLayer.componentGraphics.fillStyle(selectInfo.color, selectInfo.alpha);
-	// 						// hoverLayer.componentGraphics.circle(selectInfo.coords[0].x, selectInfo.coords[0].y, selectInfo.size);
-	// 					}
-	// 				}
-	// 			}
-	// 			return;
-	// 		}
-	// 		for (group in dataByGroup) {
-	// 			for (dataPoint in group) {
-	// 				if (!dataPoint.allowed) {
-	// 					continue;
-	// 				}
-	// 				if (inPointRadius(new Point(e.localX, e.localY), new Point(dataPoint.coord.x, dataPoint.coord.y),
-	// 					dataPoint.size + dataPoint.borderThickness)) {
-	// 					// hoverLayer.componentGraphics.fillStyle(Color.fromString("#ffffff"), 0.5);
-	// 					// hoverLayer.componentGraphics.circle(dataPoint.coord.x, dataPoint.coord.y, dataPoint.size);
-	// 				}
-	// 			}
-	// 		}
-	// 	});
-	// 	// Drawing
-	// }
 
 	private function inPointRadius(mouseCoords:Point, pointCenter:Point, size:Float) {
 		var dist = Math.pow(pointCenter.x - mouseCoords.x, 2) + Math.pow(pointCenter.y - mouseCoords.y, 2);

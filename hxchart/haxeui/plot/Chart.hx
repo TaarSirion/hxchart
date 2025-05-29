@@ -355,10 +355,19 @@ class Builder extends CompositeBuilder {
 							_chart.axes.get(axisID).axisCalc.axesInfo[0],
 							_chart.axes.get(axisID).axisCalc.axesInfo[1]
 						];
+					} else {
+						var coordSystem = new CoordinateSystem();
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
+						var axis = new Axis(axisID, chartInfo.axisInfo, coordSystem);
+						axis.percentHeight = 100;
+						axis.percentWidth = 100;
+						_chart.axes.set(axisID, axis);
+						_chart.chartBody.addComponent(axis);
 					}
 					var scatter = null;
-					if (!_chart.axes.exists(axisID)) {
-						scatter = new Scatter(chartInfo, null, _chart.chartBody, chartID, axisID, eventHandler);
+					if (_chart.trails.length < (i + 1)) {
+						scatter = new Scatter(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID, eventHandler);
 						_chart.trails.push(scatter);
 					} else {
 						scatter = _chart.trails[i];
