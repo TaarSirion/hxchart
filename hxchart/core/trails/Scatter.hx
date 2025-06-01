@@ -370,7 +370,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 		var tickBottom = ticks[minIndex].middlePos.y;
 		var tickTop = largerTicks[0].middlePos.y;
-		var y = tickBottom - (tickBottom - tickTop) * (yValue - yMin) / (yMax - yMin);
+		var y = (tickTop - tickBottom) * (yValue - yMin) / (yMax - yMin) + tickBottom;
 		return y;
 	}
 }

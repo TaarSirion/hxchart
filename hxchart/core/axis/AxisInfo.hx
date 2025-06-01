@@ -45,7 +45,7 @@ import hxchart.core.tickinfo.TickInfo;
 	@:optional public var title:AxisTitle;
 	@:optional public var subTitle:AxisTitle;
 
-	@:optional public var tickMargin:Float = 5;
+	@:optional public var tickMargin:Float = 10;
 
 	public function setAxisInfo(trailValues:Array<Any>) {
 		if (trailValues.length == 0 && values.length == 0) {
