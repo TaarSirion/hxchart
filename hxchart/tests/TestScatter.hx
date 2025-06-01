@@ -11,8 +11,6 @@ import hxchart.core.axis.AxisInfo;
 import hxchart.core.axis.AxisTypes;
 import hxchart.core.tickinfo.NumericTickInfo;
 import hxchart.core.utils.CoordinateSystem;
-import hxchart.core.utils.Point;
-// import hxchart.haxeui.colors.ColorPalettes; // Removed HaxeUI import
 import hxchart.core.styling.TrailStyle;
 
 class TestScatter extends Test {
@@ -20,7 +18,7 @@ class TestScatter extends Test {
 		super();
 	}
 
-	function testCalculateCoordinates() {
+	function testCalculateCoordinatesWithTitle() {
 		// Setup TrailStyle
 		var trailStyle:TrailStyle = {
 			colorPalette: [0x000000], // Using a hardcoded black color
@@ -34,13 +32,11 @@ class TestScatter extends Test {
 		xValues.set("min", [0.]);
 		xValues.set("max", [10.]);
 		var xTickInfo = new NumericTickInfo(xValues);
-		// xTickInfo.dataInterval = 5; // This field does not exist
 
 		var yValues:Map<String, Array<Float>> = new Map<String, Array<Float>>();
 		yValues.set("min", [0.]);
 		yValues.set("max", [10.]);
 		var yTickInfo = new NumericTickInfo(yValues);
-		// yTickInfo.dataInterval = 5; // This field does not exist
 
 		// Setup AxisInfo for X and Y axes
 		var xaxisInfo:AxisInfo = {
@@ -49,11 +45,6 @@ class TestScatter extends Test {
 			id: "xaxis",
 			tickInfo: xTickInfo,
 			title: {text: "X-Axis"}, // Assuming AxisTitle object
-			// labelRotation: 0, // Extra field
-			// tickLabelOffset: { x: 0, y: 0 }, // Extra field
-			// axisProportion: 0, // Extra field
-			// mainAxisProportion: 0, // Extra field
-			// crossAxisProportion: 0 // Extra field
 		};
 
 		var yaxisInfo:AxisInfo = {
@@ -62,11 +53,6 @@ class TestScatter extends Test {
 			id: "yaxis",
 			tickInfo: yTickInfo,
 			title: {text: "Y-Axis"}, // Assuming AxisTitle object
-			// labelRotation: 0, // Extra field
-			// tickLabelOffset: { x: 0, y: 0 }, // Extra field
-			// axisProportion: 0, // Extra field
-			// mainAxisProportion: 0, // Extra field
-			// crossAxisProportion: 0 // Extra field
 		};
 
 		// Setup ChartInfo (TrailInfo)
@@ -129,14 +115,15 @@ class TestScatter extends Test {
 		// Data (0,0) -> Screen (22, 22)
 		// Data (5,5) -> Screen (56, 56)
 		// Data (10,10) -> Screen (90, 90)
+		// Point (0,0)
 		Assert.floatEquals(22, scatter.dataByGroup[0][0].coord.x, 0.001, "X coord for data point (0,0) was: " + scatter.dataByGroup[0][0].coord.x);
 		Assert.floatEquals(22, scatter.dataByGroup[0][0].coord.y, 0.001, "Y coord for data point (0,0) was: " + scatter.dataByGroup[0][0].coord.y);
 
-		// Point (5,5) maps to screen (10 + 80/2, 90 - 80/2) = (50, 50)
+		// Point (5,5)
 		Assert.floatEquals(56, scatter.dataByGroup[0][1].coord.x, 0.001, "X coord for data point (5,5) was: " + scatter.dataByGroup[0][1].coord.x);
 		Assert.floatEquals(56, scatter.dataByGroup[0][1].coord.y, 0.001, "Y coord for data point (5,5) was: " + scatter.dataByGroup[0][1].coord.y);
 
-		// Point (10,10) maps to screen (90, 10)
+		// Point (10,10)
 		Assert.floatEquals(90, scatter.dataByGroup[0][2].coord.x, 0.001, "X coord for data point (10,10) was: " + scatter.dataByGroup[0][2].coord.x);
 		Assert.floatEquals(90, scatter.dataByGroup[0][2].coord.y, 0.001, "Y coord for data point (10,10) was: " + scatter.dataByGroup[0][2].coord.y);
 	}
@@ -155,13 +142,11 @@ class TestScatter extends Test {
 		xValues.set("min", [0.]);
 		xValues.set("max", [10.]);
 		var xTickInfo = new NumericTickInfo(xValues);
-		// xTickInfo.dataInterval = 5; // This field does not exist
 
 		var yValues:Map<String, Array<Float>> = new Map<String, Array<Float>>();
 		yValues.set("min", [0.]);
 		yValues.set("max", [10.]);
 		var yTickInfo = new NumericTickInfo(yValues);
-		// yTickInfo.dataInterval = 5; // This field does not exist
 
 		// Setup AxisInfo for X and Y axes
 		var xaxisInfo:AxisInfo = {
@@ -169,11 +154,6 @@ class TestScatter extends Test {
 			rotation: 0,
 			id: "xaxis",
 			tickInfo: xTickInfo
-			// labelRotation: 0, // Extra field
-			// tickLabelOffset: { x: 0, y: 0 }, // Extra field
-			// axisProportion: 0, // Extra field
-			// mainAxisProportion: 0, // Extra field
-			// crossAxisProportion: 0 // Extra field
 		};
 
 		var yaxisInfo:AxisInfo = {
@@ -181,11 +161,6 @@ class TestScatter extends Test {
 			rotation: 90,
 			id: "yaxis",
 			tickInfo: yTickInfo
-			// labelRotation: 0, // Extra field
-			// tickLabelOffset: { x: 0, y: 0 }, // Extra field
-			// axisProportion: 0, // Extra field
-			// mainAxisProportion: 0, // Extra field
-			// crossAxisProportion: 0 // Extra field
 		};
 
 		// Setup ChartInfo (TrailInfo)
