@@ -233,19 +233,19 @@ class TestAxis extends Test {
 
 		// X-axis (axisInfoX): zeroIndex=0. zp.x = (0*200/10)+0+10 = 10
 		// Y-axis (axisInfoY): zeroIndex=0. zp.y = (0*150/10)+0+5 = 5
-		// Subtitle for Y-axis: zeroPoint.x (10) <= cs.left (0) + 20. So newWidth = 200-20=180. zeroPoint.x becomes 20.
-		Assert.equals(25, axis.zeroPoint.x);
+		// As no title is present for
+		Assert.equals(10, axis.zeroPoint.x);
 		Assert.equals(5, axis.zeroPoint.y);
 
 		// axisInfoY: newWidth was changed by Y-axis subtitle. start.x = zp.x = 20. length = cs.height = 150
-		Assert.equals(25, axisInfoY.start.x);
+		Assert.equals(10, axisInfoY.start.x);
 		Assert.equals(0, axisInfoY.start.y); // cs.bottom
 		Assert.equals(150, axisInfoY.length); // cs.height
 
 		// axisInfoX: newWidth was changed by Y-axis subtitle. start.x = zp.x = 20
 		// length = newWidth = 180
-		Assert.equals(20, axisInfoX.start.x);
+		Assert.equals(0, axisInfoX.start.x);
 		Assert.equals(5, axisInfoX.start.y);
-		Assert.equals(180, axisInfoX.length);
+		Assert.equals(200, axisInfoX.length);
 	}
 }
