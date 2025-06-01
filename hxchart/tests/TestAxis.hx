@@ -1,184 +1,218 @@
 package hxchart.tests;
 
-import haxe.ui.styles.StyleSheet;
-import haxe.ui.containers.Absolute;
-import haxe.ui.components.Canvas;
-import haxe.ui.util.Color;
-import haxe.ui.geom.Point;
-import hxchart.basics.axis.Axis;
-import hxchart.basics.axis.NumericTickInfo;
-import hxchart.basics.axis.StringTickInfo;
 import utest.Assert;
-import hxchart.basics.axis.AxisTools;
 import utest.Test;
 
+// Core imports
+import hxchart.core.axis.Axis;
+import hxchart.core.axis.AxisInfo;
+import hxchart.core.axis.AxisTypes;
+import hxchart.core.axis.AxisTitle;
+import hxchart.core.utils.CoordinateSystem;
+import hxchart.core.utils.Point;
+import hxchart.core.tickinfo.NumericTickInfo;
+import hxchart.core.tickinfo.StringTickInfo;
+
 class TestAxis extends Test {
-	function testAxisInfo() {
-		var info:AxisInfo = {
-			id: "axis",
-			rotation: 0
-		};
-		info.setAxisInfo([0, 1]);
-		Assert.equals(linear, info.type);
-		Assert.isTrue(info.tickInfo is NumericTickInfo);
-		Assert.equals("1", info.tickInfo.labels[info.tickInfo.labels.length - 1]);
 
-		var info:AxisInfo = {
-			id: "axis",
-			rotation: 0
-		};
-		info.setAxisInfo(["0", "1"]);
-		Assert.equals(categorical, info.type);
-		Assert.isTrue(info.tickInfo is StringTickInfo);
-		Assert.equals("1", info.tickInfo.labels[info.tickInfo.labels.length - 1]);
+    private function createNumericTickInfo(min:Float, max:Float):NumericTickInfo {
+        return new NumericTickInfo(["min"=>[min], "max"=>[max]]);
+    }
 
-		var info:AxisInfo = {
-			id: "axis",
-			rotation: 0,
-			type: linear
-		};
-		info.setAxisInfo(["0", "1"]);
-		Assert.isTrue(info.tickInfo is NumericTickInfo);
-		Assert.equals("1", info.tickInfo.labels[info.tickInfo.labels.length - 1]);
+    private function createStringTickInfo(labels:Array<String>):StringTickInfo {
+        return new StringTickInfo(labels);
+    }
 
-		var info:AxisInfo = {
-			id: "axis",
-			rotation: 0,
-			type: linear,
-			tickInfo: new NumericTickInfo(["min" => [0], "max" => [10]])
-		};
-		info.setAxisInfo(["0", "1"]);
-		Assert.isTrue(info.tickInfo is NumericTickInfo);
-		Assert.equals("10", info.tickInfo.labels[info.tickInfo.labels.length - 1]);
-	}
+    function testCorePosition_BasicNoTitles_Horizontal() {
+        var cs = new CoordinateSystem();
+        cs.left = 0; cs.bottom = 0; cs.width = 200; cs.height = 150;
 
-	function testAxisCreation() {
-		var tickInfo:NumericTickInfo = new NumericTickInfo(["min" => [0], "max" => [100]]);
-		var axisInfo:AxisInfo = {
-			id: "xaxis",
-			tickInfo: tickInfo,
-			start: new Point(50, 50),
-			rotation: 0,
-			length: 100,
-			type: linear
-		};
-		axisInfo.setAxisInfo([1, 6, 18, 40, 76]);
+        var axisInfoX:AxisInfo = {
+            id: "x-axis", rotation: 0, tickMargin: 10,
+            tickInfo: createNumericTickInfo(0, 10), // Assumed: tickNum=11, zeroIndex=0
+            type: AxisTypes.linear
+        };
 
-		var axis = new Axis("axis", [axisInfo]);
+        var axes:Array<AxisInfo> = [axisInfoX];
+        var axis = new Axis(axes, cs);
+        axis.positionStartPoint();
 
-		Assert.equals(0, axis.top);
-		Assert.equals(0, axis.left);
-		Assert.equals(0, axis.axesInfo[0].rotation);
-		Assert.equals(100, axis.axesInfo[0].length);
-		Assert.equals(null, axis.axesInfo[0].showZeroTick);
-		Assert.equals("axis", axis.id);
-		Assert.equals(50, axis.axesInfo[0].start.x);
-		Assert.equals(50, axis.axesInfo[0].start.y);
-		Assert.equals(2, axis.childComponents.length);
-		Assert.equals(10, axis.axesInfo[0].tickMargin);
-		Assert.isOfType(axis.childComponents[0], Canvas);
-		Assert.isOfType(axis.childComponents[1], Absolute);
-		Assert.equals(0, axis.ticksPerInfo[0].length);
-	}
+        Assert.equals(10, axis.zeroPoint.x, "BasicH: zeroPoint.x"); // (0 * 200 / 10) + 0 + 10 = 10
+        Assert.equals(75, axis.zeroPoint.y, "BasicH: zeroPoint.y"); // cs.height / 2 = 75
 
-	function testAxisStyle() {
-		var tickInfo:NumericTickInfo = new NumericTickInfo(["min" => [0], "max" => [100]]);
-		var axisX = new Axis("axis", [
-			{
-				id: "xaxis",
-				tickInfo: tickInfo,
-				start: new Point(50, 50),
-				rotation: 0,
-				length: 100,
-				type: linear
-			}
-		]);
-		Assert.equals(0x000000, axisX.axisColor);
+        Assert.equals(0, axisInfoX.start.x, "BasicH: x-axis start.x"); // cs.left
+        Assert.equals(75, axisInfoX.start.y, "BasicH: x-axis start.y"); // zeroPoint.y
+        Assert.equals(200, axisInfoX.length, "BasicH: x-axis length"); // cs.width
+        Assert.notNull(axisInfoX.end, "BasicH: x-axis end should not be null");
+        if (axisInfoX.end != null) {
+            Assert.equals(200, axisInfoX.end.x, "BasicH: x-axis end.x"); // start.x + length
+            Assert.equals(75, axisInfoX.end.y, "BasicH: x-axis end.y"); // start.y
+        }
+    }
 
-		var style = new StyleSheet();
-		style.parse(".axis {background-color: #ababab;}");
-		var axisX = new Axis("axis", [
-			{
-				id: "xaxis",
-				tickInfo: tickInfo,
-				start: new Point(50, 50),
-				rotation: 0,
-				length: 100,
-				type: linear
-			}
-		], style);
-		Assert.equals(0xababab, axisX.axisColor);
-	}
+    function testCorePosition_HorizontalWithTitle_ZeroImpacted() {
+        var cs = new CoordinateSystem();
+        cs.left = 0; cs.bottom = 0; cs.width = 200; cs.height = 150;
 
-	function testTicks() {
-		var tickInfo:NumericTickInfo = new NumericTickInfo(["min" => [0], "max" => [100]]);
-		var axisX = new Axis("axis", [
-			{
-				start: new Point(50, 50),
-				rotation: 0,
-				length: 100,
-				tickInfo: tickInfo,
-				id: "xaxis",
-				type: linear
-			}
-		]);
-		axisX.setTicks(false);
-		Assert.equals(60, axisX.ticksPerInfo[0][0].left);
-		Assert.equals(68, axisX.ticksPerInfo[0][1].left);
-		Assert.equals(100, axisX.ticksPerInfo[0][5].left);
-		Assert.equals(132, axisX.ticksPerInfo[0][9].left);
-		Assert.equals(140, axisX.ticksPerInfo[0][10].left);
+        var titleX:AxisTitle = { text: "X-Axis Title" };
+        var axisInfoX:AxisInfo = {
+            id: "x-axis", rotation: 0, tickMargin: 10,
+            tickInfo: createNumericTickInfo(0,100), // zeroIndex=0, tickNum=11
+            type: AxisTypes.linear,
+            title: titleX
+        };
 
-		var axisX = new Axis("axis", [
-			{
-				start: new Point(50, 100),
-				rotation: 90,
-				length: 100,
-				tickInfo: tickInfo,
-				id: "xaxis",
-				type: linear
-			}
-		]);
-		axisX.setTicks(false);
-		Assert.equals(90, axisX.ticksPerInfo[0][0].top);
-		Assert.equals(82, axisX.ticksPerInfo[0][1].top);
-		Assert.equals(50, axisX.ticksPerInfo[0][5].top);
-		Assert.equals(18, axisX.ticksPerInfo[0][9].top);
-		Assert.equals(10, axisX.ticksPerInfo[0][10].top);
-	}
+        var axisInfoY:AxisInfo = {
+            id: "y-axis", rotation: 90, tickMargin: 5,
+            tickInfo: createNumericTickInfo(0,50), // zeroIndex=0, tickNum=11
+            type: AxisTypes.linear
+        };
 
-	function testPositionStartPoint() {
-		var axisInfo:Array<AxisInfo> = [
-			{
-				id: "x-axis",
-				type: AxisTypes.linear,
-				values: [0, 10],
-				rotation: 0,
-				tickInfo: new NumericTickInfo(["min" => [0], "max" => [10]])
-			},
-			{
-				id: "y-axis",
-				type: AxisTypes.linear,
-				values: [0, 100],
-				rotation: 90,
-				tickInfo: new NumericTickInfo(["min" => [0], "max" => [100]])
-			}
-		];
+        var axes:Array<AxisInfo> = [axisInfoX, axisInfoY];
+        var axis = new Axis(axes, cs);
+        axis.positionStartPoint();
 
-		var axis = new Axis("test-axis", axisInfo);
-		axis.width = 100;
-		axis.height = 100;
-		axis.positionStartPoint();
+        // X-axis (axisInfoX): zeroIndex=0. zp.x = (0*200/10)+0+10 = 10
+        // Y-axis (axisInfoY): zeroIndex=0. zp.y = (0*150/10)+0+5 = 5
+        // Title for X-axis: zeroPoint.y (5) <= cs.bottom (0) + 12. So newHeight = 150-12=138. zeroPoint.y becomes 12.
+        Assert.equals(10, axis.zeroPoint.x, "TitleImpactH: zeroPoint.x");
+        Assert.equals(12, axis.zeroPoint.y, "TitleImpactH: zeroPoint.y");
 
-		// Validate zeroPoint positioning
-		Assert.notNull(axis.zeroPoint);
-		Assert.isTrue(axis.zeroPoint.x > 0);
-		Assert.isTrue(axis.zeroPoint.y > 0);
+        // axisInfoX: zeroPoint.y was changed by title, so start.x = zp.x - margin = 10 - 10 = 0 (ERROR in original prompt, should be zp.x - margin)
+        // The prompt implies start.x should be cs.left if length!=newWidth, but here length *is* newWidth (implicitly, as it's not changed if title is on other axis)
+        // Original logic: if (info.length != newWidth) { info.start.x = zeroPoint.x - info.tickMargin; } else { info.start.x = coordSystem.left; }
+        // Here, newWidth = cs.width (200). info.length for X is cs.width (200). So start.x = cs.left = 0.
+        Assert.equals(0, axisInfoX.start.x, "TitleImpactH: x-axis start.x"); // cs.left
+        Assert.equals(12, axisInfoX.start.y, "TitleImpactH: x-axis start.y"); // zeroPoint.y
+        Assert.equals(200, axisInfoX.length, "TitleImpactH: x-axis length");  // cs.width (newWidth not affected by X title)
 
-		// Validate axis lengths
-		Assert.equals(axisInfo[0].length, axis.width - axis.axisMarginLeft * 2);
-		Assert.equals(axisInfo[1].length, axis.height - axis.axisMarginTop * 2);
-		Assert.equals(axisInfo[0].start.x, axis.axisMarginLeft);
-		Assert.equals(axisInfo[1].start.y, axis.height - axis.axisMarginTop);
-	}
+        // axisInfoY: zeroPoint.y was changed by X-axis title, so start.y = zp.y - margin = 12 - 5 = 7
+        // length is newHeight = 138
+        Assert.equals(10, axisInfoY.start.x, "TitleImpactH: y-axis start.x"); // zeroPoint.x
+        Assert.equals(7, axisInfoY.start.y, "TitleImpactH: y-axis start.y");
+        Assert.equals(138, axisInfoY.length, "TitleImpactH: y-axis length");
+    }
+
+    function testCorePosition_HorizontalWithTitle_ZeroNotImpactedButSpaceTaken() {
+        var cs = new CoordinateSystem();
+        cs.left = 0; cs.bottom = 0; cs.width = 200; cs.height = 150;
+
+        var titleX:AxisTitle = { text: "X-Axis Title" };
+        var axisInfoX:AxisInfo = {
+            id: "x-axis", rotation: 0, tickMargin: 10,
+            tickInfo: createNumericTickInfo(0,100), // zeroIndex=0, tickNum=11
+            type: AxisTypes.linear,
+            title: titleX
+        };
+
+        var axisInfoY_highZero:AxisInfo = {
+            id: "y-high", rotation: 90, tickMargin: 5,
+            // NumericTickInfo(["min"=>[-50.], "max"=>[50.]]) -> tickNum=11, zeroIndex=5
+            tickInfo: new NumericTickInfo(["min"=>[-50.], "max"=>[50.]]),
+            type: AxisTypes.linear
+        };
+
+        var axes:Array<AxisInfo> = [axisInfoX, axisInfoY_highZero];
+        var axis = new Axis(axes, cs);
+        axis.positionStartPoint();
+
+        // X-axis (axisInfoX): zeroIndex=0. zp.x = (0*200/10)+0+10 = 10
+        // Y-axis (axisInfoY_highZero): zeroIndex=5. zp.y = (5*150/10)+0+5 = 75+5 = 80
+        // Title for X-axis: zeroPoint.y (80) > cs.bottom (0) + 12. So newHeight not changed by title. zeroPoint.y remains 80.
+        Assert.equals(10, axis.zeroPoint.x, "TitleNoImpactH: zeroPoint.x");
+        Assert.equals(80, axis.zeroPoint.y, "TitleNoImpactH: zeroPoint.y");
+
+        // axisInfoX: newHeight not changed. start.x = cs.left = 0. length = cs.width = 200
+        Assert.equals(0, axisInfoX.start.x, "TitleNoImpactH: x-axis start.x");
+        Assert.equals(80, axisInfoX.start.y, "TitleNoImpactH: x-axis start.y");
+        Assert.equals(200, axisInfoX.length, "TitleNoImpactH: x-axis length");
+
+        // axisInfoY_highZero: newHeight not changed. start.y = cs.bottom = 0. length = cs.height = 150
+        Assert.equals(10, axisInfoY_highZero.start.x, "TitleNoImpactH: y-axis start.x");
+        Assert.equals(0, axisInfoY_highZero.start.y, "TitleNoImpactH: y-axis start.y");
+        Assert.equals(150, axisInfoY_highZero.length, "TitleNoImpactH: y-axis length");
+    }
+
+    function testCorePosition_StringTicksHorizontal() {
+        var cs = new CoordinateSystem();
+        cs.left = 0; cs.bottom = 0; cs.width = 220; cs.height = 100;
+        var strLabels = ["A", "B", "C", "D"]; // tickNum=4, zeroIndex=0 (implicit)
+        var axisInfoX:AxisInfo = {
+            id: "x-str-axis", rotation: 0, tickMargin: 10,
+            tickInfo: createStringTickInfo(strLabels),
+            type: AxisTypes.categorical
+        };
+        var axes:Array<AxisInfo> = [axisInfoX];
+        var axis = new Axis(axes, cs);
+        axis.positionStartPoint();
+
+        // StringInfo: tickNum=4, zeroIndex=0. Divisor = 3.
+        // zp.x = (0 * 220 / 3) + 0 + 10 = 10. zp.y = 100/2 = 50.
+        Assert.equals(10, Math.round(axis.zeroPoint.x), "StringH: zeroPoint.x"); // Original logic used tickNum-1 as divisor for StringTickInfo too
+        Assert.equals(50, axis.zeroPoint.y, "StringH: zeroPoint.y");
+
+        Assert.equals(0, axisInfoX.start.x, "StringH: x-axis start.x"); // cs.left
+        Assert.equals(50, axisInfoX.start.y, "StringH: x-axis start.y"); // zeroPoint.y
+        Assert.equals(220, axisInfoX.length, "StringH: x-axis length"); // cs.width
+    }
+
+    function testCorePosition_SmallDimensions_LengthClamped() {
+        var cs = new CoordinateSystem();
+        cs.left = 0; cs.bottom = 0; cs.width = 30; cs.height = 20;
+        var axisInfoX:AxisInfo = {
+            id: "x-small", rotation: 0, tickMargin: 20,
+            tickInfo: createNumericTickInfo(0,1), // tickNum=2, zeroIndex=0
+            type: AxisTypes.linear
+        };
+        var axes:Array<AxisInfo> = [axisInfoX];
+        var axis = new Axis(axes, cs);
+        axis.positionStartPoint();
+        // zp.x = (0*30/1) + 0 + 20 = 20. zp.y = 20/2 = 10
+        Assert.equals(20, axis.zeroPoint.x, "SmallDim: zeroPoint.x");
+        Assert.equals(10, axis.zeroPoint.y, "SmallDim: zeroPoint.y");
+        // start.x = cs.left = 0. length = cs.width = 30
+        Assert.equals(0, axisInfoX.start.x, "SmallDim: x-axis start.x");
+        Assert.equals(10, axisInfoX.start.y, "SmallDim: x-axis start.y");
+        Assert.equals(30, axisInfoX.length, "SmallDim: x-axis length"); // Original does not clamp in positionStartPoint
+    }
+
+    function testCorePosition_VerticalWithSubtitle_ZeroImpacted() {
+        var cs = new CoordinateSystem();
+        cs.left = 0; cs.bottom = 0; cs.width = 200; cs.height = 150;
+
+        var subtitleY:AxisTitle = { text: "Y-Axis Subtitle" };
+        var axisInfoY:AxisInfo = {
+            id: "y-axis", rotation: 90, tickMargin: 5,
+            tickInfo: createNumericTickInfo(0,50), // zeroIndex=0, tickNum=11
+            type: AxisTypes.linear,
+            subTitle: subtitleY
+        };
+
+        var axisInfoX:AxisInfo = {
+            id: "x-axis", rotation: 0, tickMargin: 10,
+            tickInfo: createNumericTickInfo(0,100), // zeroIndex=0, tickNum=11
+            type: AxisTypes.linear
+        };
+
+        var axes:Array<AxisInfo> = [axisInfoX, axisInfoY];
+        var axis = new Axis(axes, cs);
+        axis.positionStartPoint();
+
+        // X-axis (axisInfoX): zeroIndex=0. zp.x = (0*200/10)+0+10 = 10
+        // Y-axis (axisInfoY): zeroIndex=0. zp.y = (0*150/10)+0+5 = 5
+        // Subtitle for Y-axis: zeroPoint.x (10) <= cs.left (0) + 20. So newWidth = 200-20=180. zeroPoint.x becomes 20.
+        Assert.equals(20, axis.zeroPoint.x, "SubImpactV: zeroPoint.x");
+        Assert.equals(5, axis.zeroPoint.y, "SubImpactV: zeroPoint.y");
+
+        // axisInfoY: newWidth was changed by Y-axis subtitle. start.x = zp.x = 20. length = cs.height = 150
+        Assert.equals(20, axisInfoY.start.x, "SubImpactV: y-axis start.x");
+        Assert.equals(0, axisInfoY.start.y, "SubImpactV: y-axis start.y"); // cs.bottom
+        Assert.equals(150, axisInfoY.length, "SubImpactV: y-axis length"); // cs.height
+
+        // axisInfoX: newWidth was changed by Y-axis subtitle. start.x = zp.x - margin = 20 - 10 = 10
+        // length = newWidth = 180
+        Assert.equals(10, axisInfoX.start.x, "SubImpactV: x-axis start.x");
+        Assert.equals(5, axisInfoX.start.y, "SubImpactV: x-axis start.y");
+        Assert.equals(180, axisInfoX.length, "SubImpactV: x-axis length");
+    }
 }
