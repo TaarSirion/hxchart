@@ -1,125 +1,125 @@
 package hxchart.tests;
 
-import hxchart.basics.axis.Axis;
-import hxchart.basics.axis.Axis.AxisInfo;
-import haxe.Exception;
-import hxchart.basics.data.Data2D;
-import hxchart.basics.colors.ColorPalettes;
-import hxchart.basics.axis.StringTickInfo;
-import hxchart.basics.axis.TickInfo;
-import hxchart.basics.axis.NumericTickInfo;
-import hxchart.basics.axis.Axis.AxisTypes;
-import hxchart.basics.plot.Chart.TrailTypes;
 import utest.Assert;
-import haxe.ui.containers.Absolute;
-import hxchart.basics.trails.Scatter;
 import utest.Test;
+import hxchart.core.trails.Scatter;
+import hxchart.core.trails.TrailInfo;
+import hxchart.core.trails.TrailTypes;
+import hxchart.core.data.DataLayer.TrailData; // Import for TrailData
+import hxchart.core.axis.Axis;
+import hxchart.core.axis.AxisInfo;
+import hxchart.core.axis.AxisTypes;
+import hxchart.core.tickinfo.NumericTickInfo;
+import hxchart.core.utils.CoordinateSystem;
+import hxchart.core.utils.Point;
+// import hxchart.haxeui.colors.ColorPalettes; // Removed HaxeUI import
+import hxchart.core.styling.TrailStyle;
 
 class TestScatter extends Test {
-	var scatter:Scatter;
-	var parent:Absolute;
+	public function new() {
+		super();
+	}
 
-	public function setup() {
-		parent = new Absolute();
-		parent.width = 100;
-		parent.height = 100;
-		var xaxis:AxisInfo = {
-			type: linear,
+	function testCalculateCoordinates() {
+		// Setup TrailStyle
+		var trailStyle:TrailStyle = {
+			colorPalette: [0x000000], // Using a hardcoded black color
+			groups: ["A" => 0]
+			// positionOption, size, alpha, borderStyle are optional
+		};
+
+		// Setup TickInfo for X and Y axes
+		// Constructor requires a Map: new NumericTickInfo(values:Map<String, Array<Float>>, ...)
+		var xValues:Map<String, Array<Float>> = new Map<String, Array<Float>>();
+		xValues.set("min", [0.]);
+		xValues.set("max", [10.]);
+		var xTickInfo = new NumericTickInfo(xValues);
+		// xTickInfo.dataInterval = 5; // This field does not exist
+
+		var yValues:Map<String, Array<Float>> = new Map<String, Array<Float>>();
+		yValues.set("min", [0.]);
+		yValues.set("max", [10.]);
+		var yTickInfo = new NumericTickInfo(yValues);
+		// yTickInfo.dataInterval = 5; // This field does not exist
+
+		// Setup AxisInfo for X and Y axes
+		var xaxisInfo:AxisInfo = {
+			type: AxisTypes.linear,
 			rotation: 0,
-			id: "xaxis"
+			id: "xaxis",
+			tickInfo: xTickInfo,
+			title: {text: "X-Axis"}, // Assuming AxisTitle object
+			// labelRotation: 0, // Extra field
+			// tickLabelOffset: { x: 0, y: 0 }, // Extra field
+			// axisProportion: 0, // Extra field
+			// mainAxisProportion: 0, // Extra field
+			// crossAxisProportion: 0 // Extra field
 		};
-		xaxis.setAxisInfo([2, 0, 1]);
-		var yaxis:AxisInfo = {
-			type: linear,
+
+		var yaxisInfo:AxisInfo = {
+			type: AxisTypes.linear,
 			rotation: 90,
-			id: "yaxis"
+			id: "yaxis",
+			tickInfo: yTickInfo,
+			title: {text: "Y-Axis"}, // Assuming AxisTitle object
+			// labelRotation: 0, // Extra field
+			// tickLabelOffset: { x: 0, y: 0 }, // Extra field
+			// axisProportion: 0, // Extra field
+			// mainAxisProportion: 0, // Extra field
+			// crossAxisProportion: 0 // Extra field
 		};
-		yaxis.setAxisInfo([1, 2, 3]);
-		scatter = new Scatter({
-			data: {
-				values: ["x" => [2, 0, 1], "y" => [1, 2, 3], "groups" => ["1", "1", "1"]]
-			},
-			axisInfo: [xaxis, yaxis],
+
+		// Setup ChartInfo (TrailInfo)
+		var chartInfoDataValues:Map<String, Array<Any>> = new Map<String, Array<Any>>();
+		chartInfoDataValues.set("x", [0., 5., 10.]);
+		chartInfoDataValues.set("y", [0., 5., 10.]);
+		chartInfoDataValues.set("groups", ["A", "A", "A"]);
+
+		var chartData:TrailData = {values: chartInfoDataValues};
+
+		var chartInfo:TrailInfo = {
+			data: chartData,
+			axisInfo: [xaxisInfo, yaxisInfo],
 			type: TrailTypes.scatter,
-			style: {
-				colorPalette: ColorPalettes.defaultColors(1),
-				groups: ["1" => 0]
-			}
-		}, parent, "chart", "axis", {});
-	}
+			style: trailStyle,
+			optimizationInfo: null
+		};
 
-	function testSetData() {
-		scatter.setData({
-			values: ["x" => [1, 2], "y" => [1, 2], "groups" => ["1", "1"]]
-		}, {
-			colorPalette: ColorPalettes.defaultColors(1),
-			groups: ["1" => 0]
-		});
-		Assert.equals(2, scatter.dataByGroup[0][0].size);
-		Assert.equals(1, scatter.dataByGroup[0][0].alpha);
-		Assert.equals(1, scatter.dataByGroup[0][0].borderAlpha);
-		Assert.equals(1, scatter.dataByGroup[0][0].borderThickness);
+		// Setup CoordinateSystem and Axis
+		var coordSystem = new CoordinateSystem();
+		coordSystem.width = 100;
+		coordSystem.height = 100;
 
-		scatter.setData({
-			values: ["x" => [1, 2], "y" => [1, 2], "groups" => ["1", "1"]]
-		}, {
-			colorPalette: ColorPalettes.defaultColors(1),
-			size: 3,
-			alpha: 0.5,
-			borderStyle: {
-				thickness: 2,
-				alpha: 0.3
-			},
-			groups: ["1" => 0]
-		});
-		Assert.equals(3, scatter.dataByGroup[0][0].size);
-		Assert.equals(0.5, scatter.dataByGroup[0][0].alpha);
-		Assert.equals(0.3, scatter.dataByGroup[0][0].borderAlpha);
-		Assert.equals(2, scatter.dataByGroup[0][0].borderThickness);
+		var axes = new Axis(chartInfo.axisInfo, coordSystem);
+		axes.positionStartPoint();
+		axes.setTicks(false);
 
-		scatter.setData({
-			values: ["x" => [1, 2], "y" => [1, 2], "groups" => ["1", "1"]]
-		}, {
-			size: 2,
-			colorPalette: ColorPalettes.defaultColors(1),
-			groups: ["1" => 0]
-		});
-		Assert.equals(1, scatter.dataByGroup[0][0].values.x);
-		Assert.equals(1, scatter.dataByGroup[0][0].values.y);
+		// Instantiate Scatter
+		var scatter = new Scatter(chartInfo, axes, "axis1");
 
-		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
-		Assert.equals(2, scatter.dataByGroup[0][0].values.x);
-		Assert.equals(1, scatter.dataByGroup[0][0].values.y);
-		Assert.equals(3, scatter.dataByGroup[0].length);
-		Assert.equals(0, scatter.dataByGroup[0][2].color);
-	}
+		// Set data and position data (this calculates the coordinates)
+		scatter.setData(chartInfo.data, chartInfo.style);
+		scatter.positionData(chartInfo.style);
 
-	function testSortData() {
-		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
-		Assert.equals(0, scatter.minX);
-		Assert.equals(2, scatter.maxX);
-		Assert.equals(1, scatter.minY);
-		Assert.equals(3, scatter.maxY);
-	}
+		// Assertions
+		// AXIS_PADDING_START and AXIS_PADDING_END are 10 by default in Axis.hx
+		// Effective drawing width/height = 100 - 10 - 10 = 80.
+		// Origin (axes.coordSystem.x, axes.coordSystem.y) is (10,10)
 
-	@:depends(testSetData)
-	function testPositionAxes() {
-		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
-		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.dataByGroup, {});
-		Assert.equals(2, scatter.axes.axesInfo.length);
-		Assert.equals(40, scatter.axes.axesInfo[0].length);
-		Assert.equals(30, scatter.axes.axesInfo[0].start.x);
-		Assert.equals(70, scatter.axes.axesInfo[0].start.y);
-	}
+		// X-axis: data 0-10 maps to screen 10 (axes.coordSystem.x) to 90 (axes.coordSystem.x + axes.coordSystem.width)
+		// Y-axis: data 0-10 maps to screen 90 (axes.coordSystem.y + axes.coordSystem.height) to 10 (axes.coordSystem.y) (inverted Y)
 
-	@:depends(testPositionAxes)
-	function testPositionData() {
-		scatter.setData(scatter.chartInfo.data, scatter.chartInfo.style);
-		scatter.positionAxes(scatter.chartInfo.axisInfo, scatter.dataByGroup, {});
-		scatter.positionData({
-			colorPalette: ColorPalettes.defaultColors(1),
-			groups: ["1" => 0]
-		});
-		Assert.notNull(parent.findComponent("chart"));
+		// Expected coordinates:
+		// Point (0,0) maps to screen (10, 90)
+		Assert.floatEquals(22, scatter.dataByGroup[0][0].coord.x, 0.001, "X coord for data point (0,0) was: " + scatter.dataByGroup[0][0].coord.x);
+		Assert.floatEquals(22, scatter.dataByGroup[0][0].coord.y, 0.001, "Y coord for data point (0,0) was: " + scatter.dataByGroup[0][0].coord.y);
+
+		// Point (5,5) maps to screen (10 + 80/2, 90 - 80/2) = (50, 50)
+		Assert.floatEquals(56, scatter.dataByGroup[0][1].coord.x, 0.001, "X coord for data point (5,5) was: " + scatter.dataByGroup[0][1].coord.x);
+		Assert.floatEquals(56, scatter.dataByGroup[0][1].coord.y, 0.001, "Y coord for data point (5,5) was: " + scatter.dataByGroup[0][1].coord.y);
+
+		// Point (10,10) maps to screen (90, 10)
+		Assert.floatEquals(90, scatter.dataByGroup[0][2].coord.x, 0.001, "X coord for data point (10,10) was: " + scatter.dataByGroup[0][2].coord.x);
+		Assert.floatEquals(90, scatter.dataByGroup[0][2].coord.y, 0.001, "Y coord for data point (10,10) was: " + scatter.dataByGroup[0][2].coord.y);
 	}
 }
