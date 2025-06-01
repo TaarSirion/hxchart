@@ -1,4 +1,5 @@
 -cp local
+-cp hxchart
 -main TestAll
 
 -lib utest

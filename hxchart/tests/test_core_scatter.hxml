@@ -1,0 +1,7 @@
+-cp ..
+-lib utest
+-lib haxeui-core
+-lib haxeui-html5
+-main hxchart.tests.RunCoreScatterTest
+-js hxchart/tests/core_test.js # Output to JS file
+# --interp # Removed interpreter mode
