@@ -141,135 +141,123 @@ class Axis {
 	 * Positions the startpoints of the axes according to the other axes, titles and margins.
 	 */
 	public function positionStartPoint() {
-    // Step 1: Initialize zeroPoint to geometric center
-    this.zeroPoint = new Point(coordSystem.left + coordSystem.width / 2, coordSystem.bottom + coordSystem.height / 2);
+		this.zeroPoint = new Point(coordSystem.left + coordSystem.width / 2, coordSystem.bottom + coordSystem.height / 2);
+		// First position zero point according to axes information. Only the first two axes will be considered.
+		var xaxesNum:Int = 0;
+		var yaxesNum:Int = 0;
+		for (info in this.axesInfo) {
+			var rotation = info.rotation;
+			switch (rotation) {
+				case 0:
+					if (xaxesNum == 0) {
+						this.zeroPoint.x = info.tickInfo.zeroIndex * coordSystem.width / (info.tickInfo.tickNum - 1) + coordSystem.left + info.tickMargin;
+					}
+					info.length = coordSystem.width;
+					xaxesNum++;
+				case 90:
+					if (yaxesNum == 0) {
+						this.zeroPoint.y = info.tickInfo.zeroIndex * coordSystem.height / (info.tickInfo.tickNum - 1) + coordSystem.bottom + info.tickMargin;
+					}
+					info.length = coordSystem.height;
+					yaxesNum++;
+				case _:
+			}
+		}
+		// Then we change the height of the axes and position of zeroPoint according to present titles.
+		var newHeight = coordSystem.height;
+		var newWidth = coordSystem.width;
+		for (info in this.axesInfo) {
+			switch (info.rotation) {
+				case 0:
+					if (info.title == null) {
+						continue;
+					}
+					if (info.title.position != null) {
+						continue;
+					}
 
-    var xaxesNum:Int = 0;
-    var yaxesNum:Int = 0;
+					if (zeroPoint.y <= coordSystem.bottom + 12) {
+						newHeight = coordSystem.height - 12;
+						zeroPoint.y = coordSystem.bottom + (coordSystem.height - newHeight) + info.tickMargin;
+					} else {
+						newHeight = coordSystem.height;
+					}
+				case 90:
+					if (info.title == null) {
+						continue;
+					}
+					if (info.title.position != null) {
+						continue;
+					}
+					// We assume a fixed size of 12 for title
+					if (zeroPoint.x <= (coordSystem.left + 12)) {
+						newWidth = coordSystem.width;
+						zeroPoint.x = coordSystem.left + (coordSystem.width - newWidth) + info.tickMargin;
+					} else {
+						newWidth = coordSystem.width;
+					}
+				case _:
+			}
+		}
+		// Repeat for subtitles
+		for (info in this.axesInfo) {
+			switch (info.rotation) {
+				case 0:
+					if (info.subTitle == null) {
+						continue;
+					}
+					if (info.subTitle.position != null) {
+						continue;
+					}
+					if (zeroPoint.y <= (coordSystem.bottom + 20)) {
+						newHeight = coordSystem.height - 20;
+						zeroPoint.y = coordSystem.bottom + (coordSystem.height - newHeight) + info.tickMargin;
+					}
+				case 90:
+					if (info.subTitle == null) {
+						continue;
+					}
+					if (info.subTitle.position != null) {
+						continue;
+					}
+					if (zeroPoint.x <= (coordSystem.left + 20)) {
+						newWidth = coordSystem.width - 20;
+						zeroPoint.x = coordSystem.left + (coordSystem.width - newWidth) + info.tickMargin;
+					}
+				case _:
+			}
+		}
+		// Lastly set the start positions of the axes according to zeroPoint and newWidth or newHeight
+		for (info in this.axesInfo) {
+			var rotation = info.rotation;
+			if (info.start == null) {
+				info.start = new Point(0, 0);
+			}
+			switch (rotation) {
+				case 0:
+					var leftEdge = coordSystem.left;
+					if (coordSystem.width != newWidth) {
+						leftEdge = coordSystem.left + (coordSystem.width - newWidth);
+					}
+					info.start.x = leftEdge;
 
-    // Step 2: Adjust zeroPoint based on the first X and Y axis's zeroIndex.
-    // (This part remains unchanged from the previous subtask's version)
-    for (info in this.axesInfo) {
-        var rotation = info.rotation;
-        var tickInfo = info.tickInfo;
-        var tickNum = tickInfo.tickNum;
+					info.start.y = zeroPoint.y;
+					info.length = newWidth;
+				case 90:
+					var bottomEdge = coordSystem.bottom;
+					if (coordSystem.height != newHeight) {
+						bottomEdge = coordSystem.bottom + (coordSystem.height - newHeight);
+					}
+					info.start.y = bottomEdge;
 
-        if (Std.isOfType(tickInfo, StringTickInfo)) {
-             tickNum++;
-        }
+					info.length = newHeight;
+					info.start.x = zeroPoint.x;
+				case _:
+			}
+		}
 
-        var divisor = (tickNum - 1);
-        if (divisor == 0) divisor = 1;
-
-        switch (rotation) {
-            case 0:
-                if (xaxesNum == 0) {
-                    this.zeroPoint.x = tickInfo.zeroIndex * coordSystem.width / divisor + coordSystem.left + info.tickMargin;
-                }
-                // info.length is calculated later
-                xaxesNum++;
-                break;
-            case 90:
-                if (yaxesNum == 0) {
-                    this.zeroPoint.y = tickInfo.zeroIndex * coordSystem.height / divisor + coordSystem.bottom + info.tickMargin;
-                }
-                // info.length is calculated later
-                yaxesNum++;
-                break;
-            case _:
-        }
-    }
-
-    // Step 3: Adjust newWidth, newHeight, and potentially this.zeroPoint due to titles/subtitles.
-    // This section is REPLACED with the new logic.
-    var newHeight = coordSystem.height;
-    var newWidth = coordSystem.width;
-
-    var spaceTakenBottom = 0;
-    var spaceTakenLeft = 0;
-    var titleFixedSize = 12;    // Standard size for title text area
-    var subtitleFixedSize = 20; // Standard size for subtitle text area (assumed to include title if both present)
-
-    for (info in this.axesInfo) {
-        switch (info.rotation) {
-            case 0: // Horizontal axis, titles/subtitles are assumed at the bottom if auto-positioned
-                if (info.subTitle != null && info.subTitle.position == null) {
-                    spaceTakenBottom = Math.max(spaceTakenBottom, subtitleFixedSize);
-                } else if (info.title != null && info.title.position == null) {
-                    spaceTakenBottom = Math.max(spaceTakenBottom, titleFixedSize);
-                }
-                break;
-            case 90: // Vertical axis, titles/subtitles are assumed at the left if auto-positioned
-                if (info.subTitle != null && info.subTitle.position == null) {
-                    spaceTakenLeft = Math.max(spaceTakenLeft, subtitleFixedSize);
-                } else if (info.title != null && info.title.position == null) {
-                    spaceTakenLeft = Math.max(spaceTakenLeft, titleFixedSize);
-                }
-                break;
-            case _:
-        }
-    }
-
-    newHeight = coordSystem.height - spaceTakenBottom;
-    newWidth = coordSystem.width - spaceTakenLeft;
-
-    // Adjust zeroPoint if it falls into the space taken by titles/subtitles
-    if (spaceTakenBottom > 0) {
-        var minZeroY = coordSystem.bottom + spaceTakenBottom;
-        if (this.zeroPoint.y < minZeroY) {
-            this.zeroPoint.y = minZeroY;
-        }
-    }
-
-    if (spaceTakenLeft > 0) {
-        var minZeroX = coordSystem.left + spaceTakenLeft;
-        if (this.zeroPoint.x < minZeroX) {
-            this.zeroPoint.x = minZeroX;
-        }
-    }
-    // End of REPLACED Step 3 logic
-
-    // Step 4: Set final start positions and lengths for each axis.
-    // (This part remains unchanged from the previous subtask's version, using the new newHeight/newWidth)
-    for (info in this.axesInfo) {
-        var rotation = info.rotation;
-        if (info.start == null) {
-            info.start = new Point(0, 0);
-        }
-        switch (rotation) {
-            case 0: // Horizontal axis
-                var axisActualLeftEdge = coordSystem.left;
-                if (newWidth < coordSystem.width) {
-                    axisActualLeftEdge = coordSystem.left + (coordSystem.width - newWidth);
-                }
-
-                info.start.x = axisActualLeftEdge + info.tickMargin;
-                info.start.y = this.zeroPoint.y;
-
-                info.length = newWidth - (2 * info.tickMargin);
-                if (info.length < 0) info.length = 0;
-                break;
-
-            case 90: // Vertical axis
-                var axisActualBottomEdge = coordSystem.bottom;
-                if (newHeight < coordSystem.height) {
-                    axisActualBottomEdge = coordSystem.bottom + (coordSystem.height - newHeight);
-                }
-
-                info.start.y = axisActualBottomEdge + info.tickMargin;
-                info.start.x = this.zeroPoint.x;
-
-                info.length = newHeight - (2 * info.tickMargin);
-                if (info.length < 0) info.length = 0;
-                break;
-            case _:
-        }
-    }
-
-    // Step 5: Calculate end points based on new start and length
-    // (This part remains unchanged from the previous subtask's version)
-    for (info in this.axesInfo) {
-        info.end = Trigonometry.positionEndpoint(info.start, info.rotation, info.length);
-    }
-}
+		for (info in this.axesInfo) {
+			info.end = Trigonometry.positionEndpoint(info.start, info.rotation, info.length);
+		}
+	}
 }
