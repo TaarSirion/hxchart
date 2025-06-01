@@ -45,13 +45,13 @@ import hxchart.core.tickinfo.TickInfo;
 	@:optional public var title:AxisTitle;
 	@:optional public var subTitle:AxisTitle;
 
-	@:optional public var tickMargin:Float = 10;
+	@:optional public var tickMargin:Float = 5;
 
 	public function setAxisInfo(trailValues:Array<Any>) {
 		if (trailValues.length == 0 && values.length == 0) {
 			throw new Exception("Cannot set AxisInfo without values.");
 		}
-		trace(trailValues);
+
 		if (type == null) {
 			var firstValue = trailValues[0];
 			if (firstValue is Int || firstValue is Float) {

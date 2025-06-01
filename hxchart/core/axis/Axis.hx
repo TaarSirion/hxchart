@@ -178,7 +178,7 @@ class Axis {
 
 					if (zeroPoint.y <= coordSystem.bottom + 12) {
 						newHeight = coordSystem.height - 12;
-						zeroPoint.y = coordSystem.bottom + 12;
+						zeroPoint.y = coordSystem.bottom + (coordSystem.height - newHeight) + info.tickMargin;
 					} else {
 						newHeight = coordSystem.height;
 					}
@@ -191,8 +191,8 @@ class Axis {
 					}
 					// We assume a fixed size of 12 for title
 					if (zeroPoint.x <= (coordSystem.left + 12)) {
-						newWidth = coordSystem.width - 12;
-						zeroPoint.x = coordSystem.left + 12;
+						newWidth = coordSystem.width;
+						zeroPoint.x = coordSystem.left + (coordSystem.width - newWidth) + info.tickMargin;
 					} else {
 						newWidth = coordSystem.width;
 					}
@@ -211,7 +211,7 @@ class Axis {
 					}
 					if (zeroPoint.y <= (coordSystem.bottom + 20)) {
 						newHeight = coordSystem.height - 20;
-						zeroPoint.y = coordSystem.bottom + 20;
+						zeroPoint.y = coordSystem.bottom + (coordSystem.height - newHeight) + info.tickMargin;
 					}
 				case 90:
 					if (info.subTitle == null) {
@@ -222,7 +222,7 @@ class Axis {
 					}
 					if (zeroPoint.x <= (coordSystem.left + 20)) {
 						newWidth = coordSystem.width - 20;
-						zeroPoint.x = coordSystem.left + 20;
+						zeroPoint.x = coordSystem.left + (coordSystem.width - newWidth) + info.tickMargin;
 					}
 				case _:
 			}
@@ -235,20 +235,22 @@ class Axis {
 			}
 			switch (rotation) {
 				case 0:
-					if (info.length != newWidth) {
-						info.length = newWidth;
-						info.start.x = zeroPoint.x - info.tickMargin;
-					} else {
-						info.start.x = coordSystem.left;
+					var leftEdge = coordSystem.left;
+					if (coordSystem.width != newWidth) {
+						leftEdge = coordSystem.left + (coordSystem.width - newWidth);
 					}
+					info.start.x = leftEdge;
+
 					info.start.y = zeroPoint.y;
+					info.length = newWidth;
 				case 90:
-					if (info.length != newHeight) {
-						info.length = newHeight;
-						info.start.y = zeroPoint.y - info.tickMargin;
-					} else {
-						info.start.y = coordSystem.bottom;
+					var bottomEdge = coordSystem.bottom;
+					if (coordSystem.height != newHeight) {
+						bottomEdge = coordSystem.bottom + (coordSystem.height - newHeight);
 					}
+					info.start.y = bottomEdge;
+
+					info.length = newHeight;
 					info.start.x = zeroPoint.x;
 				case _:
 			}
