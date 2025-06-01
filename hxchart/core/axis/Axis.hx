@@ -137,6 +137,9 @@ class Axis {
 		}
 	}
 
+	final titleSpace:Float = 12;
+	final subTitleSpace:Float = 20;
+
 	/**
 	 * Positions the startpoints of the axes according to the other axes, titles and margins.
 	 */
@@ -167,61 +170,47 @@ class Axis {
 		var newHeight = coordSystem.height;
 		var newWidth = coordSystem.width;
 		for (info in this.axesInfo) {
+			if (info.title == null) {
+				continue;
+			}
+			if (info.title.position != null) {
+				continue;
+			}
 			switch (info.rotation) {
 				case 0:
-					if (info.title == null) {
-						continue;
-					}
-					if (info.title.position != null) {
-						continue;
-					}
-
-					if (zeroPoint.y <= coordSystem.bottom + 12) {
-						newHeight = coordSystem.height - 12;
+					if (zeroPoint.y <= coordSystem.bottom + titleSpace) {
+						newHeight = coordSystem.height - titleSpace;
 						zeroPoint.y = coordSystem.bottom + (coordSystem.height - newHeight) + info.tickMargin;
-					} else {
-						newHeight = coordSystem.height;
 					}
 				case 90:
-					if (info.title == null) {
-						continue;
-					}
-					if (info.title.position != null) {
-						continue;
-					}
-					// We assume a fixed size of 12 for title
-					if (zeroPoint.x <= (coordSystem.left + 12)) {
-						newWidth = coordSystem.width;
+					if (zeroPoint.x <= (coordSystem.left + titleSpace)) {
+						newWidth = coordSystem.width - titleSpace;
 						zeroPoint.x = coordSystem.left + (coordSystem.width - newWidth) + info.tickMargin;
-					} else {
-						newWidth = coordSystem.width;
 					}
 				case _:
 			}
 		}
 		// Repeat for subtitles
 		for (info in this.axesInfo) {
+			if (info.subTitle == null) {
+				continue;
+			}
+			if (info.title == null) {
+				trace("WARNING: Trying to set a subtitle without a title. This is not possible, and the step will be skipped!");
+				continue;
+			}
+			if (info.subTitle.position != null) {
+				continue;
+			}
 			switch (info.rotation) {
 				case 0:
-					if (info.subTitle == null) {
-						continue;
-					}
-					if (info.subTitle.position != null) {
-						continue;
-					}
-					if (zeroPoint.y <= (coordSystem.bottom + 20)) {
-						newHeight = coordSystem.height - 20;
+					if (zeroPoint.y <= (coordSystem.bottom + subTitleSpace)) {
+						newHeight = coordSystem.height - subTitleSpace;
 						zeroPoint.y = coordSystem.bottom + (coordSystem.height - newHeight) + info.tickMargin;
 					}
 				case 90:
-					if (info.subTitle == null) {
-						continue;
-					}
-					if (info.subTitle.position != null) {
-						continue;
-					}
-					if (zeroPoint.x <= (coordSystem.left + 20)) {
-						newWidth = coordSystem.width - 20;
+					if (zeroPoint.x <= (coordSystem.left + subTitleSpace)) {
+						newWidth = coordSystem.width - subTitleSpace;
 						zeroPoint.x = coordSystem.left + (coordSystem.width - newWidth) + info.tickMargin;
 					}
 				case _:
