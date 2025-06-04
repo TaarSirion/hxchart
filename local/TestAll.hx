@@ -5,7 +5,7 @@ import hxchart.tests.TestAxis;
 // import hxchart.tests.TestStatistics;
 // import haxe.ui.Toolkit;
 // import hxchart.tests.TestAxisTools;
-// import hxchart.tests.TestScatter;
+import hxchart.tests.TestScatter;
 // import hxchart.tests.TestLegend;
 // import hxchart.tests.TestChart;
 import utest.ui.Report;
@@ -22,7 +22,7 @@ class TestAll {
 		// 	app.start();
 		// 	runner.addCase(new TestAxisTools());
 		// 	runner.addCase(new TestNumericTickInfo());
-		// 	runner.addCase(new TestScatter());
+		runner.addCase(new TestScatter());
 		// 	runner.addCase(new TestLegend());
 		// 	runner.addCase(new TestChart());
 		// 	runner.addCase(new TestStatistics());

@@ -56,5 +56,6 @@ class Tick {
 		this.tickRotation = rotation + 90;
 		showLabel = true;
 		labelPosition = S;
+		hidden = false;
 	}
 }
