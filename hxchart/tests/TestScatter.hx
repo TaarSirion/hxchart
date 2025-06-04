@@ -1,5 +1,6 @@
 package hxchart.tests;
 
+import hxchart.core.tick.Tick;
 import utest.Assert;
 import utest.Test;
 import hxchart.core.trails.Scatter;
@@ -121,5 +122,127 @@ class TestScatter extends Test {
 		// Point (10,10) maps to screen (90, 10)
 		Assert.floatEquals(90, scatter.dataByGroup[0][2].coord.x, 0.001, "X coord for data point (10,10) was: " + scatter.dataByGroup[0][2].coord.x);
 		Assert.floatEquals(90, scatter.dataByGroup[0][2].coord.y, 0.001, "Y coord for data point (10,10) was: " + scatter.dataByGroup[0][2].coord.y);
+	}
+
+	// --- Tests for calcXCoord ---
+
+	function createTick(label:String, pos:Float) {
+		var tick = new Tick();
+		tick.text = label;
+		tick.middlePos = new Point(pos, 0);
+		return tick;
+	}
+
+	function testCalcXCoord_StringValue_MatchFound() {
+		var chartInfo:TrailInfo = {
+			data: {
+				values: ["x" => ["A", "B", "C"], "y" => [1, 2, 3]]
+			},
+			type: scatter
+		}
+		var scatter = new Scatter(chartInfo, null, "");
+
+		var ticks:Array<Tick> = [createTick("A", 10), createTick("B", 20)];
+
+		var result = scatter.calcXCoord("A", ticks);
+		Assert.notNull(result, "Result should not be null for match found");
+		Assert.floatEquals(10, result, 0.001);
+	}
+
+	function testCalcXCoord_StringValue_NoMatch() {
+		var chartInfo:TrailInfo = {
+			data: {
+				values: ["x" => ["A", "B", "C"], "y" => [1, 2, 3]]
+			},
+			type: scatter
+		}
+		var scatter = new Scatter(chartInfo, null, "");
+		var ticks:Array<Tick> = [createTick("A", 10), createTick("B", 20)];
+		var result = scatter.calcXCoord("C", ticks);
+		Assert.isNull(result, "Result should be null for no match");
+	}
+
+	function testCalcXCoord_FloatValue_ExactMatch() {
+		var chartInfo:TrailInfo = {
+			data: {
+				values: ["x" => ["A", "B", "C"], "y" => [1, 2, 3]]
+			},
+			type: scatter
+		}
+		var scatter = new Scatter(chartInfo, null, "");
+		var ticks:Array<Tick> = [createTick("0", 0), createTick("5", 50), createTick("10", 100)];
+		var result = scatter.calcXCoord(5.0, ticks);
+		Assert.notNull(result, "Result should not be null for exact match");
+		Assert.floatEquals(50.0, result, 0.001);
+	}
+
+	function testCalcXCoord_FloatValue_BetweenTicks() {
+		var chartInfo:TrailInfo = {
+			data: {
+				values: ["x" => ["A", "B", "C"], "y" => [1, 2, 3]]
+			},
+			type: scatter
+		}
+		var scatter = new Scatter(chartInfo, null, "");
+		var ticks1:Array<Tick> = [createTick("0", 0), createTick("10", 100)];
+
+		var result1 = scatter.calcXCoord(5.0, ticks1);
+		Assert.notNull(result1, "Result1 should not be null");
+		Assert.floatEquals(50.0, result1, 0.001, "Failed for 5.0 between 0 and 10");
+
+		var ticks2:Array<Tick> = [createTick("10", 20), createTick("20", 40)];
+
+		var result2 = scatter.calcXCoord(15.0, ticks2);
+		Assert.notNull(result2, "Result2 should not be null");
+		Assert.floatEquals(30.0, result2, 0.001, "Failed for 15.0 between 10 and 20");
+	}
+
+	function testCalcXCoord_FloatValue_OutsideLower() {
+		var chartInfo:TrailInfo = {
+			data: {
+				values: ["x" => ["A", "B", "C"], "y" => [1, 2, 3]]
+			},
+			type: scatter
+		}
+		var scatter = new Scatter(chartInfo, null, "");
+		var ticks:Array<Tick> = [createTick("10", 100), createTick("20", 200)];
+
+		var result = scatter.calcXCoord(5.0, ticks);
+		Assert.notNull(result, "Result should not be null for outside lower");
+		// Expected behavior: returns the x-coordinate of the first tick if value is less than all tick values.
+		Assert.floatEquals(100.0, result, 0.001);
+	}
+
+	function testCalcXCoord_FloatValue_OutsideUpper_MaxTickValue() {
+		var chartInfo:TrailInfo = {
+			data: {
+				values: ["x" => ["A", "B", "C"], "y" => [1, 2, 3]]
+			},
+			type: scatter
+		}
+		var scatter = new Scatter(chartInfo, null, "");
+		var ticks:Array<Tick> = [createTick("0", 0), createTick("10", 100)];
+
+		var result = scatter.calcXCoord(10.0, ticks); // Value is the max tick value
+		Assert.notNull(result, "Result should not be null for outside upper (max tick value)");
+		Assert.floatEquals(100.0, result, 0.001);
+	}
+
+	function testCalcXCoord_FloatValue_SingleTick_ValueLETick() {
+		var chartInfo:TrailInfo = {
+			data: {
+				values: ["x" => ["A", "B", "C"], "y" => [1, 2, 3]]
+			},
+			type: scatter
+		}
+		var scatter = new Scatter(chartInfo, null, "");
+		var ticks:Array<Tick> = [createTick("5", 50)];
+		var result1 = scatter.calcXCoord(5.0, ticks);
+		Assert.notNull(result1, "Result should not be null for single tick, value equals tick");
+		Assert.floatEquals(50.0, result1, 0.001, "Failed for single tick, value equals tick");
+
+		var result2 = scatter.calcXCoord(2.0, ticks);
+		Assert.notNull(result2, "Result should not be null for single tick, value less than tick");
+		Assert.floatEquals(50.0, result2, 0.001, "Failed for single tick, value less than tick");
 	}
 }
