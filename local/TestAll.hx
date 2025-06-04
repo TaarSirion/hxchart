@@ -1,3 +1,4 @@
+import hxchart.tests.TestStatistics;
 import hxchart.tests.TestStringTickInfo;
 import hxchart.tests.TestNumericTickInfo;
 import hxchart.tests.TestLegendInfo;
@@ -18,6 +19,7 @@ class TestAll {
 		runner.addCase(new TestLegendInfo());
 		runner.addCase(new TestNumericTickInfo());
 		runner.addCase(new TestStringTickInfo());
+		runner.addCase(new TestStatistics());
 		Report.create(runner);
 		runner.run();
 		// });
