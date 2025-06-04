@@ -1,3 +1,4 @@
+import hxchart.tests.TestAxisInfo;
 import hxchart.tests.TestAxis;
 // import hxchart.tests.TestDataLayer;
 // import hxchart.tests.TestUtils;
@@ -23,6 +24,7 @@ class TestAll {
 		// 	runner.addCase(new TestAxisTools());
 		// 	runner.addCase(new TestNumericTickInfo());
 		runner.addCase(new TestScatter());
+		runner.addCase(new TestAxisInfo());
 		// 	runner.addCase(new TestLegend());
 		// 	runner.addCase(new TestChart());
 		// 	runner.addCase(new TestStatistics());

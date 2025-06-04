@@ -53,11 +53,30 @@ import hxchart.core.tickinfo.TickInfo;
 		}
 
 		if (type == null) {
-			var firstValue = trailValues[0];
-			if (firstValue is Int || firstValue is Float) {
-				type = linear;
-			} else if (firstValue is String) {
-				type = categorical;
+			if (trailValues.length == 0) {
+				for (value in values) {
+					if (value is String) {
+						type = categorical;
+						break;
+					}
+					if (!(value is Int) && !(value is Float)) {
+						type = categorical;
+						break;
+					}
+					type = linear;
+				}
+			} else {
+				for (value in trailValues) {
+					if (value is String) {
+						type = categorical;
+						break;
+					}
+					if (!(value is Int) && !(value is Float)) {
+						type = categorical;
+						break;
+					}
+					type = linear;
+				}
 			}
 		}
 		var moduloRotation = Math.round(Math.abs(rotation % 360));
