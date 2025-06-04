@@ -6,6 +6,7 @@ import hxchart.tests.TestLegend;
 import hxchart.tests.TestAxisInfo;
 import hxchart.tests.TestAxis;
 import hxchart.tests.TestScatter;
+import hxchart.tests.TestTrigonometry;
 import utest.ui.Report;
 import utest.Runner;
 
@@ -20,6 +21,7 @@ class TestAll {
 		runner.addCase(new TestNumericTickInfo());
 		runner.addCase(new TestStringTickInfo());
 		runner.addCase(new TestStatistics());
+		runner.addCase(new TestTrigonometry());
 		Report.create(runner);
 		runner.run();
 		// });
