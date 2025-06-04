@@ -37,22 +37,17 @@ class TestAxisInfo extends utest.Test {
 		Assert.equals(AxisTypes.categorical, axisInfo.type, "Type should be categorical for string data");
 		Assert.isTrue(Std.isOfType(axisInfo.tickInfo, StringTickInfo), "TickInfo should be StringTickInfo for string data");
 		var stringTickInfo = cast(axisInfo.tickInfo, StringTickInfo);
-		Assert.contains("a", stringTickInfo.labels, "a not in labels");
-		Assert.contains("b", stringTickInfo.labels, "b not in labels");
-		Assert.contains("c", stringTickInfo.labels, "c not in labels");
+		Assert.same(["", "a", "b", "c"], stringTickInfo.labels);
 	}
 
 	public function testSetAxisInfo_mixedData() {
 		var axisInfo:AxisInfo = {id: "test", rotation: 0};
 		// Assuming mixed data defaults to categorical
 		axisInfo.setAxisInfo(["a", 1, "b", 2]);
-		Assert.equals(AxisTypes.categorical, axisInfo.type, "Type should be categorical for mixed data");
-		Assert.isTrue(Std.isOfType(axisInfo.tickInfo, StringTickInfo), "TickInfo should be StringTickInfo for mixed data");
+		Assert.equals(AxisTypes.categorical, axisInfo.type);
+		Assert.isTrue(Std.isOfType(axisInfo.tickInfo, StringTickInfo));
 		var stringTickInfo = cast(axisInfo.tickInfo, StringTickInfo);
-		Assert.contains("a", stringTickInfo.labels, "a not in labels");
-		Assert.contains("1", stringTickInfo.labels, "1 not in labels");
-		Assert.contains("b", stringTickInfo.labels, "c not in labels");
-		Assert.contains("2", stringTickInfo.labels, "2 not in labels");
+		Assert.same(["", "a", "1", "b", "2"], stringTickInfo.labels);
 	}
 
 	public function testSetAxisInfo_emptyData() {

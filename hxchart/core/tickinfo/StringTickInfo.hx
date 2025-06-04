@@ -28,7 +28,7 @@ class StringTickInfo implements TickInfo {
 	public function setLabels(values:Array<String>) {
 		for (label in values) {
 			if (labels.indexOf(label) == -1) {
-				labels.push(label);
+				labels.push(Std.string(label));
 			}
 		}
 	}
