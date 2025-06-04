@@ -17,6 +17,8 @@ class StringTickInfo implements TickInfo {
 		labels = [];
 		labels.push("");
 		zeroIndex = 0;
+		subTickNum = 0;
+		subLabels = [];
 		setLabels(values);
 		calcTickNum();
 	}
