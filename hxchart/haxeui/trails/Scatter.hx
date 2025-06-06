@@ -1,5 +1,6 @@
 package hxchart.haxeui.trails;
 
+import hxchart.core.coordinates.CoordinateSystem;
 import haxe.ui.events.MouseEvent;
 import hxchart.haxeui.utils.ConvertCoords;
 import hxchart.core.styling.TrailStyle;
@@ -39,8 +40,6 @@ class Scatter {
 	public var dataLayer:Absolute;
 	public var dataCanvas:Canvas;
 
-	var dataSize:Int;
-
 	var quadTree:Quadtree;
 	var optimGrid:OptimGrid;
 	var gridStep:Float = 1;
@@ -59,8 +58,8 @@ class Scatter {
 	public var hoverLayer:Absolute;
 	public var clickLayer:Canvas;
 
-	public function new(chartInfo:TrailInfo, axes:Axis, parent:Absolute, id:String, axisID:String, eventHandler:EventHandler) {
-		scatterCalc = new ScatterCalc(chartInfo, axes.axisCalc, axisID);
+	public function new(chartInfo:TrailInfo, axes:Axis, parent:Absolute, id:String, axisID:String, eventHandler:EventHandler, coordSystem:CoordinateSystem) {
+		scatterCalc = new ScatterCalc(chartInfo, axes.axisCalc, coordSystem);
 		scatterCalc.validateChart();
 
 		this.parent = parent;
@@ -128,7 +127,6 @@ class Scatter {
 	public function render(style:TrailStyle) {
 		// Hover event handling
 		eventHandler.hoverHandlers.push(function(e) {
-			trace(hoverLayer.numComponents);
 			if (e is MouseEvent) {
 				var event:MouseEvent = e;
 				// hoverLayer.componentGraphics.clear();

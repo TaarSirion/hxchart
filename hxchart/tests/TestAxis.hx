@@ -1,5 +1,6 @@
 package hxchart.tests;
 
+import hxchart.core.utils.Point;
 import hxchart.core.utils.CompassOrientation;
 import utest.Assert;
 import utest.Test;
@@ -8,7 +9,7 @@ import hxchart.core.axis.Axis;
 import hxchart.core.axis.AxisInfo;
 import hxchart.core.axis.AxisTypes;
 import hxchart.core.axis.AxisTitle;
-import hxchart.core.utils.CoordinateSystem;
+import hxchart.core.coordinates.CoordinateSystem;
 import hxchart.core.tickinfo.NumericTickInfo;
 import hxchart.core.tickinfo.StringTickInfo;
 
@@ -23,10 +24,8 @@ class TestAxis extends Test {
 
 	function testCorePosition_BasicNoTitles_Horizontal() {
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 200;
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(200, 150);
 
 		var axisInfoX:AxisInfo = {
 			id: "x-axis",
@@ -55,10 +54,8 @@ class TestAxis extends Test {
 
 	function testCorePosition_HorizontalWithTitle_ZeroImpacted() {
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 200;
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(200, 150);
 
 		var titleX:AxisTitle = {text: "X-Axis Title"};
 		var axisInfoX:AxisInfo = {
@@ -105,10 +102,8 @@ class TestAxis extends Test {
 
 	function testCorePosition_HorizontalWithTitle_ZeroNotImpactedButSpaceTaken() {
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 200;
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(200, 150);
 
 		var titleX:AxisTitle = {text: "X-Axis Title"};
 		var axisInfoX:AxisInfo = {
@@ -152,10 +147,9 @@ class TestAxis extends Test {
 
 	function testCorePosition_StringTicksHorizontal() {
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 220;
-		cs.height = 100;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(220, 100);
+
 		var strLabels = ["A", "B", "C", "D"]; // tickNum=4, zeroIndex=0 (implicit)
 		var axisInfoX:AxisInfo = {
 			id: "x-str-axis",
@@ -180,10 +174,9 @@ class TestAxis extends Test {
 
 	function testCorePosition_SmallDimensions_LengthClamped() {
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 30;
-		cs.height = 20;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(30, 20);
+
 		var axisInfoX:AxisInfo = {
 			id: "x-small",
 			rotation: 0,
@@ -205,10 +198,8 @@ class TestAxis extends Test {
 
 	function testCorePosition_VerticalWithSubtitle_ZeroImpacted() {
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 200;
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(200, 150);
 
 		var subtitleY:AxisTitle = {text: "Y-Axis Subtitle"};
 		var axisInfoY:AxisInfo = {
@@ -253,10 +244,8 @@ class TestAxis extends Test {
 	function testSetTicks_NumericHorizontal_InitialCreation() {
 		// 1. Setup CoordinateSystem
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 200;
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(200, 150);
 
 		// 2. Create AxisInfo
 		var numericTickInfo = createNumericTickInfo(0, 4); // Creates 5 ticks: 0, 1, 2, 3, 4
@@ -311,10 +300,8 @@ class TestAxis extends Test {
 	function testSetTicks_NumericVertical_InitialCreation() {
 		// 1. Setup CoordinateSystem
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 200;
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(200, 150);
 
 		// 2. Create AxisInfo
 		var numericTickInfo = createNumericTickInfo(0, 3); // Creates 4 ticks: 0, 1, 2, 3
@@ -371,10 +358,8 @@ class TestAxis extends Test {
 	function testSetTicks_StringHorizontal_InitialCreation() {
 		// 1. Setup CoordinateSystem
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 250;
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(250, 150);
 
 		// 2. Create AxisInfo
 		var labels = ["Apple", "Banana", "Cherry"]; // tickNum will be 3 initially
@@ -439,10 +424,8 @@ class TestAxis extends Test {
 	function testSetTicks_Numeric_HideZeroTick() {
 		// 1. Setup CoordinateSystem
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 200;
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(200, 150);
 
 		// 2. Create AxisInfo
 		// Ticks: -2, -1, 0, 1, 2. So tickNum = 5. zeroIndex should be 2.
@@ -491,10 +474,8 @@ class TestAxis extends Test {
 	function testSetTicks_NumericHorizontal_UpdateTicks() {
 		// 1. Setup CoordinateSystem
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 200;
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(200, 150);
 
 		// 2. Create AxisInfo
 		var numericTickInfo = createNumericTickInfo(0, 4); // 5 ticks: 0, 1, 2, 3, 4
@@ -556,10 +537,8 @@ class TestAxis extends Test {
 	function testSetTicks_Numeric_MinimumTicks() {
 		// 1. Setup CoordinateSystem
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 200;
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(200, 150);
 
 		// 2. Create AxisInfo
 		// createNumericTickInfo(0,1) will result in tickNum = 2 (ticks for 0 and 1)
@@ -611,10 +590,8 @@ class TestAxis extends Test {
 	function testSetTicks_Numeric_LargeMargins() {
 		// 1. Setup CoordinateSystem
 		var cs = new CoordinateSystem();
-		cs.left = 0;
-		cs.bottom = 0;
-		cs.width = 200; // axis length will be 200
-		cs.height = 150;
+		cs.start = new Point(0, 0);
+		cs.end = new Point(200, 150);
 
 		// 2. Create AxisInfo
 		var numericTickInfo = createNumericTickInfo(0, 2); // 3 Ticks: 0, 1, 2. tickNum = 3

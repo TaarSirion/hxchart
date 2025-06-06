@@ -24,7 +24,7 @@ import hxchart.core.axis.Axis in AxisCalc;
 import hxchart.haxeui.utils.ConvertCoords.HaxeUICoords;
 import hxchart.core.axis.AxisTitle;
 import hxchart.core.axis.AxisInfo;
-import hxchart.core.utils.CoordinateSystem;
+import hxchart.core.coordinates.CoordinateSystem;
 #if haxeui_html5
 import js.Browser;
 import js.html.Element;

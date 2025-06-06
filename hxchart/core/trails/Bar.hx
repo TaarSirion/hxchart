@@ -1,17 +1,18 @@
 package hxchart.core.trails;
 
 import hxchart.core.axis.AxisInfo;
-import hxchart.core.tickinfo.NumericTickInfo;
 import hxchart.core.styling.PositionOptions.PositionOption;
-import hxchart.core.data.Data2D;
 import hxchart.core.styling.TrailStyle;
-import hxchart.core.chart.ChartStatus;
 import hxchart.core.axis.Axis;
 import haxe.Exception;
 import hxchart.core.utils.Point;
-import hxchart.core.utils.CoordinateSystem;
+import hxchart.core.coordinates.CoordinateSystem;
 import hxchart.core.data.DataLayer;
 import hxchart.core.axis.AxisLayer;
+import hxchart.core.coordinates.TrailCalcs;
+
+using hxchart.core.utils.Statistics;
+using Lambda;
 
 typedef BarDataRec = {
 	coord:Point,
@@ -36,11 +37,10 @@ class Bar implements AxisLayer implements DataLayer {
 	public var axes:Axis;
 
 	public var trailInfo:TrailInfo;
-	public var axisID:String;
 
 	public var dataByGroup:Array<Array<BarDataRec>> = [];
 
-	public function new(trailInfo:TrailInfo, axes:Axis, id:String, axisID:String) {
+	public function new(trailInfo:TrailInfo, axes:Axis, coordSystem:CoordinateSystem) {
 		if (trailInfo.axisInfo[0].type == linear && trailInfo.axisInfo[1].type == linear) {
 			throw new Exception("It is not possible to use two 'linear' axes for a bar-chart. Please change one of them to 'categorical'.");
 		}
@@ -48,23 +48,16 @@ class Bar implements AxisLayer implements DataLayer {
 			throw new Exception("It is not possible to use two 'categorical' axes for a bar-chart. Please change one of them to 'linear'.");
 		}
 
-		valueGroups = [];
-		xValues = [];
-		yValues = [];
+		this.coordSystem = coordSystem;
 
 		if (axes != null) {
 			this.axes = axes;
 		}
-		this.axisID = axisID;
 		this.trailInfo = trailInfo;
 	}
 
-	public function validateChart(status:ChartStatus) {
-		switch status {
-			case start:
-				setData(trailInfo.data, trailInfo.style);
-			case redraw:
-		}
+	public function validateChart() {
+		setData(trailInfo.data, trailInfo.style);
 		positionAxes(trailInfo.axisInfo, data, trailInfo.style);
 	}
 
@@ -86,10 +79,6 @@ class Bar implements AxisLayer implements DataLayer {
 		for (key in style.groups.keys()) {
 			uniqueGroupsNum++;
 			dataByGroup.push([]);
-		}
-
-		if (x[0] is String) {
-			isXCategoric = true;
 		}
 
 		for (i in 0...x.length) {
@@ -233,67 +222,11 @@ class Bar implements AxisLayer implements DataLayer {
 		}
 	};
 
-	var isXCategoric:Bool = false;
-	var valueGroups:Array<Dynamic>;
-	var xValues:Array<Dynamic>;
-	var yValues:Array<Dynamic>;
-	var groupNum:Int;
-
-	function sortData(style:TrailStyle) {
-		xValues = data.map(x -> {
-			var val:Data2D = x;
-			return val.xValue;
-		});
-		yValues = data.map(x -> {
-			var val:Data2D = x;
-			return val.yValue;
-		});
-
-		if (Std.isOfType(xValues[0], Float)) {
-			var a = xValues.copy();
-			a.sort(Reflect.compare);
-			minX = a[0];
-			maxX = a[a.length - 1];
-		} else {
-			isXCategoric = true;
-			valueGroups = xValues.unique();
-		}
-		if (Std.isOfType(yValues[0], Float)) {
-			var a = yValues.copy();
-			a.sort(Reflect.compare);
-			minY = a[0];
-			maxY = a[a.length - 1];
-		} else {
-			valueGroups = yValues.unique();
-		}
-		if (style.positionOption == PositionOption.stacked) {
-			if (isXCategoric) {
-				for (v in valueGroups) {
-					var indexes = xValues.position(v);
-					var sum = 0;
-					for (i in indexes) {
-						var val = yValues[i];
-						sum += val;
-					}
-					maxY = Math.max(maxY, sum);
-				}
-			} else {
-				for (v in valueGroups) {
-					var indexes = yValues.position(v);
-					var sum = 0;
-					for (i in indexes) {
-						var val = xValues[i];
-						sum += val;
-					}
-					maxX = Math.max(maxX, sum);
-				}
-			}
-		}
-	}
-
 	public function positionData(style:TrailStyle):Void {
-		var spacePerXTick = (axes.axesInfo[0].length / (axes.ticksPerInfo[0].length - 1)) * 2 / 3;
-		var spacePerYTick = (axes.axesInfo[1].length / (axes.ticksPerInfo[1].length - 1)) * 2 / 3;
+		var useableWidth = axes.ticksPerInfo[0][axes.ticksPerInfo[0].length - 1].middlePos.x - axes.ticksPerInfo[0][0].middlePos.x;
+		var useableHeight = axes.ticksPerInfo[1][axes.ticksPerInfo[1].length - 1].middlePos.y - axes.ticksPerInfo[1][0].middlePos.y;
+		var spacePerXTick = (useableWidth / (axes.ticksPerInfo[0].length - 1)) * 2 / 3;
+		var spacePerYTick = (useableHeight / (axes.ticksPerInfo[1].length - 1)) * 2 / 3;
 		var spacePerGroupX = spacePerXTick / dataByGroup.length;
 		var spacePerGroupY = spacePerYTick / dataByGroup.length;
 
@@ -365,34 +298,17 @@ class Bar implements AxisLayer implements DataLayer {
 					var tick = axes.ticksPerInfo[0].filter(x -> {
 						return x.text == dataRec.values.x;
 					})[0];
-					var y:Float = dataRec.values.y;
-					var min:Float = 0;
-					var max:Float = 0;
-					var minIndex:Int = 0;
-					var maxIndex:Int = 0;
-					if (y >= 0) {
-						min = 0;
-						minIndex = axes.axesInfo[1].tickInfo.zeroIndex;
-						max = Std.parseFloat(axes.ticksPerInfo[1][axes.ticksPerInfo[1].length - 1].text);
-						maxIndex = axes.ticksPerInfo[1].length - 1;
-					} else {
-						max = 0;
-						maxIndex = axes.axesInfo[1].tickInfo.zeroIndex;
-						min = Std.parseFloat(axes.ticksPerInfo[1][0].text);
-						minIndex = 0;
-					}
-					var tickTop = axes.ticksPerInfo[1][maxIndex].top;
-					var tickBottom = axes.ticksPerInfo[1][minIndex].top;
-					var xCoord = tick.left - (spacePerXTick / 2);
-					var yCoord = tickBottom - (tickBottom - tickTop) * (y - min) / (max - min);
+					var xCoord = tick.middlePos.x - (spacePerXTick / 2);
+					var yCoord = tick.middlePos.y;
 					dataRec.width = spacePerXTick;
-					dataRec.height = y > 0 ? tickBottom - yCoord : yCoord - tickTop;
 					switch ([style.positionOption, dataByGroup.length > 1, prevGroup.length > 0]) {
 						case [PositionOption.stacked, true, true]:
-							yCoord = calcStackedBarY(dataRec, prevGroup, y, tickBottom, tickTop, min, max);
-						case [PositionOption.layered(v), true, false]:
+							yCoord = calcStackedBarY(dataRec, prevGroup);
+						case [PositionOption.layered(v), true, false]: // positioning for 1st layered bar
 							dataRec.width = spacePerGroupX;
-						case [PositionOption.layered(v), true, true]:
+							yCoord = calcLayeredBarY(dataRec);
+						case [PositionOption.layered(v), true, true]: // positioning for other layered bars
+							yCoord = calcLayeredBarY(dataRec);
 							dataRec.width = spacePerGroupX;
 							var prevDataRec = prevGroup.filter(d -> {
 								d.values.x == dataRec.values.x;
@@ -404,45 +320,28 @@ class Bar implements AxisLayer implements DataLayer {
 							}
 							xCoord = prevDataRec.coord.x + spacePerGroupX * v;
 						case [null, true, true]: // default to stacked for multiple groups
-							yCoord = calcStackedBarY(dataRec, prevGroup, y, tickBottom, tickTop, min, max);
+							yCoord = calcStackedBarY(dataRec, prevGroup);
 						case [_, true, true]: // default to stacked for multiple groups
-							yCoord = calcStackedBarY(dataRec, prevGroup, y, tickBottom, tickTop, min, max);
+							yCoord = calcStackedBarY(dataRec, prevGroup);
 						case _:
+							yCoord = calcStackedBarY(dataRec, prevGroup);
 					}
 					dataRec.coord = new Point(xCoord, yCoord);
 				} else {
 					var tick = axes.ticksPerInfo[1].filter(x -> {
 						return x.text == dataRec.values.y;
 					})[0];
-					var x:Float = dataRec.values.x;
-					var min:Float = 0;
-					var max:Float = 0;
-					var minIndex:Int = 0;
-					var maxIndex:Int = 0;
-					if (x >= 0) {
-						min = 0;
-						minIndex = axes.axesInfo[0].tickInfo.zeroIndex;
-						max = Std.parseFloat(axes.ticksPerInfo[0][axes.ticksPerInfo[0].length - 1].text);
-						maxIndex = axes.ticksPerInfo[0].length - 1;
-					} else {
-						max = 0;
-						maxIndex = axes.axesInfo[0].tickInfo.zeroIndex;
-						min = Std.parseFloat(axes.ticksPerInfo[0][0].text);
-						minIndex = 0;
-					}
-					var tickLeft = axes.ticksPerInfo[0][minIndex].left;
-					var tickRight = axes.ticksPerInfo[0][maxIndex].left;
-					var xCoord = tickLeft;
-					var widthCoord = (tickRight - tickLeft) * (x - min) / (max - min) + tickLeft;
-					dataRec.width = widthCoord - xCoord;
-					var yCoord = tick.top - (spacePerYTick / 2);
+					var xCoord = tick.middlePos.x;
+					var yCoord = tick.middlePos.y - (spacePerYTick / 2);
 					dataRec.height = spacePerYTick;
 					switch ([style.positionOption, dataByGroup.length > 1, prevGroup.length > 0]) {
 						case [PositionOption.stacked, true, true]:
-							xCoord = calcStackedBarX(dataRec, prevGroup, x, tickLeft, tickRight, min, max);
-						case [PositionOption.layered(v), true, false]:
+							xCoord = calcStackedBarX(dataRec, prevGroup);
+						case [PositionOption.layered(v), true, false]: // positioning for 1st layered bar
 							dataRec.height = spacePerGroupY;
-						case [PositionOption.layered(v), true, true]:
+							xCoord = calcLayeredBarX(dataRec);
+						case [PositionOption.layered(v), true, true]: // positioning for other layered bars
+							xCoord = calcLayeredBarX(dataRec);
 							dataRec.height = spacePerGroupY;
 							var prevDataRec = prevGroup.filter(d -> {
 								d.values.y == dataRec.values.y;
@@ -454,10 +353,11 @@ class Bar implements AxisLayer implements DataLayer {
 							}
 							yCoord = prevDataRec.coord.y + spacePerGroupY * v;
 						case [null, true, true]: // default to stacked for multiple groups
-							xCoord = calcStackedBarX(dataRec, prevGroup, x, tickLeft, tickRight, min, max);
+							xCoord = calcStackedBarX(dataRec, prevGroup);
 						case [_, true, true]: // default to stacked for multiple groups
-							xCoord = calcStackedBarX(dataRec, prevGroup, x, tickLeft, tickRight, min, max);
+							xCoord = calcStackedBarX(dataRec, prevGroup);
 						case _:
+							xCoord = calcStackedBarX(dataRec, prevGroup);
 					}
 					dataRec.coord = new Point(xCoord, yCoord);
 				}
@@ -465,28 +365,74 @@ class Bar implements AxisLayer implements DataLayer {
 		}
 	};
 
-	function calcStackedBarY(dataRec:BarDataRec, prevGroup:Array<BarDataRec>, y:Float, tickBottom:Float, tickTop:Float, min:Float, max:Float) {
+	function calcStackedBarY(dataRec:BarDataRec, prevGroup:Array<BarDataRec>) {
 		var prevDataRec = prevGroup.filter(d -> {
 			d.values.x == dataRec.values.x;
 		});
-		y = cast(dataRec.values.y, Float) + prevDataRec[0].values.acc;
+		var y = cast(dataRec.values.y, Float);
 		dataRec.values.acc = y;
-		var yCoord = tickBottom - (tickBottom - tickTop) * (y - min) / (max - min);
-		var bottom = prevDataRec[0].coord.y;
-		dataRec.height = y >= 0 ? bottom - yCoord : yCoord - bottom;
+		var yCoord = TrailCalcs.calcBarCoordinates(axes.ticksPerInfo[1], y, axes.axesInfo[1].tickInfo.zeroIndex, true);
+		var tickBottom = axes.ticksPerInfo[1][axes.axesInfo[1].tickInfo.zeroIndex].middlePos.y;
+		if (Math.isNaN(yCoord)) {
+			yCoord = tickBottom;
+		}
+		dataRec.height = yCoord - tickBottom;
+		if (prevDataRec.length > 0) {
+			var yOld = prevDataRec[0].values.acc;
+			dataRec.values.acc = y + yOld;
+			var yCoordOld = TrailCalcs.calcBarCoordinates(axes.ticksPerInfo[1], yOld, axes.axesInfo[1].tickInfo.zeroIndex, true);
+			if (Math.isNaN(yCoordOld)) {
+				yCoordOld = tickBottom;
+			}
+			yCoord = yCoordOld + dataRec.height;
+		}
+
 		return yCoord;
 	}
 
-	function calcStackedBarX(dataRec:BarDataRec, prevGroup:Array<BarDataRec>, x:Float, tickLeft:Float, tickRight:Float, min:Float, max:Float) {
+	function calcStackedBarX(dataRec:BarDataRec, prevGroup:Array<BarDataRec>) {
 		var prevDataRec = prevGroup.filter(d -> {
 			d.values.y == dataRec.values.y;
 		});
-		x = cast(dataRec.values.x, Float) + prevDataRec[0].values.acc;
+		var x = cast(dataRec.values.x, Float);
 		dataRec.values.acc = x;
-		var xCoord = prevDataRec[0].coord.x + prevDataRec[0].width;
-		var widthCoord = (tickRight - tickLeft) * (x - min) / (max - min) + tickLeft;
-		dataRec.width = widthCoord - xCoord;
+		var xCoord = TrailCalcs.calcBarCoordinates(axes.ticksPerInfo[0], x, axes.axesInfo[0].tickInfo.zeroIndex, false);
+		var tickLeft = axes.ticksPerInfo[0][axes.axesInfo[0].tickInfo.zeroIndex].middlePos.x;
+		if (Math.isNaN(xCoord)) {
+			xCoord = tickLeft;
+		}
+		dataRec.width = xCoord - tickLeft;
+		if (prevDataRec.length > 0) {
+			var xOld = prevDataRec[0].values.acc;
+			dataRec.values.acc = x + xOld;
+			var xCoordOld = TrailCalcs.calcBarCoordinates(axes.ticksPerInfo[0], xOld, axes.axesInfo[0].tickInfo.zeroIndex, false);
+			if (Math.isNaN(xCoordOld)) {
+				xCoordOld = tickLeft;
+			}
+			xCoord = xCoordOld + dataRec.width;
+		}
 		return xCoord;
+	}
+
+	function calcLayeredBarX(dataRec:BarDataRec) {
+		var xCoord = TrailCalcs.calcBarCoordinates(axes.ticksPerInfo[0], dataRec.values.x, axes.axesInfo[0].tickInfo.zeroIndex, false);
+		var tickLeft = axes.ticksPerInfo[0][axes.axesInfo[0].tickInfo.zeroIndex].middlePos.x;
+		if (Math.isNaN(xCoord)) {
+			xCoord = tickLeft;
+		}
+		dataRec.width = xCoord - tickLeft;
+		return xCoord;
+	}
+
+	function calcLayeredBarY(dataRec:BarDataRec) {
+		var yCoord = TrailCalcs.calcBarCoordinates(axes.ticksPerInfo[1], dataRec.values.y, axes.axesInfo[1].tickInfo.zeroIndex, true);
+		var tickBottom = axes.ticksPerInfo[0][axes.axesInfo[1].tickInfo.zeroIndex].middlePos.y;
+		if (Math.isNaN(yCoord)) {
+			yCoord = tickBottom;
+		}
+		trace(dataRec.values.y, yCoord, tickBottom);
+		dataRec.height = yCoord - tickBottom;
+		return yCoord;
 	}
 
 	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle):Void {
@@ -496,7 +442,7 @@ class Bar implements AxisLayer implements DataLayer {
 			positionData(style);
 			return;
 		}
-		axes = new Axis(axisID, axisInfo);
+		axes = new Axis(axisInfo, coordSystem);
 		axes.positionStartPoint();
 		axes.setTicks(false);
 		positionData(style);

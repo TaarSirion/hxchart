@@ -3,7 +3,7 @@ package hxchart.core.trails;
 import hxchart.core.axis.AxisInfo;
 import hxchart.core.styling.TrailStyle;
 import hxchart.core.axis.Axis;
-import hxchart.core.utils.CoordinateSystem;
+import hxchart.core.coordinates.CoordinateSystem;
 import hxchart.core.tick.Tick;
 import hxchart.core.chart.ChartStatus;
 import hxchart.core.optimization.OptimGrid;
@@ -28,9 +28,7 @@ typedef ScatterDataPoint = {
 }
 
 class Scatter implements AxisLayer implements DataLayer {
-	public var dataLayerID:String;
 	public var coordSystem:CoordinateSystem;
-	public var axisID:String;
 	public var axes:Axis;
 
 	public var dataByGroup:Array<Array<ScatterDataPoint>> = [];
@@ -49,9 +47,8 @@ class Scatter implements AxisLayer implements DataLayer {
 
 	public var colorPalette:Array<Int>;
 
-	public function new(chartInfo:TrailInfo, axes:Axis, axisID:String) {
-		coordSystem = new CoordinateSystem();
-		this.axisID = axisID;
+	public function new(chartInfo:TrailInfo, axes:Axis, coordSystem:CoordinateSystem) {
+		this.coordSystem = coordSystem;
 		this.chartInfo = chartInfo;
 		if (axes != null) {
 			this.axes = axes;
@@ -63,9 +60,9 @@ class Scatter implements AxisLayer implements DataLayer {
 					if (chartInfo.optimizationInfo.gridStep != null) {
 						gridStep = chartInfo.optimizationInfo.gridStep;
 					}
-					optimGrid = new OptimGrid(coordSystem.width, coordSystem.height, gridStep);
+					optimGrid = new OptimGrid(coordSystem.end.x - coordSystem.start.x, coordSystem.end.y - coordSystem.start.y, gridStep);
 				case OptimizationType.quadTree:
-					quadTree = new Quadtree(new Region(0, coordSystem.width, 0, coordSystem.height));
+					quadTree = new Quadtree(new Region(0, coordSystem.end.x - coordSystem.start.x, 0, coordSystem.end.y - coordSystem.start.y));
 			}
 		}
 	}

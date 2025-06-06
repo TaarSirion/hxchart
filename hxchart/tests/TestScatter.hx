@@ -11,7 +11,7 @@ import hxchart.core.axis.Axis;
 import hxchart.core.axis.AxisInfo;
 import hxchart.core.axis.AxisTypes;
 import hxchart.core.tickinfo.NumericTickInfo;
-import hxchart.core.utils.CoordinateSystem;
+import hxchart.core.coordinates.CoordinateSystem;
 import hxchart.core.utils.Point;
 // import hxchart.haxeui.colors.ColorPalettes; // Removed HaxeUI import
 import hxchart.core.styling.TrailStyle;
@@ -88,15 +88,13 @@ class TestScatter extends Test {
 
 		// Setup CoordinateSystem and Axis
 		var coordSystem = new CoordinateSystem();
-		coordSystem.width = 100;
-		coordSystem.height = 100;
 
 		var axes = new Axis(chartInfo.axisInfo, coordSystem);
 		axes.positionStartPoint();
 		axes.setTicks(false);
 
 		// Instantiate Scatter
-		var scatter = new Scatter(chartInfo, axes, "axis1");
+		var scatter = new Scatter(chartInfo, axes, coordSystem);
 
 		// Set data and position data (this calculates the coordinates)
 		scatter.setData(chartInfo.data, chartInfo.style);
@@ -140,7 +138,8 @@ class TestScatter extends Test {
 			},
 			type: scatter
 		}
-		var scatter = new Scatter(chartInfo, null, "");
+		var coordSystem = new CoordinateSystem();
+		var scatter = new Scatter(chartInfo, null, coordSystem);
 
 		var ticks:Array<Tick> = [createTick("A", 10), createTick("B", 20)];
 
@@ -156,7 +155,8 @@ class TestScatter extends Test {
 			},
 			type: scatter
 		}
-		var scatter = new Scatter(chartInfo, null, "");
+		var coordSystem = new CoordinateSystem();
+		var scatter = new Scatter(chartInfo, null, coordSystem);
 		var ticks:Array<Tick> = [createTick("A", 10), createTick("B", 20)];
 		var result = scatter.calcXCoord("C", ticks);
 		Assert.isNull(result, "Result should be null for no match");
@@ -169,7 +169,8 @@ class TestScatter extends Test {
 			},
 			type: scatter
 		}
-		var scatter = new Scatter(chartInfo, null, "");
+		var coordSystem = new CoordinateSystem();
+		var scatter = new Scatter(chartInfo, null, coordSystem);
 		var ticks:Array<Tick> = [createTick("0", 0), createTick("5", 50), createTick("10", 100)];
 		var result = scatter.calcXCoord(5.0, ticks);
 		Assert.notNull(result, "Result should not be null for exact match");
@@ -183,7 +184,8 @@ class TestScatter extends Test {
 			},
 			type: scatter
 		}
-		var scatter = new Scatter(chartInfo, null, "");
+		var coordSystem = new CoordinateSystem();
+		var scatter = new Scatter(chartInfo, null, coordSystem);
 		var ticks1:Array<Tick> = [createTick("0", 0), createTick("10", 100)];
 
 		var result1 = scatter.calcXCoord(5.0, ticks1);
@@ -204,7 +206,8 @@ class TestScatter extends Test {
 			},
 			type: scatter
 		}
-		var scatter = new Scatter(chartInfo, null, "");
+		var coordSystem = new CoordinateSystem();
+		var scatter = new Scatter(chartInfo, null, coordSystem);
 		var ticks:Array<Tick> = [createTick("10", 100), createTick("20", 200)];
 
 		var result = scatter.calcXCoord(5.0, ticks);
@@ -220,7 +223,8 @@ class TestScatter extends Test {
 			},
 			type: scatter
 		}
-		var scatter = new Scatter(chartInfo, null, "");
+		var coordSystem = new CoordinateSystem();
+		var scatter = new Scatter(chartInfo, null, coordSystem);
 		var ticks:Array<Tick> = [createTick("0", 0), createTick("10", 100)];
 
 		var result = scatter.calcXCoord(10.0, ticks); // Value is the max tick value
@@ -235,7 +239,8 @@ class TestScatter extends Test {
 			},
 			type: scatter
 		}
-		var scatter = new Scatter(chartInfo, null, "");
+		var coordSystem = new CoordinateSystem();
+		var scatter = new Scatter(chartInfo, null, coordSystem);
 		var ticks:Array<Tick> = [createTick("5", 50)];
 		var result1 = scatter.calcXCoord(5.0, ticks);
 		Assert.notNull(result1, "Result should not be null for single tick, value equals tick");

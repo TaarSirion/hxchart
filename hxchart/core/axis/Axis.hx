@@ -7,7 +7,7 @@ import hxchart.core.utils.Point;
 import hxchart.core.tick.Tick;
 import hxchart.core.utils.CompassOrientation;
 import hxchart.core.tickinfo.StringTickInfo;
-import hxchart.core.utils.CoordinateSystem;
+import hxchart.core.coordinates.CoordinateSystem;
 
 class Axis {
 	public var coordSystem:CoordinateSystem;
@@ -144,7 +144,10 @@ class Axis {
 	 * Positions the startpoints of the axes according to the other axes, titles and margins.
 	 */
 	public function positionStartPoint() {
-		this.zeroPoint = new Point(coordSystem.left + coordSystem.width / 2, coordSystem.bottom + coordSystem.height / 2);
+		var width = coordSystem.end.x - coordSystem.start.x;
+		var height = coordSystem.end.y - coordSystem.start.y;
+
+		this.zeroPoint = new Point(coordSystem.start.x + width / 2, coordSystem.start.y + height / 2);
 		// First position zero point according to axes information. Only the first two axes will be considered.
 		var xaxesNum:Int = 0;
 		var yaxesNum:Int = 0;
@@ -153,22 +156,22 @@ class Axis {
 			switch (rotation) {
 				case 0:
 					if (xaxesNum == 0) {
-						this.zeroPoint.x = info.tickInfo.zeroIndex * coordSystem.width / (info.tickInfo.tickNum - 1) + coordSystem.left + info.tickMargin;
+						this.zeroPoint.x = info.tickInfo.zeroIndex * width / (info.tickInfo.tickNum - 1) + coordSystem.start.x + info.tickMargin;
 					}
-					info.length = coordSystem.width;
+					info.length = width;
 					xaxesNum++;
 				case 90:
 					if (yaxesNum == 0) {
-						this.zeroPoint.y = info.tickInfo.zeroIndex * coordSystem.height / (info.tickInfo.tickNum - 1) + coordSystem.bottom + info.tickMargin;
+						this.zeroPoint.y = info.tickInfo.zeroIndex * height / (info.tickInfo.tickNum - 1) + coordSystem.start.y + info.tickMargin;
 					}
-					info.length = coordSystem.height;
+					info.length = height;
 					yaxesNum++;
 				case _:
 			}
 		}
 		// Then we change the height of the axes and position of zeroPoint according to present titles.
-		var newHeight = coordSystem.height;
-		var newWidth = coordSystem.width;
+		var newHeight = height;
+		var newWidth = width;
 		for (info in this.axesInfo) {
 			if (info.title == null) {
 				continue;
@@ -178,14 +181,14 @@ class Axis {
 			}
 			switch (info.rotation) {
 				case 0:
-					if (zeroPoint.y <= coordSystem.bottom + titleSpace) {
-						newHeight = coordSystem.height - titleSpace;
-						zeroPoint.y = coordSystem.bottom + (coordSystem.height - newHeight) + info.tickMargin;
+					if (zeroPoint.y <= coordSystem.start.y + titleSpace) {
+						newHeight = height - titleSpace;
+						zeroPoint.y = coordSystem.start.y + (height - newHeight) + info.tickMargin;
 					}
 				case 90:
-					if (zeroPoint.x <= (coordSystem.left + titleSpace)) {
-						newWidth = coordSystem.width - titleSpace;
-						zeroPoint.x = coordSystem.left + (coordSystem.width - newWidth) + info.tickMargin;
+					if (zeroPoint.x <= (coordSystem.start.x + titleSpace)) {
+						newWidth = width - titleSpace;
+						zeroPoint.x = coordSystem.start.x + (width - newWidth) + info.tickMargin;
 					}
 				case _:
 			}
@@ -204,14 +207,14 @@ class Axis {
 			}
 			switch (info.rotation) {
 				case 0:
-					if (zeroPoint.y <= (coordSystem.bottom + subTitleSpace)) {
-						newHeight = coordSystem.height - subTitleSpace;
-						zeroPoint.y = coordSystem.bottom + (coordSystem.height - newHeight) + info.tickMargin;
+					if (zeroPoint.y <= (coordSystem.start.y + subTitleSpace)) {
+						newHeight = height - subTitleSpace;
+						zeroPoint.y = coordSystem.start.y + (height - newHeight) + info.tickMargin;
 					}
 				case 90:
-					if (zeroPoint.x <= (coordSystem.left + subTitleSpace)) {
-						newWidth = coordSystem.width - subTitleSpace;
-						zeroPoint.x = coordSystem.left + (coordSystem.width - newWidth) + info.tickMargin;
+					if (zeroPoint.x <= (coordSystem.start.x + subTitleSpace)) {
+						newWidth = width - subTitleSpace;
+						zeroPoint.x = coordSystem.start.x + (width - newWidth) + info.tickMargin;
 					}
 				case _:
 			}
@@ -224,18 +227,18 @@ class Axis {
 			}
 			switch (rotation) {
 				case 0:
-					var leftEdge = coordSystem.left;
-					if (coordSystem.width != newWidth) {
-						leftEdge = coordSystem.left + (coordSystem.width - newWidth);
+					var leftEdge = coordSystem.start.x;
+					if (width != newWidth) {
+						leftEdge = coordSystem.start.x + (width - newWidth);
 					}
 					info.start.x = leftEdge;
 
 					info.start.y = zeroPoint.y;
 					info.length = newWidth;
 				case 90:
-					var bottomEdge = coordSystem.bottom;
-					if (coordSystem.height != newHeight) {
-						bottomEdge = coordSystem.bottom + (coordSystem.height - newHeight);
+					var bottomEdge = coordSystem.start.y;
+					if (height != newHeight) {
+						bottomEdge = coordSystem.start.y + (height - newHeight);
 					}
 					info.start.y = bottomEdge;
 

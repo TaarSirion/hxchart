@@ -37,7 +37,6 @@ import hxchart.core.styling.TrailStyle;
 }
 
 interface DataLayer {
-	public var dataLayerID:String;
 	public var data:Array<Any>;
 
 	public function setData(newData:TrailData, style:TrailStyle):Void;

@@ -1,6 +1,7 @@
 package hxchart.haxeui.plot;
 
-import hxchart.core.utils.CoordinateSystem;
+import hxchart.haxeui.trails.Bar;
+import hxchart.core.coordinates.CoordinateSystem;
 import haxe.Timer;
 import hxchart.core.utils.Utils;
 import haxe.ui.core.Component;
@@ -65,10 +66,13 @@ class Chart extends Component {
 	public var legend:Legend;
 	public var chartStyleSheet:StyleSheet;
 
+	public var coreCoordinateSystem:CoordinateSystem;
+
 	public var isAlive:Bool = false;
 
 	public function new(chartInfo:TrailInfo, ?legendInfo:LegendInfo, ?styleSheet:StyleSheet) {
 		super();
+		coreCoordinateSystem = new CoordinateSystem();
 		trailInfos = [];
 		trails = [];
 		axes = new Map();
@@ -321,7 +325,7 @@ class Builder extends CompositeBuilder {
 
 					var scatter = null;
 					if (_chart.trails.length < (i + 1)) {
-						scatter = new Scatter(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID, eventHandler);
+						scatter = new Scatter(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID, eventHandler, _chart.coreCoordinateSystem);
 						_chart.trails.push(scatter);
 					} else {
 						scatter = _chart.trails[i];
@@ -367,7 +371,7 @@ class Builder extends CompositeBuilder {
 					}
 					var scatter = null;
 					if (_chart.trails.length < (i + 1)) {
-						scatter = new Scatter(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID, eventHandler);
+						scatter = new Scatter(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID, eventHandler, _chart.coreCoordinateSystem);
 						_chart.trails.push(scatter);
 					} else {
 						scatter = _chart.trails[i];
@@ -377,39 +381,51 @@ class Builder extends CompositeBuilder {
 						_chart.axes.set(axisID, scatter.axes);
 					}
 				case bar:
-					// if (chartInfo.axisInfo == null) {
-					// 	chartInfo.axisInfo = [
-					// 		{
-					// 			id: "x_" + axisID,
-					// 			rotation: 0
-					// 		},
-					// 		{
-					// 			id: "y_" + axisID,
-					// 			rotation: 90
-					// 		}
-					// 	];
-					// 	chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
-					// 	chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
-					// } else if (chartInfo.axisInfo.length > 2) {
-					// 	throw new Exception("Not able to use more than 2 axes for bar-chart!");
-					// } else {
-					// 	chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
-					// 	chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
-					// }
-					// if (_chart.axes.exists(axisID)) {
-					// 	chartInfo.axisInfo = [_chart.axes.get(axisID).axesInfo[0], _chart.axes.get(axisID).axesInfo[1]];
-					// }
-					// var bar = null;
-					// if (!_chart.axes.exists(axisID)) {
-					// 	bar = new Bar(chartInfo, null, _chart.chartBody, chartID, axisID);
-					// 	_chart.trails.push(bar);
-					// } else {
-					// 	bar = _chart.trails[i];
-					// }
-					// bar.validateChart(status);
-					// if (!_chart.axes.exists(axisID)) {
-					// 	_chart.axes.set(axisID, bar.axes);
-					// }
+					if (chartInfo.axisInfo == null) {
+						chartInfo.axisInfo = [
+							{
+								id: "x_" + axisID,
+								rotation: 0
+							},
+							{
+								id: "y_" + axisID,
+								rotation: 90
+							}
+						];
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
+					} else if (chartInfo.axisInfo.length > 2) {
+						throw new Exception("Not able to use more than 2 axes for bar-chart!");
+					} else {
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
+					}
+					if (_chart.axes.exists(axisID)) {
+						chartInfo.axisInfo = [
+							_chart.axes.get(axisID).axisCalc.axesInfo[0],
+							_chart.axes.get(axisID).axisCalc.axesInfo[1]
+						];
+					} else {
+						var coordSystem = new CoordinateSystem();
+						chartInfo.axisInfo[0].setAxisInfo(chartInfo.data.values.get("x"));
+						chartInfo.axisInfo[1].setAxisInfo(chartInfo.data.values.get("y"));
+						var axis = new Axis(axisID, chartInfo.axisInfo, coordSystem);
+						axis.percentHeight = 100;
+						axis.percentWidth = 100;
+						_chart.axes.set(axisID, axis);
+						_chart.chartBody.addComponent(axis);
+					}
+					var bar = null;
+					if (_chart.trails.length < (i + 1)) {
+						bar = new Bar(chartInfo, _chart.axes.get(axisID), _chart.chartBody, chartID, axisID, _chart.coreCoordinateSystem);
+						_chart.trails.push(bar);
+					} else {
+						bar = _chart.trails[i];
+					}
+					bar.validateChart(status);
+					if (!_chart.axes.exists(axisID)) {
+						_chart.axes.set(axisID, bar.axes);
+					}
 				case pie:
 					return;
 			}
