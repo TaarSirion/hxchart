@@ -3,9 +3,9 @@ package hxchart.tests;
 import utest.Assert;
 import utest.Test;
 
-using hxchart.core.utils.Statistics;
+using hxchart.core.utils.ArrayTools;
 
-class TestStatistics extends Test {
+class TestArrayTools extends Test {
 	function testOrder() {
 		// Test with an empty array
 		var arrEmpty:Array<Int> = [];
@@ -80,33 +80,33 @@ class TestStatistics extends Test {
 		Assert.same(["a", "a"], "a".repeat(2));
 
 		// Test with n = 0 for integer
-		Assert.same([], Statistics.repeat(1, 0));
+		Assert.same([], ArrayTools.repeat(1, 0));
 		// Assert.same([], 1.repeat(0)); // Alternative if it works as an extension method
 
 		// Test with n = 0 for string
-		Assert.same([], Statistics.repeat("a", 0));
+		Assert.same([], ArrayTools.repeat("a", 0));
 		// Assert.same([], "a".repeat(0)); // Alternative if it works as an extension method
 	}
 
 	function testAny() {
 		// Test with an empty array
 		var arrEmpty:Array<Int> = [];
-		Assert.isFalse(Statistics.any(arrEmpty, function(v) return v > 0));
+		Assert.isFalse(ArrayTools.any(arrEmpty, function(v) return v > 0));
 
 		// Test with an array of integers and a condition that is met
 		var arrIntMet = [1, -2, 3];
-		Assert.isTrue(Statistics.any(arrIntMet, function(v) return v > 0));
+		Assert.isTrue(ArrayTools.any(arrIntMet, function(v) return v > 0));
 
 		// Test with an array of integers and a condition that is not met
 		var arrIntNotMet = [-1, -2, -3];
-		Assert.isFalse(Statistics.any(arrIntNotMet, function(v) return v > 0));
+		Assert.isFalse(ArrayTools.any(arrIntNotMet, function(v) return v > 0));
 
 		// Test with an array of strings and a condition that is met
 		var arrStringMet = ["a", "b", "c"];
-		Assert.isTrue(Statistics.any(arrStringMet, function(v) return v == "b"));
+		Assert.isTrue(ArrayTools.any(arrStringMet, function(v) return v == "b"));
 
 		// Test with an array of strings and a condition that is not met
 		var arrStringNotMet = ["a", "b", "c"];
-		Assert.isFalse(Statistics.any(arrStringNotMet, function(v) return v == "d"));
+		Assert.isFalse(ArrayTools.any(arrStringNotMet, function(v) return v == "d"));
 	}
 }

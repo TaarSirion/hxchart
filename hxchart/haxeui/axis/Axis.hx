@@ -3,7 +3,7 @@ package hxchart.haxeui.axis;
 import hxchart.haxeui.utils.ConvertCoords;
 import hxchart.core.utils.Trigonometry;
 import haxe.ds.Vector;
-import hxchart.core.utils.Statistics;
+import hxchart.core.utils.ArrayTools;
 import haxe.ui.styles.elements.Directive;
 import haxe.ui.styles.elements.RuleElement;
 import haxe.ui.components.Label;

@@ -11,7 +11,7 @@ import hxchart.core.data.DataLayer;
 import hxchart.core.axis.AxisLayer;
 import hxchart.core.coordinates.TrailCalcs;
 
-using hxchart.core.utils.Statistics;
+using hxchart.core.utils.ArrayTools;
 using Lambda;
 
 typedef BarDataRec = {

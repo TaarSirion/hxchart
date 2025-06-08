@@ -1,6 +1,6 @@
 package hxchart.core.utils;
 
-class Statistics {
+class ArrayTools {
 	public static function order<T>(arr:Array<T>) {
 		var x = arr.copy();
 		x.sort(Reflect.compare);

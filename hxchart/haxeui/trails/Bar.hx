@@ -23,7 +23,7 @@ import hxchart.core.data.DataLayer;
 import hxchart.core.axis.AxisLayer;
 import hxchart.core.trails.Bar in BarCalc;
 
-using hxchart.core.utils.Statistics;
+using hxchart.core.utils.ArrayTools;
 using Lambda;
 
 class Bar {

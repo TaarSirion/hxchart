@@ -1,6 +1,6 @@
 package hxchart.core.tickinfo;
 
-import hxchart.core.utils.Statistics;
+import hxchart.core.utils.ArrayTools;
 import hxchart.core.utils.CompassOrientation;
 import haxe.ds.Vector;
 import hxchart.core.utils.Utils;
@@ -93,7 +93,7 @@ class NumericTickInfo implements TickInfo {
 		}
 		if (values.exists("ticks")) {
 			var ticks:Array<Float> = values.get("ticks");
-			ticks = Statistics.unique(ticks);
+			ticks = ArrayTools.unique(ticks);
 			ticks.sort(Reflect.compare);
 			tickNum = ticks.length;
 			negNum = ticks.filter(tick -> tick < 0).length;

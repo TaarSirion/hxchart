@@ -1,5 +1,5 @@
 import hxchart.tests.TestUtils;
-import hxchart.tests.TestStatistics;
+import hxchart.tests.TestArrayTools;
 import hxchart.tests.TestStringTickInfo;
 import hxchart.tests.TestNumericTickInfo;
 import hxchart.tests.TestLegendInfo;
@@ -21,7 +21,7 @@ class TestAll {
 		runner.addCase(new TestLegendInfo());
 		runner.addCase(new TestNumericTickInfo());
 		runner.addCase(new TestStringTickInfo());
-		runner.addCase(new TestStatistics());
+		runner.addCase(new TestArrayTools());
 		runner.addCase(new TestTrigonometry());
 		runner.addCase(new TestUtils());
 		Report.create(runner);

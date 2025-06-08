@@ -1,6 +1,6 @@
 package hxchart.core.data;
 
-import hxchart.core.utils.Statistics;
+import hxchart.core.utils.ArrayTools;
 import hxchart.core.trails.TrailTypes;
 import hxchart.core.styling.TrailStyle;
 
@@ -23,13 +23,13 @@ import hxchart.core.styling.TrailStyle;
 			switch (type) {
 				case scatter:
 					var x = values.get("x");
-					values.set("groups", Statistics.repeat(group, x.length));
+					values.set("groups", ArrayTools.repeat(group, x.length));
 				case line:
 					var x = values.get("x");
-					values.set("groups", Statistics.repeat(group, x.length));
+					values.set("groups", ArrayTools.repeat(group, x.length));
 				case bar:
 					var x = values.get("x");
-					values.set("groups", Statistics.repeat(group, x.length));
+					values.set("groups", ArrayTools.repeat(group, x.length));
 				case pie:
 			}
 		}

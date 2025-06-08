@@ -1,6 +1,6 @@
 package hxchart.core.axis;
 
-import hxchart.core.utils.Statistics;
+import hxchart.core.utils.ArrayTools;
 import haxe.Exception;
 import hxchart.core.utils.Trigonometry;
 import hxchart.core.utils.Point;
@@ -120,11 +120,11 @@ class Axis {
 			throw new Exception("No AxisInfo found.");
 		}
 
-		if (Statistics.any(axisInfo, info -> info.type == null)) {
+		if (ArrayTools.any(axisInfo, info -> info.type == null)) {
 			throw new Exception("Axis cannot be created without type. You can generate the type via setAxisInfo in AxisInfo or provide one by hand.");
 		}
 
-		if (Statistics.any(axisInfo, info -> info.tickInfo == null)) {
+		if (ArrayTools.any(axisInfo, info -> info.tickInfo == null)) {
 			throw new Exception("Axis cannot be created without TickInfo. You can generate the TickInfo via setAxisInfo in AxisInfo or provide one by hand.");
 		}
 
