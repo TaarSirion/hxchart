@@ -2,7 +2,6 @@
 -main TestAll
 
 -lib utest
--lib haxeui-core
--lib haxeui-html5
 
--js Export/test-html/main.js
+--interp
+# -js Export/test-html/main.js

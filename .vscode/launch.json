@@ -1,5 +1,5 @@
 {
-    "version":"0.2.0",
+    "version": "0.2.0",
     "configurations": [
         {
             "type": "firefox",
@@ -7,9 +7,19 @@
             "name": "Attach"
         },
         {
-            "name" : "Build + Debug",
+            "name": "Build + Debug",
             "type": "lime",
             "request": "launch"
+        },
+        {
+            "name": "HashLink/JIT",
+            "type": "hl",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": {
+                "type": "haxe",
+                "args": "active configuration"
+            }
         }
     ]
 }

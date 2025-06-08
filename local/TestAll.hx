@@ -1,25 +1,35 @@
-import hxchart.tests.TestStatistics;
-import haxe.ui.Toolkit;
-import hxchart.tests.TestAxisTools;
-import hxchart.tests.TestScatter;
+import hxchart.tests.TestBar;
+import hxchart.tests.TestUtils;
+import hxchart.tests.TestArrayTools;
+import hxchart.tests.TestStringTickInfo;
+import hxchart.tests.TestNumericTickInfo;
+import hxchart.tests.TestLegendInfo;
 import hxchart.tests.TestLegend;
-import hxchart.tests.TestChart;
+import hxchart.tests.TestAxisInfo;
+import hxchart.tests.TestAxis;
+import hxchart.tests.TestScatter;
+import hxchart.tests.TestTrigonometry;
+import hxchart.tests.TestTrailCalcs;
 import utest.ui.Report;
 import utest.Runner;
-// import hxchart.tests.TestAxis;
-import hxchart.tests.TestNumericTickInfo;
 
 class TestAll {
 	public static function main() {
 		var runner = new Runner();
-		Toolkit.init();
-		runner.addCase(new TestAxisTools());
-		runner.addCase(new TestNumericTickInfo());
 		runner.addCase(new TestScatter());
+		runner.addCase(new TestAxisInfo());
+		runner.addCase(new TestAxis());
 		runner.addCase(new TestLegend());
-		runner.addCase(new TestChart());
-		runner.addCase(new TestStatistics());
+		runner.addCase(new TestLegendInfo());
+		runner.addCase(new TestNumericTickInfo());
+		runner.addCase(new TestStringTickInfo());
+		runner.addCase(new TestArrayTools());
+		runner.addCase(new TestTrigonometry());
+		runner.addCase(new TestUtils());
+		runner.addCase(new TestBar());
+		runner.addCase(new TestTrailCalcs());
 		Report.create(runner);
 		runner.run();
+		// });
 	}
 }
