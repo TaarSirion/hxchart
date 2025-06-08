@@ -434,7 +434,6 @@ class Bar implements AxisLayer implements DataLayer {
 		if (Math.isNaN(yCoord)) {
 			yCoord = tickBottom;
 		}
-		trace(dataRec.values.y, yCoord, tickBottom);
 		dataRec.height = yCoord - tickBottom;
 		return yCoord;
 	}
