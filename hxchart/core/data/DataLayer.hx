@@ -27,7 +27,7 @@ import hxchart.core.styling.TrailStyle;
 				groups.push(val);
 			}
 			#else
-			var groups = ArrayTools.repeat(group, x.length)
+			var groups = ArrayTools.repeat(group, x.length);
 			#end
 			switch (type) {
 				case scatter:
