@@ -3,5 +3,5 @@
 
 -lib utest
 
-# --interp
--js Export/test-html/main.js
+--interp
+# -js Export/test-html/main.js

@@ -62,13 +62,13 @@ class Bar implements AxisLayer implements DataLayer {
 	}
 
 	@:allow(hxchart.tests)
-	var minX:Float;
+	var minX:Float = Math.POSITIVE_INFINITY;
 	@:allow(hxchart.tests)
-	var maxX:Float;
+	var maxX:Float = Math.NEGATIVE_INFINITY;
 	@:allow(hxchart.tests)
-	var minY:Float;
+	var minY:Float = Math.POSITIVE_INFINITY;
 	@:allow(hxchart.tests)
-	var maxY:Float;
+	var maxY:Float = Math.NEGATIVE_INFINITY;
 
 	public function setData(newData:TrailData, style:TrailStyle) {
 		data = [];
