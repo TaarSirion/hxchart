@@ -1,11 +1,11 @@
 package hxchart.core.trails;
 
+import hxchart.core.coordinates.TrailCalcs;
 import hxchart.core.axis.AxisInfo;
 import hxchart.core.styling.TrailStyle;
 import hxchart.core.axis.Axis;
 import hxchart.core.coordinates.CoordinateSystem;
 import hxchart.core.tick.Tick;
-import hxchart.core.chart.ChartStatus;
 import hxchart.core.optimization.OptimGrid;
 import hxchart.core.optimization.Quadtree;
 import hxchart.core.optimization.OptimizationType;
@@ -325,49 +325,23 @@ class Scatter implements AxisLayer implements DataLayer {
 
 	public function calcXCoord(xValue:Dynamic, ticks:Array<Tick>) {
 		if (Std.isOfType(xValue, String)) {
-			var ticksFiltered = ticks.filter(x -> {
-				return x.text == xValue;
-			});
-			if (ticksFiltered == null || ticksFiltered.length == 0) {
+			var pos = TrailCalcs.getCategoricPosFromTick(xValue, ticks);
+			if (pos == null) {
 				return null;
 			}
-			return ticksFiltered[0].middlePos.x;
+			return pos.x;
 		}
-		var largerTicks = ticks.filter(tick -> Std.parseFloat(tick.text) >= xValue);
-		var xMax = Std.parseFloat(largerTicks[0].text);
-		var maxIndex = ticks.indexOf(largerTicks[0]);
-		var minIndex = maxIndex == 0 ? 0 : maxIndex - 1;
-		var xMin = Std.parseFloat(ticks[minIndex].text);
-		if (xMax == xMin) {
-			return ticks[minIndex].middlePos.x;
-		}
-		var tickLeft = ticks[minIndex].middlePos.x;
-		var tickRight = largerTicks[0].middlePos.x;
-		var x = (tickRight - tickLeft) * (xValue - xMin) / (xMax - xMin) + tickLeft;
-		return x;
+		return TrailCalcs.calcScatterCoordinates(ticks, xValue, false);
 	}
 
 	public function calcYCoord(yValue:Dynamic, ticks:Array<Tick>) {
 		if (Std.isOfType(yValue, String)) {
-			var ticksFiltered = ticks.filter(x -> {
-				return x.text == yValue;
-			});
-			if (ticksFiltered == null || ticksFiltered.length == 0) {
+			var pos = TrailCalcs.getCategoricPosFromTick(yValue, ticks);
+			if (pos == null) {
 				return null;
 			}
-			return ticksFiltered[0].middlePos.y;
+			return pos.y;
 		}
-		var largerTicks = ticks.filter(tick -> Std.parseFloat(tick.text) >= yValue);
-		var yMax = Std.parseFloat(largerTicks[0].text);
-		var maxIndex = ticks.indexOf(largerTicks[0]);
-		var minIndex = maxIndex == 0 ? 0 : maxIndex - 1;
-		var yMin = Std.parseFloat(ticks[minIndex].text);
-		if (yMin == yMax) {
-			return ticks[minIndex].middlePos.y;
-		}
-		var tickBottom = ticks[minIndex].middlePos.y;
-		var tickTop = largerTicks[0].middlePos.y;
-		var y = (tickTop - tickBottom) * (yValue - yMin) / (yMax - yMin) + tickBottom;
-		return y;
+		return TrailCalcs.calcScatterCoordinates(ticks, yValue, true);
 	}
 }

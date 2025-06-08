@@ -1,3 +1,4 @@
+import hxchart.tests.TestBar;
 import hxchart.tests.TestUtils;
 import hxchart.tests.TestArrayTools;
 import hxchart.tests.TestStringTickInfo;
@@ -24,6 +25,7 @@ class TestAll {
 		runner.addCase(new TestArrayTools());
 		runner.addCase(new TestTrigonometry());
 		runner.addCase(new TestUtils());
+		runner.addCase(new TestBar());
 		Report.create(runner);
 		runner.run();
 		// });
