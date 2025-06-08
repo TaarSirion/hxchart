@@ -1,5 +1,5 @@
 {
-    "name": "hxchart",
+    "name": "hxchart-core",
     "url": "https://github.com/TaarSirion/hxchart",
     "license": "MIT",
     "tags": [
@@ -13,8 +13,5 @@
     "releasenote": "Initial release",
     "contributors": [
         "TaarSirion"
-    ],
-    "dependencies": {
-        "haxeui-core": "1.6.0"
-    }
+    ]
 }
