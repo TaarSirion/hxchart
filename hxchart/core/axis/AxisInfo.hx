@@ -55,11 +55,11 @@ import hxchart.core.tickinfo.TickInfo;
 		if (type == null) {
 			if (trailValues.length == 0) {
 				for (value in values) {
-					if (value is String) {
+					if (Std.isOfType(value, String)) {
 						type = categorical;
 						break;
 					}
-					if (!(value is Int) && !(value is Float)) {
+					if (!(Std.isOfType(value, Int)) && !(Std.isOfType(value, Float))) {
 						type = categorical;
 						break;
 					}
@@ -67,11 +67,11 @@ import hxchart.core.tickinfo.TickInfo;
 				}
 			} else {
 				for (value in trailValues) {
-					if (value is String) {
+					if (Std.isOfType(value, String)) {
 						type = categorical;
 						break;
 					}
-					if (!(value is Int) && !(value is Float)) {
+					if (!(Std.isOfType(value, Int)) && !(Std.isOfType(value, Float))) {
 						type = categorical;
 						break;
 					}

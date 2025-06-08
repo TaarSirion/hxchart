@@ -20,16 +20,22 @@ import hxchart.core.styling.TrailStyle;
 
 	public function setGroups(type:TrailTypes, group:String) {
 		if (!values.exists("groups")) {
+			var x = values.get("x");
+			#if (haxe == "4.1.5")
+			var groups:Array<Any> = [];
+			for (val in x) {
+				groups.push(val);
+			}
+			#else
+			var groups = ArrayTools.repeat(group, x.length)
+			#end
 			switch (type) {
 				case scatter:
-					var x = values.get("x");
-					values.set("groups", ArrayTools.repeat(group, x.length));
+					values.set("groups", groups);
 				case line:
-					var x = values.get("x");
-					values.set("groups", ArrayTools.repeat(group, x.length));
+					values.set("groups", groups);
 				case bar:
-					var x = values.get("x");
-					values.set("groups", ArrayTools.repeat(group, x.length));
+					values.set("groups", groups);
 				case pie:
 			}
 		}

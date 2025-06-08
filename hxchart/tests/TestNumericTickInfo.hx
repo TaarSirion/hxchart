@@ -302,10 +302,10 @@ class TestNumericTickInfo extends utest.Test {
 
 	function testCalcPowerWithSmallValues() {
 		var tickInfo = new NumericTickInfo(["min" => [0.00001], "max" => [0.0001]]);
-		Assert.equals(0.0001, tickInfo.power);
+		Assert.floatEquals(0.0001, tickInfo.power);
 
 		var tickInfo2 = new NumericTickInfo(["min" => [-0.0001], "max" => [-0.00001]]);
-		Assert.equals(0.0001, tickInfo2.power);
+		Assert.floatEquals(0.0001, tickInfo2.power);
 	}
 
 	function testCalcPowerResultingInPowerLessThanOne() {

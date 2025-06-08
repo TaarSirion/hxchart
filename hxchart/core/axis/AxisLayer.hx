@@ -5,5 +5,5 @@ import hxchart.core.styling.TrailStyle;
 interface AxisLayer {
 	public var axes:Axis;
 
-	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle):Void;
+	public function positionAxes(axisInfo:Array<AxisInfo>, style:TrailStyle):Void;
 }

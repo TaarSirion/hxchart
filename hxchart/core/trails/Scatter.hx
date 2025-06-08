@@ -69,7 +69,7 @@ class Scatter implements AxisLayer implements DataLayer {
 
 	public function validateChart() {
 		setData(chartInfo.data, chartInfo.style);
-		positionAxes(chartInfo.axisInfo, dataByGroup, chartInfo.style);
+		positionAxes(chartInfo.axisInfo, chartInfo.style);
 	}
 
 	@:allow(hxchart.tests)
@@ -114,14 +114,14 @@ class Scatter implements AxisLayer implements DataLayer {
 				allowed: false
 			});
 		}
-		if (style.size is Float || style.size is Int) {
+		if (Std.isOfType(style.size, Float) || Std.isOfType(style.size, Int)) {
 			var size = cast(style.size, Float);
 			for (group in dataByGroup) {
 				for (dataPoint in group) {
 					dataPoint.size = size;
 				}
 			}
-		} else if (style.size is Array) {
+		} else if (Std.isOfType(style.size, Array)) {
 			var size:Array<Float> = style.size;
 			if (size.length == x.length) {
 				var i = 0;
@@ -141,14 +141,14 @@ class Scatter implements AxisLayer implements DataLayer {
 			}
 		}
 
-		if (style.alpha is Float || style.alpha is Int) {
+		if (Std.isOfType(style.alpha, Float) || Std.isOfType(style.alpha, Int)) {
 			var alpha = cast(style.alpha, Float);
 			for (group in dataByGroup) {
 				for (dataPoint in group) {
 					dataPoint.alpha = alpha;
 				}
 			}
-		} else if (style.alpha is Array) {
+		} else if (Std.isOfType(style.alpha, Array)) {
 			var alpha:Array<Float> = style.alpha;
 			if (alpha.length == x.length) {
 				var i = 0;
@@ -170,14 +170,14 @@ class Scatter implements AxisLayer implements DataLayer {
 
 		if (style.borderStyle != null) {
 			if (style.borderStyle.color != null) {
-				if (style.borderStyle.color is Int) {
+				if (Std.isOfType(style.borderStyle.color, Int)) {
 					var color = cast(style.borderStyle.color, Int);
 					for (group in dataByGroup) {
 						for (dataPoint in group) {
 							dataPoint.borderColor = color;
 						}
 					}
-				} else if (style.borderStyle.color is Array) {
+				} else if (Std.isOfType(style.borderStyle.color, Array)) {
 					var color:Array<Int> = style.borderStyle.color;
 					if (color.length == x.length) {
 						var i = 0;
@@ -198,14 +198,14 @@ class Scatter implements AxisLayer implements DataLayer {
 				}
 			}
 
-			if (style.borderStyle.alpha is Float || style.borderStyle.alpha is Int) {
+			if (Std.isOfType(style.borderStyle.alpha, Float) || Std.isOfType(style.borderStyle.alpha, Int)) {
 				var alpha = cast(style.borderStyle.alpha, Float);
 				for (group in dataByGroup) {
 					for (dataPoint in group) {
 						dataPoint.borderAlpha = alpha;
 					}
 				}
-			} else if (style.borderStyle.alpha is Array) {
+			} else if (Std.isOfType(style.borderStyle.alpha, Array)) {
 				var alpha:Array<Float> = style.borderStyle.alpha;
 				if (alpha.length == x.length) {
 					var i = 0;
@@ -225,14 +225,14 @@ class Scatter implements AxisLayer implements DataLayer {
 				}
 			}
 
-			if (style.borderStyle.thickness is Float || style.borderStyle.thickness is Int) {
+			if (Std.isOfType(style.borderStyle.thickness, Float) || Std.isOfType(style.borderStyle.thickness, Int)) {
 				var thickness = cast(style.borderStyle.thickness, Float);
 				for (group in dataByGroup) {
 					for (dataPoint in group) {
 						dataPoint.borderThickness = thickness;
 					}
 				}
-			} else if (style.borderStyle.thickness is Array) {
+			} else if (Std.isOfType(style.borderStyle.thickness, Array)) {
 				var thickness:Array<Float> = style.borderStyle.thickness;
 				if (thickness.length == x.length) {
 					var i = 0;
@@ -254,7 +254,7 @@ class Scatter implements AxisLayer implements DataLayer {
 		}
 	}
 
-	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle) {
+	public function positionAxes(axisInfo:Array<AxisInfo>, style:TrailStyle) {
 		if (axes != null) {
 			axes.positionStartPoint();
 			axes.setTicks(true);

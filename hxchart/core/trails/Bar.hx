@@ -58,7 +58,7 @@ class Bar implements AxisLayer implements DataLayer {
 
 	public function validateChart() {
 		setData(trailInfo.data, trailInfo.style);
-		positionAxes(trailInfo.axisInfo, data, trailInfo.style);
+		positionAxes(trailInfo.axisInfo, trailInfo.style);
 	}
 
 	@:allow(hxchart.tests)
@@ -88,7 +88,7 @@ class Bar implements AxisLayer implements DataLayer {
 		for (i in 0...x.length) {
 			var group = groupsArr[i];
 			var groupIndex = style.groups.get(group);
-			if (x[i] is Float) {
+			if (Std.isOfType(x[i], Float)) {
 				maxX = Math.max(maxX, x[i]);
 				minX = Math.min(minX, x[i]);
 			} else {
@@ -102,7 +102,7 @@ class Bar implements AxisLayer implements DataLayer {
 				values: {
 					x: x[i],
 					y: y[i],
-					acc: x[i] is String ? y[i] : x[i]
+					acc: Std.isOfType(x[i], String) ? y[i] : x[i]
 				},
 				alpha: 1,
 				borderAlpha: 1,
@@ -113,14 +113,14 @@ class Bar implements AxisLayer implements DataLayer {
 			});
 		}
 
-		if (style.alpha is Float || style.alpha is Int) {
+		if (Std.isOfType(style.alpha, Float) || Std.isOfType(style.alpha, Int)) {
 			var alpha = cast(style.alpha, Float);
 			for (group in dataByGroup) {
 				for (dataRec in group) {
 					dataRec.alpha = alpha;
 				}
 			}
-		} else if (style.alpha is Array) {
+		} else if (Std.isOfType(style.alpha, Array)) {
 			var alpha:Array<Float> = style.alpha;
 			if (alpha.length == x.length) {
 				var i = 0;
@@ -142,14 +142,14 @@ class Bar implements AxisLayer implements DataLayer {
 
 		if (style.borderStyle != null) {
 			if (style.borderStyle.color != null) {
-				if (style.borderStyle.color is Int) {
+				if (Std.isOfType(style.borderStyle.color, Int)) {
 					var color = cast(style.borderStyle.color, Int);
 					for (group in dataByGroup) {
 						for (dataRec in group) {
 							dataRec.borderColor = color;
 						}
 					}
-				} else if (style.borderStyle.color is Array) {
+				} else if (Std.isOfType(style.borderStyle.color, Array)) {
 					var color:Array<Int> = style.borderStyle.color;
 					if (color.length == x.length) {
 						var i = 0;
@@ -170,14 +170,14 @@ class Bar implements AxisLayer implements DataLayer {
 				}
 			}
 
-			if (style.borderStyle.alpha is Float || style.borderStyle.alpha is Int) {
+			if (Std.isOfType(style.borderStyle.alpha, Float) || Std.isOfType(style.borderStyle.alpha, Int)) {
 				var alpha = cast(style.borderStyle.alpha, Float);
 				for (group in dataByGroup) {
 					for (dataRec in group) {
 						dataRec.borderAlpha = alpha;
 					}
 				}
-			} else if (style.borderStyle.alpha is Array) {
+			} else if (Std.isOfType(style.borderStyle.alpha, Array)) {
 				var alpha:Array<Float> = style.borderStyle.alpha;
 				if (alpha.length == x.length) {
 					var i = 0;
@@ -197,14 +197,14 @@ class Bar implements AxisLayer implements DataLayer {
 				}
 			}
 
-			if (style.borderStyle.thickness is Float || style.borderStyle.thickness is Int) {
+			if (Std.isOfType(style.borderStyle.thickness, Float) || Std.isOfType(style.borderStyle.thickness, Int)) {
 				var thickness = cast(style.borderStyle.thickness, Float);
 				for (group in dataByGroup) {
 					for (dataRec in group) {
 						dataRec.borderWidth = thickness;
 					}
 				}
-			} else if (style.borderStyle.thickness is Array) {
+			} else if (Std.isOfType(style.borderStyle.thickness, Array)) {
 				var thickness:Array<Float> = style.borderStyle.thickness;
 				if (thickness.length == x.length) {
 					var i = 0;
@@ -240,7 +240,7 @@ class Bar implements AxisLayer implements DataLayer {
 			if (group.length == maxGroupValues) {
 				continue;
 			}
-			if (maxGroup[0].values.x is String) {
+			if (Std.isOfType(maxGroup[0].values.x, String)) {
 				for (dataRec in maxGroup) {
 					var dataRecInGroup = group.filter(d -> {
 						return d.values.x == dataRec.values.x;
@@ -298,7 +298,7 @@ class Bar implements AxisLayer implements DataLayer {
 				prevGroup = dataByGroup[i - 1];
 			}
 			for (dataRec in group) {
-				if (dataRec.values.x is String) {
+				if (Std.isOfType(dataRec.values.x, String)) {
 					var tick = axes.ticksPerInfo[0].filter(x -> {
 						return x.text == dataRec.values.x;
 					})[0];
@@ -438,7 +438,7 @@ class Bar implements AxisLayer implements DataLayer {
 		return yCoord;
 	}
 
-	public function positionAxes(axisInfo:Array<AxisInfo>, data:Array<Any>, style:TrailStyle):Void {
+	public function positionAxes(axisInfo:Array<AxisInfo>, style:TrailStyle):Void {
 		if (axes != null) {
 			axes.positionStartPoint();
 			axes.setTicks(true);
