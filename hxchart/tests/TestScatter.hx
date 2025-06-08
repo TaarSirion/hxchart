@@ -13,7 +13,6 @@ import hxchart.core.axis.AxisTypes;
 import hxchart.core.tickinfo.NumericTickInfo;
 import hxchart.core.coordinates.CoordinateSystem;
 import hxchart.core.utils.Point;
-// import hxchart.haxeui.colors.ColorPalettes; // Removed HaxeUI import
 import hxchart.core.styling.TrailStyle;
 
 class TestScatter extends Test {

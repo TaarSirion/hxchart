@@ -1,8 +1,8 @@
 package hxchart.core.trails;
 
+import hxchart.core.optimization.OptimizationInfo;
 import haxe.Exception;
 import hxchart.core.events.EventLayer.EventInfo;
-import hxchart.haxeui.plot.Chart.OptimizationInfo;
 import hxchart.core.axis.AxisInfo;
 import hxchart.core.styling.TrailStyle;
 import hxchart.core.data.DataLayer.TrailData;
