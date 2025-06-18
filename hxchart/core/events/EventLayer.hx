@@ -19,9 +19,11 @@ import hxchart.core.styling.BorderStyle;
 	public var alpha:Float;
 	public var border:BorderStyle;
 	public var size:Float;
+	@:optional public var render:Void->Any;
 }
 
 @:structInit class EventInfo {
 	@:optional public var onHover:EventObject->EventObject;
+	@:optional public var useCustomHoverRender:Bool;
 	@:optional public var onClick:EventObject->EventObject;
 }
