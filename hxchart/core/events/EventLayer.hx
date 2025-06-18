@@ -24,6 +24,6 @@ import hxchart.core.styling.BorderStyle;
 
 @:structInit class EventInfo {
 	@:optional public var onHover:EventObject->EventObject;
-	@:optional public var useCustomHoverRender:Bool;
+	@:optional public var customHoverRender:Void->Any;
 	@:optional public var onClick:EventObject->EventObject;
 }
